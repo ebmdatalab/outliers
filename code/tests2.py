@@ -21,6 +21,7 @@ class TestGetStats(TestCase):
 
         # Create final results dataframe from the get_stats() function 
         results_df = get_stats(df=test_df, measure='count', aggregators=['group_letter'])
+        print(results_df)
 
         # Create final results from unit test dictionary
         a_list = []
@@ -33,8 +34,9 @@ class TestGetStats(TestCase):
                     b_list.append(v2)
                 else:
                     print("error")
-        
+
         a_mean = stats.mean(a_list)
+        print(a_mean)
         a_std = round(stats.stdev(a_list), 6)
 
         self.assertEqual(results_df.iloc[0]['mean'], a_mean, "should be equal")
