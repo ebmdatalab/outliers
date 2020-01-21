@@ -25,7 +25,7 @@ pd.DataFrame.to_html = (
 def dist_plot(org_value,
               distribution,
               figsize=(3.5, 1),
-              **kwags): 
+              **kwargs):
     """ Draws a matplotlib plot with a kde curve and a line for
     an individual institution.
     
@@ -44,7 +44,7 @@ def dist_plot(org_value,
     plt : matplotlib plot
 
     """
-    fig, ax = plt.subplots(1,1,figsize=figsize,**kwags)
+    fig, ax = plt.subplots(1,1,figsize=figsize,**kwargs)
     sns.kdeplot(distribution,ax=ax,linewidth=0.9)
     ax.axvline(org_value,color='r',linewidth=1)
     ax = remove_clutter(ax)
