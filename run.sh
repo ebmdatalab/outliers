@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker build -t outliers -f config/outliers.Dockerfile .
-docker run -ti -v ${PWD}:/usr/local/bin/outliers -p 8888:8888 outliers
+docker build -t datalab-jupyter -f Dockerfile .
+docker run --rm -ti --mount source=${PWD},dst=/home/app/notebook,type=bind -p 8888:8888 datalab-jupyter
