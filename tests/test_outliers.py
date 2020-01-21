@@ -42,10 +42,11 @@ def alternate_get_stats(test_df):
 def test_get_stats():
     ''' unit test that compares the output of get_stats() with alternate implementation 
     using dictionary'''
-    # copy dataframe and make alternate implementation of function 
+    # copy dataframe 
     df = make_fake_data()
     test_df = df.copy()
     
+    # make alternate implementation of function 
     test_res = alternate_get_stats(test_df)
     
     # Create final results dataframe from the get_stats() function 
