@@ -9,10 +9,10 @@ def make_fake_data():
     ''' 
     function takes makes fake data frame in the correct format
     '''
-    test_df = pd.DataFrame(np.random.randint(100, size=(10, 3)), columns=['Group', 'Group2', 'count'])
+    test_df = pd.DataFrame(np.random.randint(100, size=(100, 3)), columns=['Group', 'Group2', 'count'])
     test_df['group_letter'] = np.where(test_df['Group'] > 50, "A", "B")
     test_df['colour'] = pd.qcut(test_df['Group2'], 5, labels=list(['Red', 'Blue', 'Green', 'Orange', 'Yellow']))
-    test_df = test_df.groupby(['group_letter','colour']).agg({'count': 'sum'})    
+    test_df = test_df.groupby(['group_letter','colour']).agg({'count': 'sum'})
     return test_df
 
 def alternate_get_stats(test_df):
@@ -23,20 +23,21 @@ def alternate_get_stats(test_df):
     test_dict = test_df.to_dict()
     
     a_list = []
+    a_num = 0
     b_list = []
+    b_num = 0
     for k, v in test_dict.items():
         for k2, v2 in v.items():
-            if "A" in k2:
-                a_list.append(v2)
-            elif "B" in k2:
-                b_list.append(v2)
+            if pd.isnull(v2):
+                pass
             else:
-                print("error")
-    
-    a_mean = stats.mean(a_list)
-    a_std = round(stats.stdev(a_list), 6)
-    
-    return a_mean, a_std
+                if "A" in k2:
+                    a_list.append(v2)
+                    a_num = a_num + 1
+
+    mean_res = stats.mean(a_list)
+    std_res = round(stats.stdev(a_list), 6)
+    return mean_res, std_res
     
 def test_get_stats():
     ''' unit test that compares the output of get_stats() with alternate implementation 
@@ -49,9 +50,11 @@ def test_get_stats():
     
     # Create final results dataframe from the get_stats() function 
     results_df = get_stats(df=df, measure='count', aggregators=['group_letter'])
-    
+    print(results_df)
+
     #assert statements
     assert results_df.iloc[0]['mean'] == test_res[0], "mean does not match expected value"
     assert round(results_df.iloc[0]['std'],6) == test_res[1], "standard deviation does not match expected value"
+
     
 
