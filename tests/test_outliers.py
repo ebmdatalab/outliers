@@ -3,7 +3,7 @@ import numpy as np
 import os
 import statistics as stats
 
-from code.outliers import get_stats
+from lib.outliers import get_stats
 
 def make_fake_data():
     ''' 
@@ -24,8 +24,7 @@ def alternate_get_stats(test_df):
     
     a_list = []
     a_num = 0
-    b_list = []
-    b_num = 0
+
     for k, v in test_dict.items():
         for k2, v2 in v.items():
             if pd.isnull(v2):
