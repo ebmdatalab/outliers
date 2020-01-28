@@ -8,6 +8,20 @@ from lib.outliers import get_stats
 def make_fake_data():
     ''' 
     function takes makes fake data frame in the correct format
+
+    e.g. see below: 
+                             
+    group_letter    colour  count     
+    A               Red     630  
+                    Blue    404  
+                    Green   711  
+                    Orange  779  
+                    Yellow  497  
+    B               Red     806  
+                    Blue    492  
+                    Green   329  
+                    Orange  246  
+                    Yellow  428
     '''
     test_df = pd.DataFrame(np.random.randint(100, size=(100, 3)), columns=['Group', 'Group2', 'count'])
     test_df['group_letter'] = np.where(test_df['Group'] > 50, "A", "B")
