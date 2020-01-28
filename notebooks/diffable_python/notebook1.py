@@ -14,6 +14,6 @@
 #     name: python3
 # ---
 
-from code.outliers import get_stats
+from lib.outliers import get_stats
 
 
