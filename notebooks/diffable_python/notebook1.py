@@ -15,5 +15,3 @@
 # ---
 
 from lib.outliers import get_stats
-
-
