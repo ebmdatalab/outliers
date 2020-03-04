@@ -2,8 +2,8 @@ from io import BytesIO
 from base64 import b64encode
 import pandas as pd
 import matplotlib.pyplot as plt
-from IPython.display import HTML
 from ebmdatalab import bq
+#from IPython.display import HTML
 # Turn off the max column width so the images won't be truncated
 pd.set_option('display.max_colwidth', None)
 #Monkeypatch DataFrame so that instances can display charts in a notebook
@@ -266,7 +266,14 @@ def get_stats(df,
     df = df.dropna()
     return df
 
-def dist_table(df, column, subset=None):
+def dist_table(
+        df,
+        column,
+        entity_name,
+        sort_col='z_score',
+        ascending=False,
+        table_length=10
+    ):
     """ Creates a pandas dataframe containing ditribution plots, based on a
     specific column.
 
@@ -285,18 +292,20 @@ def dist_table(df, column, subset=None):
     HTML table containing columns and figures.
 
     """
-    if subset is not None:
-        index = subset
-    else:
-        index = df.index
+    subset = df.loc[[entity_name]]
+    subset = subset.sort_values(sort_col,ascending=ascending)
+    subset = subset.head(table_length)
+    index = subset.index
     series = pd.Series(index=index,name='plots')
     for idx in index:
         plot = dist_plot(df.loc[idx,column],
-                         df.loc[idx[0],column])
+                         df.loc[(slice(None),idx[1]),column])
         series.loc[idx] = html_plt(plot)
     df = df.join(series, how='right')
     df = df.round(decimals=2)
-    return HTML(df.to_html(escape=False))
+
+    df = df.reset_index(drop=True)
+    return df
 
 
 ######## Change outliers ########
