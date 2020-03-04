@@ -118,6 +118,32 @@ def html_plt(plt):
     return html_plot
 
 
+def get_entity_names(name, measure):
+    entity_type = name.split('_')[0]
+    entity_names = entity_names_query(entity_type)
+    entity_names['code'] = entity_names.index
+    measure_name = measure.split('_')[-1]
+    entity_names['link'] = entity_names[['code','name']].apply(lambda x:
+        f'<a href="https://openprescribing.net/measure/{measure_name}/{entity_type}/{x[0]}/">{x[1]}</a>',
+        axis=1
+    )
+    return entity_names
+
+def entity_names_query(entity_type):
+    query = f"""
+    SELECT
+      DISTINCT code,
+      name
+    FROM
+      ebmdatalab.hscic.{entity_type}s
+    WHERE
+      name IS NOT NULL
+    """
+    entity_names = bq.cached_read(
+        query,
+        csv_path=f'data/{entity_type}_names.csv'
+    )
+    return entity_names.set_index('code')
 def get_stats(df,
               measure='measure',
               aggregators=['code']):
@@ -183,7 +209,7 @@ def dist_table(df, column, subset=None):
     return HTML(df.to_html(escape=False))
 
 
-def sparkline_table(df, column, subset=None):
+def sparkline_series(df, column, subset=None):
     """ Creates a pandas series containing sparkline plots, based on a
     specific column in a dataframe.
 
@@ -214,3 +240,46 @@ def sparkline_table(df, column, subset=None):
     df = df.round(decimals=2)
     series['one'] = 1
     return series
+
+def sparkline_table(change_df, name, measure):
+    data = pd.read_csv('data/{}/bq_cache.csv'.format(name),index_col='code')
+    data['month'] = pd.to_datetime(data['month'])
+    data['rate'] = data['numerator'] / data['denominator']
+    data = data.sort_values('month')
+   
+    filtered = change_df.loc[measure]
+    
+    #pick entities that start high
+    mask = filtered['is.intlev.initlev'] > filtered['is.intlev.initlev'].quantile(0.8)
+    filtered = filtered.loc[mask]
+    
+    #remove entities with a big spike
+    mean_std_max = data['rate'].groupby(['code']).agg(['mean','std','max'])
+    mask = mean_std_max['max'] < (mean_std_max['mean'] + (1.96*mean_std_max['std']))
+    filtered = filtered.loc[mask]
+    
+    #drop duplicates
+    filtered = filtered.loc[~filtered.index.duplicated(keep='first')]
+    
+    filtered = filtered.sort_values('is.intlev.levdprop', ascending=False).head(10)
+    plot_series = sparkline_series(data, 'rate', subset=filtered.index)
+    
+    entity_names = get_entity_names(name, measure)
+
+    #create output table
+    out_table = filtered[['is.tfirst.big','is.intlev.levdprop']]
+    out_table = out_table.join(entity_names['link'])
+    out_table = out_table.join(plot_series)
+    out_table = out_table.rename(columns={
+        "is.tfirst.big": "Month when change detected",
+         "is.intlev.levdprop": "Measured proportional change"
+         })
+    return out_table.set_index('link')
+
+def month_integer_to_dates(input_df, change_df):
+    change_df['min_month'] = input_df['month'].min()
+    change_df['is.tfirst.big'] = change_df.apply(lambda x:
+        x['min_month']
+        + pd.DateOffset(months = x['is.tfirst.big']-1 ),
+        axis=1)
+    return change_df
