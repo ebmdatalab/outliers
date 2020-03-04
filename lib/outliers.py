@@ -266,6 +266,41 @@ def get_stats(df,
     df = df.dropna()
     return df
 
+class StaticOutlierStats:
+    def __init__(
+            self,
+            df,
+            entity_type,
+            num_code,
+            denom_code,
+            measure="ratio",
+            stat_parameters=None,
+            trim=True
+            ):
+        self.df = df
+        self.entity_type = entity_type
+        self.num_code = num_code
+        self.denom_code = denom_code
+        self.measure = measure
+        self.stat_parameters = stat_parameters
+        self.trim = trim
+
+    def get_table(self):
+        shaped_df = static_data_reshaping(
+            self.df,
+            self.entity_type,
+            self.denom_code,
+            self.num_code,
+        )
+        stats = get_stats(
+            df=shaped_df,
+            measure=self.measure,
+            aggregators=self.num_code,
+            stat_parameters=None,
+            trim=True
+        )
+        return stats
+
 def dist_table(
         df,
         column,
