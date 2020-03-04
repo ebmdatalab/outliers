@@ -4,8 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from IPython.display import HTML
 # Turn off the max column width so the images won't be truncated
-#Monkey patch the dataframe so the sparklines are displayed
 pd.set_option('display.max_colwidth', None)
+#Monkeypatch DataFrame so that instances can display charts in a notebook
 pd.DataFrame._repr_html_ = lambda self: self.to_html(escape=False)
 
 # Display pandas linebreaks properly
@@ -19,6 +19,8 @@ pd.DataFrame.to_html = (
 )
 
 
+
+######## Plots ########
 def dist_plot(org_value,
               distribution,
               figsize=(3.5, 1),
@@ -47,7 +49,6 @@ def dist_plot(org_value,
     ax = remove_clutter(ax)
     return plt
 
-
 def sparkline_plot(series,
                    figsize=(3.5, 1),
                    **kwags):
@@ -66,12 +67,10 @@ def sparkline_plot(series,
     plt : matplotlib plot
 
     """
-
     fig, ax = plt.subplots(1,1,figsize=figsize,**kwags)
     series.reset_index().plot(ax=ax,linewidth=0.9)
     ax = remove_clutter(ax)
     return plt
-
 
 def remove_clutter(ax):
     """ Removes axes and other clutter from the charts.
@@ -97,7 +96,6 @@ def remove_clutter(ax):
     plt.tight_layout()
     return ax
 
-
 def html_plt(plt):
     """ Converts a matplotlib plot into an html image.
     
@@ -118,6 +116,7 @@ def html_plt(plt):
     return html_plot
 
 
+######## Entity & bnf names ########
 def get_entity_names(name, measure):
     entity_type = name.split('_')[0]
     entity_names = entity_names_query(entity_type)
@@ -144,6 +143,7 @@ def entity_names_query(entity_type):
         csv_path=f'data/{entity_type}_names.csv'
     )
     return entity_names.set_index('code')
+######## Static outliers ########
 def get_stats(df,
               measure='measure',
               aggregators=['code']):
@@ -174,7 +174,6 @@ def get_stats(df,
     #self['z_score'] = self['z_score'].abs() # change to absolute values
     df = df.dropna()
     return df
-
 
 def dist_table(df, column, subset=None):
     """ Creates a pandas dataframe containing ditribution plots, based on a
@@ -209,6 +208,7 @@ def dist_table(df, column, subset=None):
     return HTML(df.to_html(escape=False))
 
 
+######## Change outliers ########
 def sparkline_series(df, column, subset=None):
     """ Creates a pandas series containing sparkline plots, based on a
     specific column in a dataframe.
