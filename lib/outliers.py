@@ -2,10 +2,7 @@ from io import BytesIO
 import base64
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 from IPython.display import HTML
-# reset to matplotlib defaults rather than seaborn ones
-plt.rcdefaults()
 # Turn off the max column width so the images won't be truncated
 pd.set_option('display.max_colwidth', -1)
 #Monkey patch the dataframe so the sparklines are displayed
@@ -45,7 +42,7 @@ def dist_plot(org_value,
 
     """
     fig, ax = plt.subplots(1,1,figsize=figsize,**kwargs)
-    sns.kdeplot(distribution,ax=ax,linewidth=0.9)
+    distribution.plot.kde(ax=ax,linewidth=0.9)
     ax.axvline(org_value,color='r',linewidth=1)
     ax = remove_clutter(ax)
     return plt
@@ -96,6 +93,7 @@ def remove_clutter(ax):
     ax.set_yticks([])
     #ax.set_xticks([])
     ax.xaxis.set_label_text('')
+    ax.yaxis.set_label_text('')
     plt.tight_layout()
     return ax
 
