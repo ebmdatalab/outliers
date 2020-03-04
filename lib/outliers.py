@@ -301,14 +301,24 @@ class StaticOutlierStats:
         )
         return stats
 
+col_names = {
+    'chapter': ['BNF Chapter', 'Chapter Items'],
+    'section': ['BNF Section', 'Section Items'],
+    'para': ['BNF Paragraph', 'Paragraph Items'],
+    'subpara': ['BNF Subparagraph', 'Subparagraph Items'],
+    'chemical': ['BNF Chemical', 'Chemical Items'],
+    'product': ['BNF Product', 'Product Items'],
+    'presentation': ['BNF Presentation', 'Presentation Items']
+}
+
 def dist_table(
         df,
-        column,
+        attr,
         entity_name,
         sort_col='z_score',
         ascending=False,
         table_length=10
-    ):
+        ):
     """ Creates a pandas dataframe containing ditribution plots, based on a
     specific column.
 
@@ -333,13 +343,21 @@ def dist_table(
     index = subset.index
     series = pd.Series(index=index,name='plots')
     for idx in index:
-        plot = dist_plot(df.loc[idx,column],
-                         df.loc[(slice(None),idx[1]),column])
+        plot = dist_plot(df.loc[idx,attr.measure],
+                         df.loc[(slice(None),idx[1]),attr.measure])
         series.loc[idx] = html_plt(plot)
     df = df.join(series, how='right')
     df = df.round(decimals=2)
 
     df = df.reset_index(drop=True)
+    df = df.drop(columns=attr.denom_code)
+    df = df.rename(columns={
+        f'{attr.num_code}_name': col_names[attr.num_code][0],
+        'numerator': col_names[attr.num_code][1],
+        f'{attr.denom_code}_name': col_names[attr.denom_code][0],
+        'denominator': col_names[attr.denom_code][1],
+        })
+    df = df.set_index(col_names[attr.num_code][0])
     return df
 
 
