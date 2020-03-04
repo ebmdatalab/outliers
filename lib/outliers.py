@@ -229,7 +229,9 @@ def trim_outliers(df, measure, aggregators):
 
 def get_stats(df,
               measure='measure',
-              aggregators=['code']):
+              aggregators=['code'],
+              stat_parameters=['skew',pd.DataFrame.kurt],
+              trim=False):
     """ Generates pandas columns with various stats in.
 
     Parameters
@@ -247,14 +249,20 @@ def get_stats(df,
     df : pandas DataFrame
 
     """
+    if trim:
+        stats = trim_outliers(df, measure, aggregators)
+    else:
+        stats = df
     #1 calculate stats
-    agg = df.groupby(aggregators).agg(['mean','std','skew'])[measure]
-    kurtosis = df.groupby(aggregators).apply(pd.DataFrame.kurt)
-    agg['kurtosis'] = kurtosis[measure]
-    df = df.join(agg)
+    if stat_parameters:
+        stat_parameters = ['mean','std'] + stat_parameters
+    else:
+        stat_parameters = ['mean','std']
+    stats = stats.groupby(aggregators).agg(stat_parameters)[measure]
+    df = df.join(stats)
     #2 calculate the # of std deviations an entity is away from the mean
-    df['z_score'] = (df[measure]-agg['mean'])/agg['std']
-    #self['z_score'] = self['z_score'].abs() # change to absolute values
+    df['z_score'] = (df[measure]-stats['mean'])/stats['std']
+    #df['z_score'] = df['z_score'].abs() # change to absolute values
     df = df.dropna()
     return df
 
