@@ -1,5 +1,5 @@
 from io import BytesIO
-import base64
+from base64 import b64encode
 import pandas as pd
 import matplotlib.pyplot as plt
 from IPython.display import HTML
@@ -47,6 +47,9 @@ def dist_plot(org_value,
     fig, ax = plt.subplots(1,1,figsize=figsize,**kwargs)
     distribution.plot.kde(ax=ax,linewidth=0.9)
     ax.axvline(org_value,color='r',linewidth=1)
+    #lower_limit = max(0,min(distribution.quantile(0.001),org_value*0.9))
+    upper_limit = max(distribution.quantile(0.999),org_value*1.1)
+    ax.set_xlim(0,upper_limit)
     ax = remove_clutter(ax)
     return plt
 
@@ -112,8 +115,9 @@ def html_plt(plt):
     img = BytesIO()
     plt.savefig(img, transparent=True)
     plt.close()
-    html_plot = '<img src=\"data:image/png;base64,{}"/>'.format(
-                base64.b64encode(img.getvalue()).decode())
+    b64_plot = b64encode(img.getvalue()).decode()
+    html_plot = f'<img src=\"data:image/png;base64,{b64_plot}"/>'
+
     return html_plot
 
 
