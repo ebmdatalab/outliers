@@ -228,10 +228,10 @@ def trim_outliers(df, measure, aggregators):
     return df.loc[mask]
 
 def get_stats(df,
-              measure='measure',
-              aggregators=['code'],
+              measure,
+              aggregators,
               stat_parameters=['skew',pd.DataFrame.kurt],
-              trim=False):
+              trim=True):
     """ Generates pandas columns with various stats in.
 
     Parameters
