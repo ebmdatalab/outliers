@@ -1,6 +1,7 @@
 from io import BytesIO
 from base64 import b64encode
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from ebmdatalab import bq
 #from IPython.display import HTML
@@ -263,6 +264,10 @@ def get_stats(df,
     #2 calculate the # of std deviations an entity is away from the mean
     df['z_score'] = (df[measure]-stats['mean'])/stats['std']
     #df['z_score'] = df['z_score'].abs() # change to absolute values
+
+    ## Some chemicals had a std of ~0 making inf values
+    ## I think this identifies where e.g. CCGs are the only ones to prescribe this.
+    df = df.replace([np.inf, -np.inf], np.nan)
     df = df.dropna()
     return df
 
