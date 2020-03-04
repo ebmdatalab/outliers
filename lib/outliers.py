@@ -4,8 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from IPython.display import HTML
 # Turn off the max column width so the images won't be truncated
-pd.set_option('display.max_colwidth', -1)
 #Monkey patch the dataframe so the sparklines are displayed
+pd.set_option('display.max_colwidth', None)
 pd.DataFrame._repr_html_ = lambda self: self.to_html(escape=False)
 
 # Display pandas linebreaks properly
