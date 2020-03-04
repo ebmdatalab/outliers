@@ -3,6 +3,7 @@ import base64
 import pandas as pd
 import matplotlib.pyplot as plt
 from IPython.display import HTML
+from ebmdatalab import bq
 # Turn off the max column width so the images won't be truncated
 pd.set_option('display.max_colwidth', None)
 #Monkeypatch DataFrame so that instances can display charts in a notebook
@@ -143,7 +144,85 @@ def entity_names_query(entity_type):
         csv_path=f'data/{entity_type}_names.csv'
     )
     return entity_names.set_index('code')
+
+def get_bnf_names(bnf_level):
+    bnf_code = f'{bnf_level}_code'
+    bnf_name = bnf_level
+    names = bnf_query(bnf_code, bnf_name)
+    return names
+
+def bnf_query(bnf_code, bnf_name):
+    query = f"""
+    SELECT
+      DISTINCT {bnf_code},
+      {bnf_name} AS {bnf_name}_name
+    FROM
+      ebmdatalab.hscic.bnf
+    WHERE
+      {bnf_name} IS NOT NULL
+    """
+    bnf_names = bq.cached_read(
+        query,
+        csv_path=f'data/{bnf_name}_names.csv'
+    )
+    bnf_names = pd.read_csv(f'data/{bnf_name}_names.csv',dtype={bnf_code: str})
+    return bnf_names.set_index(bnf_code)
+
+
 ######## Static outliers ########
+def fill_zeroes(df, entity_type, denom_code, num_code):
+    chems = df[[denom_code, num_code]].drop_duplicates()
+    chems['tmp'] = 1
+    entities = df[[entity_type]].drop_duplicates()
+    entities['tmp'] = 1
+    all_chem_map = entities.merge(chems,on='tmp').drop('tmp',axis=1)
+    df = df.merge(all_chem_map,on=[entity_type, denom_code, num_code],how='outer')
+    df = df.fillna(0)
+    df['numerator'] = df['numerator'].astype(int)
+    return df
+
+def static_data_reshaping(df, entity_type, denom_code, num_code):
+    ## Drop unnecessary columns
+    df = df[[entity_type, num_code, 'numerator', denom_code]]
+    
+    ## Aggregate by pcn/ccg
+    if entity_type!='practice':
+        df = df.groupby([entity_type, denom_code, num_code],as_index=False).sum()
+    
+    ## Fill zeroes where there is some prescribing within that subpara
+    df = fill_zeroes(df, entity_type, denom_code, num_code)
+    
+    ## Merge BNF names
+    for x in [num_code, denom_code]:
+        df = df.merge(
+            get_bnf_names(x),
+            how='left',
+            left_on=x,
+            right_index=True
+        )
+
+    ## Calculate denominator
+    df = df.set_index([entity_type, denom_code, num_code])
+    df['denominator'] = df.groupby([entity_type, denom_code]).sum()['numerator']
+    df = df.reset_index()
+
+    ## Calculate ratio
+    df['ratio'] = df['numerator'] / df['denominator']
+
+    return df.set_index([entity_type,num_code])
+
+def trim_outliers(df, measure, aggregators):
+    
+    def trim_series(series):
+        mask = (
+            (series>=series.quantile(0.001)) &
+            (series<=series.quantile(0.999))
+        )
+        return mask
+    
+    mask = df.groupby(aggregators)[measure].apply(lambda x: trim_series(x))
+    return df.loc[mask]
+
 def get_stats(df,
               measure='measure',
               aggregators=['code']):
