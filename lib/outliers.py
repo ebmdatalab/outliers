@@ -145,7 +145,7 @@ def entity_names_query(entity_type):
     """
     entity_names = bq.cached_read(
         query,
-        csv_path=f'data/{entity_type}_names.csv'
+        csv_path=f'../data/{entity_type}_names.csv'
     )
     return entity_names.set_index('code')
 
@@ -167,9 +167,9 @@ def bnf_query(bnf_code, bnf_name):
     """
     bnf_names = bq.cached_read(
         query,
-        csv_path=f'data/{bnf_name}_names.csv'
+        csv_path=f'../data/{bnf_name}_names.csv'
     )
-    bnf_names = pd.read_csv(f'data/{bnf_name}_names.csv',dtype={bnf_code: str})
+    bnf_names = pd.read_csv(f'../data/{bnf_name}_names.csv',dtype={bnf_code: str})
     return bnf_names.set_index(bnf_code)
 
 
@@ -342,7 +342,7 @@ def sparkline_series(df, column, subset=None):
     return series
 
 def sparkline_table(change_df, name, measure):
-    data = pd.read_csv('data/{}/bq_cache.csv'.format(name),index_col='code')
+    data = pd.read_csv('../data/{}/bq_cache.csv'.format(name),index_col='code')
     data['month'] = pd.to_datetime(data['month'])
     data['rate'] = data['numerator'] / data['denominator']
     data = data.sort_values('month')
