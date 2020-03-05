@@ -32,73 +32,57 @@ chem_per_para.head()
 
 # +
 ## WHAT TO DO WHERE DENOMINATOR == 0?
-
-# + active=""
-# df = static_data_reshaping(chem_per_para, 'ccg', 'subpara', 'chemical')
-# df.head(10)
-
-# + active=""
-# stats = get_stats(
-#     df=df,
-#     measure="ratio",
-#     aggregators=["chemical"],
-#     stat_parameters=None,
-#     trim=True
-# )
-# stats.head()
 # -
 
-stats_class = StaticOutlierStats(
-    df=chem_per_para,
-    entity_type='ccg',
-    num_code='chemical',
-    denom_code='subpara'
-)
-stats = stats_class.get_table()
-stats.head()
-
-dist_table(
-    stats,
-    stats_class,
-    '00C',
-)
-
-stats.loc[stats['z_score']>100000000000]
+# stats_class = StaticOutlierStats(
+#     df=chem_per_para,
+#     entity_type='ccg',
+#     num_code='chemical',
+#     denom_code='subpara'
+# )
+# stats = stats_class.get_table()
+# stats.head()
 
 # +
-from tqdm.notebook import tqdm
 from lib.make_html import write_to_template
-
-for x in ['ccg','pcn','practice']:
-    entity_names = entity_names_query(x)
-    stats_class = StaticOutlierStats(
-        df=chem_per_para,
-        entity_type=x,
-        num_code='chemical',
-        denom_code='subpara'
-    )
-    stats = stats_class.get_table()
-    codes = stats.index.get_level_values(0).unique()[0:10]
     
-    for code in tqdm(codes, desc=x):
-        table_high = dist_table(
-            stats,
-            stats_class,
-            code,
-            ascending=False,
+def loop_over_everything(df, entities):
+    for ent_type in entities:
+        entity_names = entity_names_query(ent_type)
+        stats_class = StaticOutlierStats(
+            df=df,
+            entity_type=ent_type,
+            num_code='chemical',
+            denom_code='subpara'
+        )
+        stats = stats_class.get_table()
+        
+        table_high = create_out_table(
+            df=stats,
+            attr=stats_class,
+            entity_type=ent_type,
             table_length=5,
+            ascending=False
         )
-        table_low = dist_table(
-            stats,
-            stats_class,
-            code,
-            ascending=True,
+        table_low = create_out_table(
+            df=stats,
+            attr=stats_class,
+            entity_type=ent_type,
             table_length=5,
+            ascending=True
         )
-        output_file = f'static_{x}_{code}'
-        write_to_template(
-            entity_names.loc[code,'name'],
-            table_high,
-            table_low,
-            output_file,
-        )
+        
+        codes = stats.index.get_level_values(0).unique()[0:10]
+        for code in tqdm(codes, desc=f'Writing HTML: {ent_type}'):
+            output_file = f'static_{ent_type}_{code}'
+            write_to_template(
+                entity_names.loc[code,'name'],
+                table_high.loc[code],
+                table_low.loc[code],
+                output_file,
+            )
+
+
+# -
+
+loop_over_everything(chem_per_para, ['ccg'])

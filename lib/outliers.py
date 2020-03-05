@@ -3,8 +3,11 @@ from base64 import b64encode
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+from tqdm.auto import tqdm
 from ebmdatalab import bq
-#from IPython.display import HTML
+# reset to matplotlib defaults rather than seaborn ones
+plt.rcdefaults()
 # Turn off the max column width so the images won't be truncated
 pd.set_option('display.max_colwidth', None)
 #Monkeypatch DataFrame so that instances can display charts in a notebook
@@ -23,6 +26,22 @@ pd.DataFrame.to_html = (
 
 
 ######## Plots ########
+
+def bw_scott(x):
+    """Adapted from https://www.statsmodels.org/stable/_modules/statsmodels/nonparametric/bandwidths.html
+    previouly cause an issue where the IQR was 0 for many
+    pandas.DataFrame.plot.kde does an okay job using scipy method,
+    but haven't worked out how to do that 
+    """
+    def _select_sigma(X):
+        #normalize = 1.349
+        #IQR = (sap(X, 75) - sap(X, 25))/normalize
+        #return np.minimum(np.std(X, axis=0, ddof=1), IQR)
+        return np.std(X, axis=0, ddof=1)
+    A = _select_sigma(x)
+    n = len(x)
+    return 1.059 * A * n ** (-0.2)
+
 def dist_plot(org_value,
               distribution,
               figsize=(3.5, 1),
@@ -46,11 +65,12 @@ def dist_plot(org_value,
 
     """
     fig, ax = plt.subplots(1,1,figsize=figsize,**kwargs)
-    distribution.plot.kde(ax=ax,linewidth=0.9)
+    distribution = distribution[~np.isnan(distribution)]
+    sns.kdeplot(distribution,bw=bw_scott(distribution),ax=ax,linewidth=0.9,legend=False)
     ax.axvline(org_value,color='r',linewidth=1)
-    #lower_limit = max(0,min(distribution.quantile(0.001),org_value*0.9))
-    upper_limit = max(distribution.quantile(0.999),org_value*1.1)
-    ax.set_xlim(0,upper_limit)
+    lower_limit = max(0,min(np.quantile(distribution, 0.001),org_value*0.9))
+    upper_limit = max(np.quantile(distribution, 0.999),org_value*1.1)
+    ax.set_xlim(lower_limit,upper_limit)
     ax = remove_clutter(ax)
     return plt
 
@@ -89,15 +109,14 @@ def remove_clutter(ax):
     ax : matplotlib axis
 
     """
-    ax.legend()#_.remove()
-    ax.legend_.remove()
+    #ax.legend()
+    #ax.legend_.remove()
     for k,v in ax.spines.items():
         v.set_visible(False)
     ax.tick_params(labelsize=5)
     ax.set_yticks([])
     #ax.set_xticks([])
     ax.xaxis.set_label_text('')
-    ax.yaxis.set_label_text('')
     plt.tight_layout()
     return ax
 
@@ -306,6 +325,23 @@ class StaticOutlierStats:
         )
         return stats
 
+def sort_pick_top(df, sort_col, ascending, entity_type, table_length):
+    df = df.sort_values(sort_col, ascending=ascending)
+    return df.groupby([entity_type]).head(table_length)
+    
+def join_numerator_array(big_df, filtered_df, measure):
+    df = big_df[measure].unstack(level=0)
+    series = df.apply(lambda r: tuple(r), axis=1).apply(np.array)
+    series = pd.Series(series,index=df.index,name='array')
+    return filtered_df.join(series)
+
+def add_plots(df, entity_type, measure):
+    tqdm.pandas(desc=f'Drawing plots: {entity_type}')
+    df['plots'] = df.progress_apply(lambda x:
+        html_plt(dist_plot(x[measure],x['array'])), axis=1)
+    df = df.drop(columns='array')
+    return df
+
 col_names = {
     'chapter': ['BNF Chapter', 'Chapter Items'],
     'section': ['BNF Section', 'Section Items'],
@@ -316,45 +352,9 @@ col_names = {
     'presentation': ['BNF Presentation', 'Presentation Items']
 }
 
-def dist_table(
-        df,
-        attr,
-        entity_name,
-        sort_col='z_score',
-        ascending=False,
-        table_length=10
-        ):
-    """ Creates a pandas dataframe containing ditribution plots, based on a
-    specific column.
-
-    Parameters
-    ----------
-    df : pandas DataFrame
-        DataFrame containing the relevant column.
-    column : str
-        Column to use for drawing distibution plots.
-    subset : pandas index, optional
-        Index matching the subset of rows that need to be in the
-        table. The default is None.
-
-    Returns
-    -------
-    HTML table containing columns and figures.
-
-    """
-    subset = df.loc[[entity_name]]
-    subset = subset.sort_values(sort_col,ascending=ascending)
-    subset = subset.head(table_length)
-    index = subset.index
-    series = pd.Series(index=index,name='plots')
-    for idx in index:
-        plot = dist_plot(df.loc[idx,attr.measure],
-                         df.loc[(slice(None),idx[1]),attr.measure])
-        series.loc[idx] = html_plt(plot)
-    df = df.join(series, how='right')
+def tidy_table(df, attr):
     df = df.round(decimals=2)
-
-    df = df.reset_index(drop=True)
+    df = df.reset_index(level=1,drop=True)
     df = df.drop(columns=attr.denom_code)
     df = df.rename(columns={
         f'{attr.num_code}_name': col_names[attr.num_code][0],
@@ -362,9 +362,21 @@ def dist_table(
         f'{attr.denom_code}_name': col_names[attr.denom_code][0],
         'denominator': col_names[attr.denom_code][1],
         })
-    df = df.set_index(col_names[attr.num_code][0])
+    #df = df.set_index(col_names[attr.num_code][0])
     return df
 
+def create_out_table(df, attr, entity_type, table_length, ascending):
+    out_table = sort_pick_top(
+        df,
+        'z_score',
+        ascending,
+        entity_type,
+        table_length
+        )
+    out_table = join_numerator_array(df, out_table, attr.measure)
+    out_table = add_plots(out_table, entity_type, attr.measure)
+    out_table = tidy_table(out_table, attr)
+    return out_table
 
 ######## Change outliers ########
 def sparkline_series(df, column, subset=None):
