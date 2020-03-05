@@ -70,6 +70,7 @@ from tqdm.notebook import tqdm
 from lib.make_html import write_to_template
 
 for x in ['ccg','pcn','practice']:
+    entity_names = entity_names_query(x)
     stats_class = StaticOutlierStats(
         df=chem_per_para,
         entity_type=x,
@@ -96,6 +97,7 @@ for x in ['ccg','pcn','practice']:
         )
         output_file = f'static_{x}_{code}'
         write_to_template(
+            entity_names.loc[code,'name'],
             table_high,
             table_low,
             output_file,
