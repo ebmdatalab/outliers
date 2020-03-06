@@ -132,7 +132,6 @@ def html_plt(plt):
     Returns
     -------
     html_plot : html image
-
     """
     img = BytesIO()
     plt.savefig(img, transparent=True)
@@ -144,6 +143,21 @@ def html_plt(plt):
 
 ######## Entity & bnf names ########
 def get_entity_names(name, measure):
+    """Takes entity name from entity_names_query and converts into a
+    link to the corresponding measure on OpenPrescribing
+    
+    Parameters
+    ----------
+    name : str
+        Name of practice/PCN/CCG etc
+    measure : str
+        Name of measure to create link to measure
+    
+    Returns
+    -------
+    link
+        Link to the measure/entity on OpenPrescribing
+    """
     entity_type = name.split("_")[0]
     entity_names = entity_names_query(entity_type)
     entity_names["code"] = entity_names.index
@@ -156,6 +170,19 @@ def get_entity_names(name, measure):
 
 
 def entity_names_query(entity_type):
+    """Queries the corresponding table for the entity and returns names with
+    entity codes as the index
+    
+    Parameters
+    ----------
+    entity_type : str
+        e.g. "ccg", "pcn", "practice"
+    
+    Returns
+    -------
+    pandas DataFrame
+        code is the index and entity names are the column
+    """
     query = f"""
     SELECT
       DISTINCT code,
@@ -170,6 +197,21 @@ def entity_names_query(entity_type):
 
 
 def get_bnf_names(bnf_level):
+    """Takes in input like "chemical" and passes the appropriate fields
+    to bnf_query
+    
+    Parameters
+    ----------
+    bnf_level : str
+        BNF level, allowable values from the bnf table in BQ are:
+        "chapter", "section" ,"para", "subpara" ,"chemical" ,"product",
+        "presentation"
+
+    Returns
+    -------
+    pandas DataFrame
+        Containing bnf_code as the index and bnf name as the only column
+    """
     bnf_code = f"{bnf_level}_code"
     bnf_name = bnf_level
     names = bnf_query(bnf_code, bnf_name)
@@ -177,6 +219,21 @@ def get_bnf_names(bnf_level):
 
 
 def bnf_query(bnf_code, bnf_name):
+    """Queries bnf table in BQ and returns a list of BNF names
+    mapped to BNF codes
+    
+    Parameters
+    ----------
+    bnf_code : str
+        name of BNF code column
+    bnf_name : str
+        name of BNF name column
+    
+    Returns
+    -------
+    pandas DataFrame
+        Containing bnf_code as the index and bnf name as the only column
+    """
     query = f"""
     SELECT
       DISTINCT {bnf_code},
