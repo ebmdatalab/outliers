@@ -17,6 +17,7 @@
 # **This requires > the standard 2GB of memory in docker. It worked with 3.5GB, but less may be possible.**
 
 import pandas as pd
+from tqdm.auto import tqdm
 from ebmdatalab import bq
 from lib.outliers import *
 
@@ -32,16 +33,6 @@ chem_per_para.head()
 
 # +
 ## WHAT TO DO WHERE DENOMINATOR == 0?
-# -
-
-# stats_class = StaticOutlierStats(
-#     df=chem_per_para,
-#     entity_type='ccg',
-#     num_code='chemical',
-#     denom_code='subpara'
-# )
-# stats = stats_class.get_table()
-# stats.head()
 
 # +
 from lib.make_html import write_to_template
@@ -64,6 +55,7 @@ def loop_over_everything(df, entities):
             table_length=5,
             ascending=False
         )
+        #print(table_high.info())
         table_low = create_out_table(
             df=stats,
             attr=stats_class,
@@ -77,12 +69,12 @@ def loop_over_everything(df, entities):
             output_file = f'static_{ent_type}_{code}'
             write_to_template(
                 entity_names.loc[code,'name'],
-                table_high.loc[code],
-                table_low.loc[code],
+                get_entity_table(table_high, stats_class, code),
+                get_entity_table(table_low, stats_class, code),
                 output_file,
             )
 
 
 # -
 
-loop_over_everything(chem_per_para, ['ccg'])
+loop_over_everything(chem_per_para, ['practice','pcn','ccg',])

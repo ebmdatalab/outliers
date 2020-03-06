@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from tqdm.auto import tqdm
 from ebmdatalab import bq
 # reset to matplotlib defaults rather than seaborn ones
 plt.rcdefaults()
@@ -72,7 +71,8 @@ def dist_plot(org_value,
     upper_limit = max(np.quantile(distribution, 0.999),org_value*1.1)
     ax.set_xlim(lower_limit,upper_limit)
     ax = remove_clutter(ax)
-    return plt
+    plt.close()
+    return fig
 
 def sparkline_plot(series,
                    figsize=(3.5, 1),
@@ -134,7 +134,6 @@ def html_plt(plt):
     """
     img = BytesIO()
     plt.savefig(img, transparent=True)
-    plt.close()
     b64_plot = b64encode(img.getvalue()).decode()
     html_plot = f'<img src=\"data:image/png;base64,{b64_plot}"/>'
 
@@ -335,10 +334,20 @@ def join_numerator_array(big_df, filtered_df, measure):
     series = pd.Series(series,index=df.index,name='array')
     return filtered_df.join(series)
 
-def add_plots(df, entity_type, measure):
-    tqdm.pandas(desc=f'Drawing plots: {entity_type}')
-    df['plots'] = df.progress_apply(lambda x:
-        html_plt(dist_plot(x[measure],x['array'])), axis=1)
+def create_out_table(df, attr, entity_type, table_length, ascending):
+    out_table = sort_pick_top(
+        df,
+        'z_score',
+        ascending,
+        entity_type,
+        table_length
+        )
+    out_table = join_numerator_array(df, out_table, attr.measure)
+    return out_table
+
+def add_plots(df, measure):
+    df['plots'] = df[[measure,'array']].apply(lambda x:
+        html_plt(dist_plot(x[0],x[1])), axis=1)
     df = df.drop(columns='array')
     return df
 
@@ -354,7 +363,6 @@ col_names = {
 
 def tidy_table(df, attr):
     df = df.round(decimals=2)
-    df = df.reset_index(level=1,drop=True)
     df = df.drop(columns=attr.denom_code)
     df = df.rename(columns={
         f'{attr.num_code}_name': col_names[attr.num_code][0],
@@ -362,21 +370,14 @@ def tidy_table(df, attr):
         f'{attr.denom_code}_name': col_names[attr.denom_code][0],
         'denominator': col_names[attr.denom_code][1],
         })
-    #df = df.set_index(col_names[attr.num_code][0])
+    df = df.set_index(col_names[attr.num_code][0])
     return df
 
-def create_out_table(df, attr, entity_type, table_length, ascending):
-    out_table = sort_pick_top(
-        df,
-        'z_score',
-        ascending,
-        entity_type,
-        table_length
-        )
-    out_table = join_numerator_array(df, out_table, attr.measure)
-    out_table = add_plots(out_table, entity_type, attr.measure)
-    out_table = tidy_table(out_table, attr)
-    return out_table
+def get_entity_table(df, attr, code):
+    df_ent = df.loc[code].copy()
+    df_ent = add_plots(df_ent, attr.measure)
+    df_ent = tidy_table(df_ent, attr)
+    return df_ent
 
 ######## Change outliers ########
 def sparkline_series(df, column, subset=None):
