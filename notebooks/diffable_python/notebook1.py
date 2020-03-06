@@ -14,11 +14,13 @@
 #     name: python3
 # ---
 
-# **This requires > the standard 2GB of memory in docker. It worked with 3.5GB, but less may be possible.**
+# **This requires > the standard 2GB of memory in docker. It worked with 4GB.**
 
 import pandas as pd
 from ebmdatalab import bq
 from lib.outliers import *
+
+# ## Load data
 
 # +
 with open("../data/static_outlier_sql/chem_per_para.sql") as sql:
@@ -29,9 +31,8 @@ with open("../data/static_outlier_sql/chem_per_para.sql") as sql:
 ## due to https://github.com/ebmdatalab/datalab-pandas/issues/26
 chem_per_para = pd.read_csv('../data/chem_per_para.zip',dtype={'subpara': str})
 chem_per_para.head()
-
-# +
-## WHAT TO DO WHERE DENOMINATOR == 0?
 # -
+
+# ## Generate HTML for practices, CCGs etc
 
 loop_over_everything(chem_per_para, ['practice','pcn','ccg',])

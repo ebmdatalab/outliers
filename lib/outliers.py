@@ -62,7 +62,6 @@ def dist_plot(org_value, distribution, figsize=(3.5, 1), **kwargs):
     Returns
     -------
     plt : matplotlib plot
-
     """
     fig, ax = plt.subplots(1, 1, figsize=figsize, **kwargs)
     distribution = distribution[~np.isnan(distribution)]
@@ -92,7 +91,6 @@ def sparkline_plot(series, figsize=(3.5, 1), **kwags):
     Returns
     -------
     plt : matplotlib plot
-
     """
     fig, ax = plt.subplots(1, 1, figsize=figsize, **kwags)
     series.reset_index().plot(ax=ax, linewidth=0.9)
@@ -110,7 +108,6 @@ def remove_clutter(ax):
     Returns
     -------
     ax : matplotlib axis
-
     """
     # ax.legend()
     # ax.legend_.remove()
@@ -252,6 +249,26 @@ def bnf_query(bnf_code, bnf_name):
 
 ######## Static outliers ########
 def fill_zeroes(df, entity_type, denom_code, num_code):
+    """Adds missing rows with 0s to fill where there is prescribing in a
+    specific denominator column, but no prescribing in the numerator
+    
+    Parameters
+    ----------
+    df : pandas df
+        Dataframe containing numerator column, as well as entitiy codes,
+        numerator codes and denominator codes.
+    entity_type : str
+        Column name for entities, e.g. 'ccg'
+    denom_code : str
+        Column name for denominator codes.
+    num_code : str
+        Column name for numerator codes.
+    
+    Returns
+    -------
+    pandas df
+        dataframe filled with rows for every possible numerator code
+    """
     chems = df[[denom_code, num_code]].drop_duplicates()
     chems["tmp"] = 1
     entities = df[[entity_type]].drop_duplicates()
@@ -264,6 +281,24 @@ def fill_zeroes(df, entity_type, denom_code, num_code):
 
 
 def static_data_reshaping(df, entity_type, denom_code, num_code):
+    """Some data management to aggregate data, and calculate some columns
+    
+    Parameters
+    ----------
+    df : pandas df
+        Dataframe obtained from the SQL query.
+    entity_type : str
+        Column name for entities, e.g. 'ccg'
+    denom_code : str
+        Column name for denominator codes.
+    num_code : str
+        Column name for numerator codes.
+    
+    Returns
+    -------
+    pandas df
+        dataframe ready to be passed to get_stats
+    """
     ## Drop unnecessary columns
     df = df[[entity_type, num_code, "numerator", denom_code]]
 
@@ -290,7 +325,40 @@ def static_data_reshaping(df, entity_type, denom_code, num_code):
 
 
 def trim_outliers(df, measure, aggregators):
+    """Trims a small number of extreme values from a df, so that they
+    don't affect the calculated z-score. This is only used in calculation of
+    summary stats, extreme values are not excluded entirely.
+    
+    Parameters
+    ----------
+    df : pandas df
+        Dataframe containing the column to be trimmed.
+    measure : str
+        Column to be trimmed.
+    aggregators : list
+        List of column(s) to group data, usually the numerator code.
+    
+    Returns
+    -------
+    pandas df
+        trimmed df
+    """
+
     def trim_series(series):
+        """Trims extreme values from a series. This should not drop values where
+        there are a large number of identical values (usually 0.0 or 1.0) at
+        the extremes.
+        
+        Parameters
+        ----------
+        series : pandas Series
+            Series to be trimmed.
+        
+        Returns
+        -------
+        pandas Series
+            Trimmed Series.
+        """
         mask = (series >= series.quantile(0.001)) & (series <= series.quantile(0.999))
         return mask
 
@@ -298,9 +366,7 @@ def trim_outliers(df, measure, aggregators):
     return df.loc[mask]
 
 
-def get_stats(
-    df, measure, aggregators, stat_parameters=["skew", pd.DataFrame.kurt], trim=True
-):
+def get_stats(df, measure, aggregators, stat_parameters, trim=True):
     """ Generates pandas columns with various stats in.
 
     Parameters
@@ -308,15 +374,18 @@ def get_stats(
     df : pandas DataFrame
         DataFrame containing the measure to be summarised and
         the aggregator column.
-    measure : str, optional
-        Column name to be summarised. The default is 'measure'.
-    aggregators : [str], optional
-        Column to use for aggregating data. The default is ['code'].
+    measure : str
+        Column name to be summarised.
+    aggregators : list
+        Column(s) to use for aggregating data. 
+    stat_parameters : list
+        Additional parameters to be calculated, e.g. ["skew", pd.DataFrame.kurt]
+    trim : bool
+        Say whether to trim the data before calculating stats
 
     Returns
     -------
     df : pandas DataFrame
-
     """
     if trim:
         stats = trim_outliers(df, measure, aggregators)
@@ -341,6 +410,27 @@ def get_stats(
 
 
 class StaticOutlierStats:
+
+    """Wrapper to take data from the SQL query and return stats dataframe
+    
+    Attributes
+    ----------
+    df : pandas df
+        Dataframe from the SQL query
+    entity_type : str
+        Column name for entity type, e.g. 'ccg'
+    measure : str
+        Name of column to calculate stats on. Default is "ratio"
+    num_code : str
+        Column name for numerator codes
+    denom_code : str
+        Column name for denominator codes
+    stat_parameters : 
+        Additional parameters to be calculated, e.g. ["skew", pd.DataFrame.kurt]
+    trim : bool
+        Say whether to trim the data before calculating stats
+    """
+
     def __init__(
         self,
         df,
@@ -360,6 +450,13 @@ class StaticOutlierStats:
         self.trim = trim
 
     def get_table(self):
+        """Activate getting the stats table
+        
+        Returns
+        -------
+        pandas df
+            Table of stats.
+        """
         shaped_df = static_data_reshaping(
             self.df, self.entity_type, self.denom_code, self.num_code,
         )
@@ -374,11 +471,48 @@ class StaticOutlierStats:
 
 
 def sort_pick_top(df, sort_col, ascending, entity_type, table_length):
+    """Sorts the df by a specified column, then picks the top X values for each
+    entity
+    
+    Parameters
+    ----------
+    df : pandas df
+        Input df.
+    sort_col : str
+        Name of column(s) on which to sort.
+    ascending : bool
+        Sort order to be passed to sort_values.
+    entity_type : str
+        Column name for entity type, e.g. 'ccg'
+    table_length : int
+        Number of rows to be returned for each entity
+    
+    Returns
+    -------
+    pandas df
+        df containing selected rows for each entity
+    """
     df = df.sort_values(sort_col, ascending=ascending)
     return df.groupby([entity_type]).head(table_length)
 
 
-def join_numerator_array(big_df, filtered_df, measure):
+def join_measure_array(big_df, filtered_df, measure):
+    """Adds a numpy array of measure values for each 
+    
+    Parameters
+    ----------
+    big_df : pandas df
+        Dataframe containing all values (from get_stats).
+    filtered_df : pandas df
+        Dataframe containing selcted rows from sort_pick_top.
+    measure : str
+        Column name for the arrays.
+    
+    Returns
+    -------
+    pandas df
+        filtered_df with measure arrays joined on. 
+    """
     df = big_df[measure].unstack(level=0)
     series = df.apply(lambda r: tuple(r), axis=1).apply(np.array)
     series = pd.Series(series, index=df.index, name="array")
@@ -386,12 +520,49 @@ def join_numerator_array(big_df, filtered_df, measure):
 
 
 def create_out_table(df, attr, entity_type, table_length, ascending):
+    """Wrapper to create table for all entities, using sort_pick_top and
+    join_measure_array
+    
+    Parameters
+    ----------
+    df : pandas df
+        Dataframe containing all values (from get_stats).
+    attr : StaticOutlierStats instance
+        Contains attributes to be used in defining the tables.
+    entity_type : str
+        Column name for entity type, e.g. 'ccg'
+    table_length : int
+        Number of rows to be returned for each entity
+    ascending : bool
+        Sort order to be passed to sort_values.
+    
+    Returns
+    -------
+    pandas df
+        Dataframe containing rows for all entities that will be made into HTML
+        tables
+    """
     out_table = sort_pick_top(df, "z_score", ascending, entity_type, table_length)
-    out_table = join_numerator_array(df, out_table, attr.measure)
+    out_table = join_measure_array(df, out_table, attr.measure)
     return out_table
 
 
 def add_plots(df, measure):
+    """Use the entity values and the measure array to draw a plot for each row
+    in the dataframe.
+    
+    Parameters
+    ----------
+    df : pandas df
+        Dataframe to have plots drawn in, from create_out_table
+    measure : str
+        Column name to be plotted for the entity
+    
+    Returns
+    -------
+    pandas df
+        Dataframe with added plots
+    """
     df["plots"] = df[[measure, "array"]].apply(
         lambda x: html_plt(dist_plot(x[0], x[1])), axis=1
     )
@@ -411,6 +582,21 @@ col_names = {
 
 
 def tidy_table(df, attr):
+    """Rounds figures, drops unnecessary columns and changes column names to be
+    easier to read (according to col_names).
+    
+    Parameters
+    ----------
+    df : pandas df
+        Input dataframe
+    attr : StaticOutlierStats instance
+        Contains attributes to be used in defining the tables.
+
+    Returns
+    -------
+    pandas df
+        Dataframe to be passed to the HTML template writer.
+    """
     df = df.round(decimals=2)
     df = df.drop(columns=attr.denom_code)
     df = df.rename(
@@ -426,43 +612,66 @@ def tidy_table(df, attr):
 
 
 def get_entity_table(df, attr, code):
+    """Wrapper to take large input dataframe containing rows for all entities,
+    and output table ready to be passed to HTML template.
+    
+    Parameters
+    ----------
+    df : pandas df
+        Input dataframe
+    attr : StaticOutlierStats instance
+        Contains attributes to be used in defining the tables.
+    code : str
+        Code for the entity to be selected.
+    
+    Returns
+    -------
+    pandas df
+        Dataframe to be passed to the HTML template writer.
+    """
     df_ent = df.loc[code].copy()
     df_ent = add_plots(df_ent, attr.measure)
     df_ent = tidy_table(df_ent, attr)
     return df_ent
 
+
 def loop_over_everything(df, entities):
+    """Loops over all entities to generate HTML for each.
+    
+    Parameters
+    ----------
+    df : pandas df
+        Dataframe obtained from the SQL query.
+    entities : list
+        List of entities to write HTML for e.g. ['practice','pcn','ccg',]
+    """
     for ent_type in entities:
         entity_names = entity_names_query(ent_type)
         stats_class = StaticOutlierStats(
-            df=df,
-            entity_type=ent_type,
-            num_code='chemical',
-            denom_code='subpara'
+            df=df, entity_type=ent_type, num_code="chemical", denom_code="subpara"
         )
         stats = stats_class.get_table()
-        
+
         table_high = create_out_table(
             df=stats,
             attr=stats_class,
             entity_type=ent_type,
             table_length=5,
-            ascending=False
+            ascending=False,
         )
-        #print(table_high.info())
         table_low = create_out_table(
             df=stats,
             attr=stats_class,
             entity_type=ent_type,
             table_length=5,
-            ascending=True
+            ascending=True,
         )
-        
+
         codes = stats.index.get_level_values(0).unique()[0:10]
-        for code in tqdm(codes, desc=f'Writing HTML: {ent_type}'):
-            output_file = f'static_{ent_type}_{code}'
+        for code in tqdm(codes, desc=f"Writing HTML: {ent_type}"):
+            output_file = f"static_{ent_type}_{code}"
             write_to_template(
-                entity_names.loc[code,'name'],
+                entity_names.loc[code, "name"],
                 get_entity_table(table_high, stats_class, code),
                 get_entity_table(table_low, stats_class, code),
                 output_file,
@@ -487,7 +696,6 @@ def sparkline_series(df, column, subset=None):
     Returns
     -------
     pandas series containing columns and figures.
-
     """
     if subset is not None:
         index = subset
