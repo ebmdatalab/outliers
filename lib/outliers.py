@@ -4,7 +4,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from tqdm.auto import tqdm
 from ebmdatalab import bq
+from lib.make_html import write_to_template
 
 # reset to matplotlib defaults rather than seaborn ones
 plt.rcdefaults()
@@ -428,6 +430,43 @@ def get_entity_table(df, attr, code):
     df_ent = add_plots(df_ent, attr.measure)
     df_ent = tidy_table(df_ent, attr)
     return df_ent
+
+def loop_over_everything(df, entities):
+    for ent_type in entities:
+        entity_names = entity_names_query(ent_type)
+        stats_class = StaticOutlierStats(
+            df=df,
+            entity_type=ent_type,
+            num_code='chemical',
+            denom_code='subpara'
+        )
+        stats = stats_class.get_table()
+        
+        table_high = create_out_table(
+            df=stats,
+            attr=stats_class,
+            entity_type=ent_type,
+            table_length=5,
+            ascending=False
+        )
+        #print(table_high.info())
+        table_low = create_out_table(
+            df=stats,
+            attr=stats_class,
+            entity_type=ent_type,
+            table_length=5,
+            ascending=True
+        )
+        
+        codes = stats.index.get_level_values(0).unique()[0:10]
+        for code in tqdm(codes, desc=f'Writing HTML: {ent_type}'):
+            output_file = f'static_{ent_type}_{code}'
+            write_to_template(
+                entity_names.loc[code,'name'],
+                get_entity_table(table_high, stats_class, code),
+                get_entity_table(table_low, stats_class, code),
+                output_file,
+            )
 
 
 ######## Change outliers ########
