@@ -93,9 +93,10 @@ def sparkline_plot(series, figsize=(3.5, 1), **kwags):
     plt : matplotlib plot
     """
     fig, ax = plt.subplots(1, 1, figsize=figsize, **kwags)
-    series.reset_index().plot(ax=ax, linewidth=0.9)
+    series.reset_index().plot(ax=ax, linewidth=0.9, legend=False)
     ax = remove_clutter(ax)
-    return plt
+    plt.close()
+    return fig
 
 
 def remove_clutter(ax):
@@ -635,49 +636,6 @@ def get_entity_table(df, attr, code):
     return df_ent
 
 
-def loop_over_everything(df, entities):
-    """Loops over all entities to generate HTML for each.
-    
-    Parameters
-    ----------
-    df : pandas df
-        Dataframe obtained from the SQL query.
-    entities : list
-        List of entities to write HTML for e.g. ['practice','pcn','ccg',]
-    """
-    for ent_type in entities:
-        entity_names = entity_names_query(ent_type)
-        stats_class = StaticOutlierStats(
-            df=df, entity_type=ent_type, num_code="chemical", denom_code="subpara"
-        )
-        stats = stats_class.get_table()
-
-        table_high = create_out_table(
-            df=stats,
-            attr=stats_class,
-            entity_type=ent_type,
-            table_length=5,
-            ascending=False,
-        )
-        table_low = create_out_table(
-            df=stats,
-            attr=stats_class,
-            entity_type=ent_type,
-            table_length=5,
-            ascending=True,
-        )
-
-        codes = stats.index.get_level_values(0).unique()[0:10]
-        for code in tqdm(codes, desc=f"Writing HTML: {ent_type}"):
-            output_file = f"static_{ent_type}_{code}"
-            write_to_template(
-                entity_names.loc[code, "name"],
-                get_entity_table(table_high, stats_class, code),
-                get_entity_table(table_low, stats_class, code),
-                output_file,
-            )
-
-
 ######## Change outliers ########
 def sparkline_series(df, column, subset=None):
     """ Creates a pandas series containing sparkline plots, based on a
@@ -712,7 +670,7 @@ def sparkline_series(df, column, subset=None):
 
 
 def sparkline_table(change_df, name, measure):
-    data = pd.read_csv("../data/{}/bq_cache.csv".format(name), index_col="code")
+    data = pd.read_csv(f"data/{name}/bq_cache.csv", index_col="code")
     data["month"] = pd.to_datetime(data["month"])
     data["rate"] = data["numerator"] / data["denominator"]
     data = data.sort_values("month")
@@ -755,3 +713,47 @@ def month_integer_to_dates(input_df, change_df):
         lambda x: x["min_month"] + pd.DateOffset(months=x["is.tfirst.big"] - 1), axis=1
     )
     return change_df
+
+
+def loop_over_everything(df, entities):
+    """Loops over all entities to generate HTML for each.
+    
+    Parameters
+    ----------
+    df : pandas df
+        Dataframe obtained from the SQL query.
+    entities : list
+        List of entities to write HTML for e.g. ['practice','pcn','ccg',]
+    """
+    for ent_type in entities:
+        entity_names = entity_names_query(ent_type)
+        stats_class = StaticOutlierStats(
+            df=df, entity_type=ent_type, num_code="chemical", denom_code="subpara"
+        )
+        stats = stats_class.get_table()
+
+        table_high = create_out_table(
+            df=stats,
+            attr=stats_class,
+            entity_type=ent_type,
+            table_length=5,
+            ascending=False,
+        )
+        table_low = create_out_table(
+            df=stats,
+            attr=stats_class,
+            entity_type=ent_type,
+            table_length=5,
+            ascending=True,
+        )
+
+        #### Currently limited to 10 per entity, for quicker testing ####
+        codes = stats.index.get_level_values(0).unique()[0:10]
+        for code in tqdm(codes, desc=f"Writing HTML: {ent_type}"):
+            output_file = f"static_{ent_type}_{code}"
+            write_to_template(
+                entity_names.loc[code, "name"],
+                get_entity_table(table_high, stats_class, code),
+                get_entity_table(table_low, stats_class, code),
+                output_file,
+            )
