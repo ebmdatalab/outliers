@@ -13,7 +13,7 @@ from jsondiff import diff
 def get_measure_json(measures, run_name):
     """Gets measure JSON from OpenPrescribing github repo
     and writes to a local file
-    
+
     Args:
         measures (list): List of measures to be imported
         run_name (str): Label for running these measures
@@ -40,11 +40,11 @@ changes = {
 def modify_measure_json(path):
     """Selectively modifies fields within the measure JSON
     according to changes dict
-    
+
     Args:
         path (str): Path to locate measure JSON to be modified
-    
-    Returns: 
+
+    Returns:
         JSON: Modified measure JSON
     """
     with open(path) as f:
@@ -123,7 +123,7 @@ def build_sql(run_name):
     """Takes all JSON files in the run_name folder and uses
     build_num_or_denom_fields to add fields to the SQL template.
     Writes folder with SQL corresponding to the measure_sql folder.
-    
+
     Args:
         run_name (str): Name of folder where JSON is found
     """

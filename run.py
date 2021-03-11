@@ -17,8 +17,7 @@ target_dir = "/home/app/notebook"
 
 
 def await_jupyter_http(port):
-    """Wait up to 10 seconds for Jupyter to be available
-    """
+    """Wait up to 10 seconds for Jupyter to be available"""
     print(f"Waiting for Jupyter to be ready on port {port}")
     timeout = 10
     increment = 0.1
@@ -38,8 +37,7 @@ def await_jupyter_http(port):
 
 
 def stream_subprocess_output(cmd):
-    """Stream stdout and stderr of `cmd` in a subprocess to stdout
-    """
+    """Stream stdout and stderr of `cmd` in a subprocess to stdout"""
     with subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
@@ -55,8 +53,7 @@ def stream_subprocess_output(cmd):
 
 
 def docker_build(tag):
-    """Build container for Dockerfile in current directory
-    """
+    """Build container for Dockerfile in current directory"""
     print(
         "Building docker image. This may take some time (particularly on the first run)..."
     )
@@ -94,8 +91,7 @@ def docker_run(tag):
 
 
 def docker_port(container_id):
-    """Return the port that the specified container is listening on
-    """
+    """Return the port that the specified container is listening on"""
     completed_process = subprocess.run(
         ["docker", "port", container_id], check=True, capture_output=True
     )
