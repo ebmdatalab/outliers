@@ -7,7 +7,7 @@ import jinja2
 
 
 def df_to_html(df):
-    return markupsafe.Markup(df.to_html(escape=True)).unescape()
+    return markupsafe.Markup(df.to_html(escape=True, classes=["table","thead-light","table-bordered","table-sm"])).unescape()
 
 
 def write_to_template(entity_name, table_high, table_low, output_file):
