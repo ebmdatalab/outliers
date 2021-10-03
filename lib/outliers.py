@@ -135,7 +135,7 @@ def html_plt(plt):
     img = BytesIO()
     plt.savefig(img, transparent=True)
     b64_plot = b64encode(img.getvalue()).decode()
-    html_plot = f'<img src="data:image/png;base64,{b64_plot}"/>'
+    html_plot = f'<img class="zoom" src="data:image/png;base64,{b64_plot}"/>'
 
     return html_plot
 
