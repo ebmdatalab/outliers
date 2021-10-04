@@ -25,7 +25,7 @@ from lib.outliers import *
 # +
 with open("../data/static_outlier_sql/chem_per_para.sql") as sql:
     query = sql.read()
-#chem_per_para = bq.cached_read(query, csv_path='data/chem_per_para.zip')
+chem_per_para = bq.cached_read(query, csv_path='../data/chem_per_para.zip')
 
 ## reload specifying data type currently required
 ## due to https://github.com/ebmdatalab/datalab-pandas/issues/26
