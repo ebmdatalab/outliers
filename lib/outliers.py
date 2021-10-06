@@ -7,6 +7,8 @@ import seaborn as sns
 from tqdm.auto import tqdm
 from ebmdatalab import bq
 from lib.make_html import write_to_template
+from lib.table_of_contents import MarkdownToC
+from os import path
 
 # reset to matplotlib defaults rather than seaborn ones
 plt.rcdefaults()
@@ -31,7 +33,7 @@ def bw_scott(x):
     """Adapted from https://www.statsmodels.org/stable/_modules/statsmodels/nonparametric/bandwidths.html
     previouly cause an issue where the IQR was 0 for many
     pandas.DataFrame.plot.kde does an okay job using scipy method,
-    but haven't worked out how to do that 
+    but haven't worked out how to do that
     """
 
     def _select_sigma(X):
@@ -46,9 +48,9 @@ def bw_scott(x):
 
 
 def dist_plot(org_value, distribution, figsize=(3.5, 1), **kwargs):
-    """ Draws a matplotlib plot with a kde curve and a line for
+    """Draws a matplotlib plot with a kde curve and a line for
     an individual institution.
-    
+
     Parameters
     ----------
     org_value : float
@@ -78,7 +80,7 @@ def dist_plot(org_value, distribution, figsize=(3.5, 1), **kwargs):
 
 
 def sparkline_plot(series, figsize=(3.5, 1), **kwags):
-    """ Draws a sparkline plot to be used in a table.
+    """Draws a sparkline plot to be used in a table.
 
     Parameters
     ----------
@@ -99,8 +101,8 @@ def sparkline_plot(series, figsize=(3.5, 1), **kwags):
 
 
 def remove_clutter(ax):
-    """ Removes axes and other clutter from the charts.
-    
+    """Removes axes and other clutter from the charts.
+
     Parameters
     ----------
     ax : matplotlib axis
@@ -122,8 +124,8 @@ def remove_clutter(ax):
 
 
 def html_plt(plt):
-    """ Converts a matplotlib plot into an html image.
-    
+    """Converts a matplotlib plot into an html image.
+
     Parameters
     ----------
     plt : matplotlib figure
@@ -144,14 +146,14 @@ def html_plt(plt):
 def get_entity_names(name, measure):
     """Takes entity name from entity_names_query and converts into a
     link to the corresponding measure on OpenPrescribing
-    
+
     Parameters
     ----------
     name : str
         Name of practice/PCN/CCG etc
     measure : str
         Name of measure to create link to measure
-    
+
     Returns
     -------
     link
@@ -171,12 +173,12 @@ def get_entity_names(name, measure):
 def entity_names_query(entity_type):
     """Queries the corresponding table for the entity and returns names with
     entity codes as the index
-    
+
     Parameters
     ----------
     entity_type : str
         e.g. "ccg", "pcn", "practice"
-    
+
     Returns
     -------
     pandas DataFrame
@@ -198,7 +200,7 @@ def entity_names_query(entity_type):
 def get_bnf_names(bnf_level):
     """Takes in input like "chemical" and passes the appropriate fields
     to bnf_query
-    
+
     Parameters
     ----------
     bnf_level : str
@@ -220,14 +222,14 @@ def get_bnf_names(bnf_level):
 def bnf_query(bnf_code, bnf_name):
     """Queries bnf table in BQ and returns a list of BNF names
     mapped to BNF codes
-    
+
     Parameters
     ----------
     bnf_code : str
         name of BNF code column
     bnf_name : str
         name of BNF name column
-    
+
     Returns
     -------
     pandas DataFrame
@@ -251,7 +253,7 @@ def bnf_query(bnf_code, bnf_name):
 def fill_zeroes(df, entity_type, denom_code, num_code):
     """Adds missing rows with 0s to fill where there is prescribing in a
     specific denominator column, but no prescribing in the numerator
-    
+
     Parameters
     ----------
     df : pandas df
@@ -263,7 +265,7 @@ def fill_zeroes(df, entity_type, denom_code, num_code):
         Column name for denominator codes.
     num_code : str
         Column name for numerator codes.
-    
+
     Returns
     -------
     pandas df
@@ -282,7 +284,7 @@ def fill_zeroes(df, entity_type, denom_code, num_code):
 
 def static_data_reshaping(df, entity_type, denom_code, num_code):
     """Some data management to aggregate data, and calculate some columns
-    
+
     Parameters
     ----------
     df : pandas df
@@ -293,7 +295,7 @@ def static_data_reshaping(df, entity_type, denom_code, num_code):
         Column name for denominator codes.
     num_code : str
         Column name for numerator codes.
-    
+
     Returns
     -------
     pandas df
@@ -328,7 +330,7 @@ def trim_outliers(df, measure, aggregators):
     """Trims a small number of extreme values from a df, so that they
     don't affect the calculated z-score. This is only used in calculation of
     summary stats, extreme values are not excluded entirely.
-    
+
     Parameters
     ----------
     df : pandas df
@@ -337,7 +339,7 @@ def trim_outliers(df, measure, aggregators):
         Column to be trimmed.
     aggregators : list
         List of column(s) to group data, usually the numerator code.
-    
+
     Returns
     -------
     pandas df
@@ -348,12 +350,12 @@ def trim_outliers(df, measure, aggregators):
         """Trims extreme values from a series. This should not drop values where
         there are a large number of identical values (usually 0.0 or 1.0) at
         the extremes.
-        
+
         Parameters
         ----------
         series : pandas Series
             Series to be trimmed.
-        
+
         Returns
         -------
         pandas Series
@@ -367,7 +369,7 @@ def trim_outliers(df, measure, aggregators):
 
 
 def get_stats(df, measure, aggregators, stat_parameters, trim=True):
-    """ Generates pandas columns with various stats in.
+    """Generates pandas columns with various stats in.
 
     Parameters
     ----------
@@ -377,7 +379,7 @@ def get_stats(df, measure, aggregators, stat_parameters, trim=True):
     measure : str
         Column name to be summarised.
     aggregators : list
-        Column(s) to use for aggregating data. 
+        Column(s) to use for aggregating data.
     stat_parameters : list
         Additional parameters to be calculated, e.g. ["skew", pd.DataFrame.kurt]
     trim : bool
@@ -412,7 +414,7 @@ def get_stats(df, measure, aggregators, stat_parameters, trim=True):
 class StaticOutlierStats:
 
     """Wrapper to take data from the SQL query and return stats dataframe
-    
+
     Attributes
     ----------
     df : pandas df
@@ -425,7 +427,7 @@ class StaticOutlierStats:
         Column name for numerator codes
     denom_code : str
         Column name for denominator codes
-    stat_parameters : 
+    stat_parameters :
         Additional parameters to be calculated, e.g. ["skew", pd.DataFrame.kurt]
     trim : bool
         Say whether to trim the data before calculating stats
@@ -451,14 +453,17 @@ class StaticOutlierStats:
 
     def get_table(self):
         """Activate getting the stats table
-        
+
         Returns
         -------
         pandas df
             Table of stats.
         """
         shaped_df = static_data_reshaping(
-            self.df, self.entity_type, self.denom_code, self.num_code,
+            self.df,
+            self.entity_type,
+            self.denom_code,
+            self.num_code,
         )
         stats = get_stats(
             df=shaped_df,
@@ -473,7 +478,7 @@ class StaticOutlierStats:
 def sort_pick_top(df, sort_col, ascending, entity_type, table_length):
     """Sorts the df by a specified column, then picks the top X values for each
     entity
-    
+
     Parameters
     ----------
     df : pandas df
@@ -486,7 +491,7 @@ def sort_pick_top(df, sort_col, ascending, entity_type, table_length):
         Column name for entity type, e.g. 'ccg'
     table_length : int
         Number of rows to be returned for each entity
-    
+
     Returns
     -------
     pandas df
@@ -497,8 +502,8 @@ def sort_pick_top(df, sort_col, ascending, entity_type, table_length):
 
 
 def join_measure_array(big_df, filtered_df, measure):
-    """Adds a numpy array of measure values for each 
-    
+    """Adds a numpy array of measure values for each
+
     Parameters
     ----------
     big_df : pandas df
@@ -507,11 +512,11 @@ def join_measure_array(big_df, filtered_df, measure):
         Dataframe containing selcted rows from sort_pick_top.
     measure : str
         Column name for the arrays.
-    
+
     Returns
     -------
     pandas df
-        filtered_df with measure arrays joined on. 
+        filtered_df with measure arrays joined on.
     """
     df = big_df[measure].unstack(level=0)
     series = df.apply(lambda r: tuple(r), axis=1).apply(np.array)
@@ -522,7 +527,7 @@ def join_measure_array(big_df, filtered_df, measure):
 def create_out_table(df, attr, entity_type, table_length, ascending):
     """Wrapper to create table for all entities, using sort_pick_top and
     join_measure_array
-    
+
     Parameters
     ----------
     df : pandas df
@@ -535,7 +540,7 @@ def create_out_table(df, attr, entity_type, table_length, ascending):
         Number of rows to be returned for each entity
     ascending : bool
         Sort order to be passed to sort_values.
-    
+
     Returns
     -------
     pandas df
@@ -550,14 +555,14 @@ def create_out_table(df, attr, entity_type, table_length, ascending):
 def add_plots(df, measure):
     """Use the entity values and the measure array to draw a plot for each row
     in the dataframe.
-    
+
     Parameters
     ----------
     df : pandas df
         Dataframe to have plots drawn in, from create_out_table
     measure : str
         Column name to be plotted for the entity
-    
+
     Returns
     -------
     pandas df
@@ -584,7 +589,7 @@ col_names = {
 def tidy_table(df, attr):
     """Rounds figures, drops unnecessary columns and changes column names to be
     easier to read (according to col_names).
-    
+
     Parameters
     ----------
     df : pandas df
@@ -614,7 +619,7 @@ def tidy_table(df, attr):
 def get_entity_table(df, attr, code):
     """Wrapper to take large input dataframe containing rows for all entities,
     and output table ready to be passed to HTML template.
-    
+
     Parameters
     ----------
     df : pandas df
@@ -623,7 +628,7 @@ def get_entity_table(df, attr, code):
         Contains attributes to be used in defining the tables.
     code : str
         Code for the entity to be selected.
-    
+
     Returns
     -------
     pandas df
@@ -635,20 +640,36 @@ def get_entity_table(df, attr, code):
     return df_ent
 
 
-def loop_over_everything(df, entities):
+def loop_over_everything(
+    df,
+    entities,
+    output_dir="../data",
+    template_path="../data/template.html",
+):
     """Loops over all entities to generate HTML for each.
-    
+
     Parameters
     ----------
     df : pandas df
         Dataframe obtained from the SQL query.
     entities : list
         List of entities to write HTML for e.g. ['practice','pcn','ccg',]
+    output_dir : str
+        Directory for output
+    template_path : str
+        Path to jinja2 html template file
     """
+    urlprefix = "https://htmlpreview.github.io/?" + \
+        "https://raw.githubusercontent.com/ebmdatalab/outliers/master/"
+    toc = MarkdownToC(urlprefix)
+
     for ent_type in entities:
         entity_names = entity_names_query(ent_type)
         stats_class = StaticOutlierStats(
-            df=df, entity_type=ent_type, num_code="chemical", denom_code="subpara"
+            df=df,
+            entity_type=ent_type,
+            num_code="chemical",
+            denom_code="subpara"
         )
         stats = stats_class.get_table()
 
@@ -669,18 +690,24 @@ def loop_over_everything(df, entities):
 
         codes = stats.index.get_level_values(0).unique()[0:10]
         for code in tqdm(codes, desc=f"Writing HTML: {ent_type}"):
-            output_file = f"static_{ent_type}_{code}"
+            output_file = path.join(
+                    output_dir,
+                    'html',
+                    f"static_{ent_type}_{code}.html",)
             write_to_template(
                 entity_names.loc[code, "name"],
                 get_entity_table(table_high, stats_class, code),
                 get_entity_table(table_low, stats_class, code),
-                output_file,
+                output_path=output_file,
+                template_path=template_path,
             )
+            toc.add_file(output_file, entity=ent_type)
+    toc.write_toc(output_dir)
 
 
 ######## Change outliers ########
 def sparkline_series(df, column, subset=None):
-    """ Creates a pandas series containing sparkline plots, based on a
+    """Creates a pandas series containing sparkline plots, based on a
     specific column in a dataframe.
 
     Parameters
