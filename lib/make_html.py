@@ -5,7 +5,6 @@ Partly adapted from https://github.com/ebmdatalab/html-template-demo
 import markupsafe
 import jinja2
 from lxml import html
-from os import path
 
 
 def make_tr(thlist):
@@ -108,7 +107,9 @@ def selective_title(str):
 
     """
     ALLCAPS = ["NHS", "PCN", "CCG"]
-    return " ".join([w.title() if w not in ALLCAPS else w for w in str.split(" ")])
+    return " ".join(
+        [w.title() if w not in ALLCAPS else w for w in str.split(" ")]
+    )
 
 
 def write_to_template(
@@ -121,7 +122,8 @@ def write_to_template(
     """
     Populate jinja template with outlier report data
 
-    Calls df_to_html to generated <table> fragments, correctly formats enetity name,
+    Calls df_to_html to generated <table> fragments,
+    correctly formats entity name,
     passes these to jinja template and renders final html
 
     Parameters
