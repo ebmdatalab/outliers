@@ -107,14 +107,23 @@ def selective_title(str):
 
     """
     ALLCAPS = ["NHS", "PCN", "CCG"]
-    return " ".join([w.title() if w not in ALLCAPS else w for w in str.split(" ")])
+    return " ".join(
+        [w.title() if w not in ALLCAPS else w for w in str.split(" ")]
+    )
 
 
-def write_to_template(entity_name, table_high, table_low, output_file):
+def write_to_template(
+    entity_name,
+    table_high,
+    table_low,
+    output_path,
+    template_path,
+):
     """
     Populate jinja template with outlier report data
 
-    Calls df_to_html to generated <table> fragments, correctly formats enetity name,
+    Calls df_to_html to generated <table> fragments,
+    correctly formats entity name,
     passes these to jinja template and renders final html
 
     Parameters
@@ -133,7 +142,8 @@ def write_to_template(entity_name, table_high, table_low, output_file):
     str
         Complete HTML outlier report
     """
-    with open("../data/template.html") as f:
+
+    with open(template_path) as f:
         template = jinja2.Template(f.read())
 
     context = {
@@ -142,5 +152,5 @@ def write_to_template(entity_name, table_high, table_low, output_file):
         "table_low": df_to_html(table_low),
     }
 
-    with open(f"../data/html/{output_file}.html", "w") as f:
+    with open(output_path, "w") as f:
         f.write(template.render(context))
