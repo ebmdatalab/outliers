@@ -180,8 +180,13 @@ def get_entity_names(name, measure):
     entity_names = entity_names_query(entity_type)
     entity_names["code"] = entity_names.index
     measure_name = measure.split("_")[-1]
+
+    def make_link(x):
+        url_stub = '<a href="https://openprescribing.net/measure/'
+        return f'{url_stub}{measure_name}/{entity_type}/{x[0]}/">{x[1]}</a>'
+
     entity_names["link"] = entity_names[["code", "name"]].apply(
-        lambda x: f'<a href="https://openprescribing.net/measure/{measure_name}/{entity_type}/{x[0]}/">{x[1]}</a>',
+        make_link,
         axis=1,
     )
     return entity_names
