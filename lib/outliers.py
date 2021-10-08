@@ -646,8 +646,12 @@ def add_openprescribing_analyse_url(df, attr, code):
         Dataframe with URL column added.
     """
     url_base = "https://openprescribing.net/analyse/#"
-    url_org = f'org={attr.entity_type}&orgIds={code}'
     url_selected = "&selectedTab=summary"
+
+    def format_entity(entity):
+        return entity.upper() if entity == "ccg" else entity
+
+    url_org = f'org={format_entity(attr.entity_type)}&orgIds={code}'
 
     def format_denom(denom):
         """

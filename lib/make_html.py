@@ -7,6 +7,33 @@ import jinja2
 from lxml import html
 
 
+def format_url(df):
+    """
+    Replace index column values with html anchor pointing at URL in URL column
+    then drop URL column
+
+    Parameters
+    ----------
+    df : DataFrame
+        Data frame on which to perform replacment
+    Returns
+    -------
+    df : DataFrame
+        Data Frame with index column values turned into URLs
+    """
+
+    ix_col = df.index.name
+    df = df.reset_index()
+    df[ix_col] = df.apply(
+        lambda x: f'<a href="{x["URL"]}">{x[ix_col]}</a>', axis=1
+    )
+    df = df.drop("URL", axis=1)
+
+    df = df.set_index(ix_col)
+
+    return df
+
+
 def make_tr(thlist):
     """
     Make a 'tr' lxml Element from list of 'th' lxml Elements
@@ -75,17 +102,17 @@ def df_to_html(df):
 
     Returns
     -------
-    str
+    table : str
         html fragment containing <table> element
     """
-    return merge_table_header(
-        markupsafe.Markup(
-            df.to_html(
+    df = format_url(df)
+    table = df.to_html(
                 escape=True,
                 classes=["table", "thead-light", "table-bordered", "table-sm"],
             )
-        ).unescape()
-    )
+    table = markupsafe.Markup(table).unescape()
+
+    return table
 
 
 def selective_title(str):
