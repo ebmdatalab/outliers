@@ -627,6 +627,61 @@ col_names = {
 }
 
 
+def add_openprescribing_analyse_url(df, attr, code):
+    """
+    Generate URL to OpenPrescribing analyse page for numerator and denominator
+    highlighting entity
+    Parameters
+    ----------
+    df : pandas df
+        Input dataframe
+    attr : StaticOutlierStats instance
+        Contains attributes to be used in defining the tables.
+    code : str
+        ID of organisational entity to be highlighted
+
+    Returns
+    -------
+    pandas df
+        Dataframe with URL column added.
+    """
+    url_base = "https://openprescribing.net/analyse/#"
+    url_org = f'org={attr.entity_type}&orgIds={code}'
+    url_selected = "&selectedTab=summary"
+
+    def format_denom(denom):
+        """
+        formats BNF chapter/section/para/subpara strings for OP website
+        e.g.: 030700 -> 3.7, 0601021 -> 6.1.2
+        """
+        if attr.denom_code in [
+            "chapter",
+            "section",
+            "para",
+            "subpara",
+        ]:
+            substrings = []
+            for i in range(0, len(denom), 2):
+                sub = denom[i:i+2]
+                if sub == "00" or len(sub) == 1:
+                    continue
+                substrings.append(sub.lstrip('0'))
+            return '.'.join(substrings)
+        else:
+            return denom
+
+    def build_url(x):
+        """assembles url elements in order"""
+        url_num = f"&numIds={x[attr.num_code]}"
+        url_denom = f"&denomIds={format_denom(x[attr.denom_code])}"
+        return url_base+url_org+url_num+url_denom+url_selected
+    ix_col = df.index.name
+    df = df.reset_index()
+    df['URL'] = df.apply(build_url, axis=1)
+    df = df.set_index(ix_col)
+    return df
+
+
 def tidy_table(df, attr):
     """Rounds figures, drops unnecessary columns and changes column names to be
     easier to read (according to col_names).
@@ -677,6 +732,7 @@ def get_entity_table(df, attr, code):
     """
     df_ent = df.loc[code].copy()
     df_ent = add_plots(df_ent, attr.measure)
+    df_ent = add_openprescribing_analyse_url(df_ent, attr, code)
     df_ent = tidy_table(df_ent, attr)
     return df_ent
 
