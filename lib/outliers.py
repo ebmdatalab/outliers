@@ -761,8 +761,7 @@ def loop_over_everything(
         Path to jinja2 html template file
     """
     urlprefix = (
-        "https://htmlpreview.github.io/?"
-        + "https://raw.githubusercontent.com/ebmdatalab/outliers/master/"
+        "https://raw.githack.com/ebmdatalab/outliers/master/"
     )
     toc = MarkdownToC(urlprefix)
 
