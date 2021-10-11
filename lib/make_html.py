@@ -111,6 +111,7 @@ def df_to_html(df):
                 classes=["table", "thead-light", "table-bordered", "table-sm"],
             )
     table = markupsafe.Markup(table).unescape()
+    table = merge_table_header(table)
 
     return table
 
