@@ -91,6 +91,8 @@ def df_to_html(df):
     """
     Return formatted html table from Pandas DataFrame
 
+    Pre-formats DataFrame with URL formatting for first column,
+    title-casing column headers.
     Uses native DataFrame.to_html function with selected bootstrap table
     classes, merges duplicate header rows that this generates, then
     unescapes the results using markupsafe
@@ -106,6 +108,7 @@ def df_to_html(df):
         html fragment containing <table> element
     """
     df = format_url(df)
+    df = df.rename(columns=lambda x: selective_title(x))
     table = df.to_html(
                 escape=True,
                 classes=["table", "thead-light", "table-bordered", "table-sm"],
@@ -120,7 +123,8 @@ def selective_title(str):
     Convert string to Title Case except for key initialisms
 
     Splits input string by space character, applies Title Case to each element
-    except for ["NHS", "PCN", "CCG"], joins elements back together with space
+    except for ["NHS", "PCN", "CCG", "BNF", "std"], then
+    joins elements back together with space
 
     Parameters
     ----------
@@ -133,7 +137,7 @@ def selective_title(str):
         Selectively title-cased string
 
     """
-    ALLCAPS = ["NHS", "PCN", "CCG"]
+    ALLCAPS = ["NHS", "PCN", "CCG", "BNF", "std"]
     return " ".join(
         [w.title() if w not in ALLCAPS else w for w in str.split(" ")]
     )
