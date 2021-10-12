@@ -8,7 +8,7 @@ from lxml import html
 
 definitions = {
     "Chemical Items": "number of prescribed items containing this chemical",
-    "Subparagraph Items": "count of all prescribed items"
+    "Subparagraph Items": "count of all prescribed items "
     "from this subparagraph",
     "Ratio": "Ratio of chemical items to subparagraph items",
     "Mean": "Population mean number of chemical items prescribed",
