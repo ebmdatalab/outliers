@@ -38,6 +38,125 @@ def add_definitions(df):
     )
 
 
+def add_item_rows(table, items_df):
+    """
+    Adds hidden rows containing item prescription counts
+
+    Iterates rows of html table body
+    extracts BNF chemical id from each row
+    filters items_df by chemical id
+    creates hidden row from filtered dataframe
+    rebuilds table body with visible (original) and hidden rows
+
+    Parameters
+    ----------
+    table : str
+        html table built from primary outlier dataframe
+    items_df : DataFrame
+    Returns
+    -------
+    table_root : str
+        utf-8 encoded string of html table root element
+    """
+    def make_hidden_row(df, id, analyse_url):
+        """
+        Builds tr of precription items hidden by bootstrap collapse class
+
+        Creates tr html element containing full with td and div within
+        For each row of input df, generate BNF-item-specific analyse URL
+        from input analyse_url show BNF item name and prescription count
+        and add to div
+
+        Parameters
+        ----------
+        df : DataFrame
+            chemical, bnf_code, bnf_name, and numerator of items prescribed
+        id : str
+            Unique css id for tr to be built
+        analyse_url : str
+            URL to openprescribing anaylse page for current entity and chemical
+        Returns
+        -------
+        tr : lxml Element
+            html tr element
+        """
+        tr = html.Element("tr")
+        tr.set("id", f"{id}_items")
+        tr.set("class", "collapse")
+        td = html.Element("td")
+        td.set("colspan", "9")
+        td.set("class", "hiddenRow")
+        div = html.Element("div")
+
+        items = []
+        for i, r in df.reset_index().iterrows():
+            url = analyse_url.replace(r["chemical"], r["bnf_code"])
+            name = r["bnf_name"]
+            count = r["numerator"]
+            anchor = html.Element("a")
+            anchor.set("href", url)
+            anchor.set("target", "_blank")
+            anchor.text = f"{name} : {count}"
+            if i > 0:
+                div.append(html.Element("br"))
+            div.append(anchor)
+        items = "</br>".join(items)
+        td.append(div)
+        tr.append(td)
+        return tr
+
+    def make_open_button(id):
+        """
+        Create open/expand prescription item detail button
+
+        Parameters
+        ----------
+        id : str
+            Unique css id for target tr to be expanded
+        Returns
+        -------
+        bt_open : lxml Element
+            html button element
+        """
+        bt_open = html.Element("button")
+        bt_open.set("type", "button")
+        bt_open.set("data-toggle", "collapse")
+        bt_open.set("data-target", f"#{id}_items")
+        bt_open.set("class", "btn btn-default btn-xs")
+        bt_open.text = "☰"
+        return bt_open
+
+    table_root = html.fragment_fromstring(table)
+    table_id = table_root.get("id")
+
+    hidden_rows = []
+    visible_rows = table_root.xpath("tbody/tr")
+    for i, tr in enumerate(visible_rows):
+        # create a unique id for this row
+        id = f"{table_id}_{i}"
+
+        # hack:extract the id of the BNF chemical from the analyse URL
+        analyse_url = tr.xpath("th/a")[0].get("href")
+        chemical_id = analyse_url.split("/")[-1].split("&")[2].split("=")[1]
+
+        # add an open button to the end of the first column
+        tr.xpath("th")[0].append(make_open_button(id))
+
+        hidden_rows.append(
+            make_hidden_row(
+                items_df[items_df.chemical == chemical_id], id, analyse_url
+            )
+        )
+    tbody = table_root.xpath("tbody")[0]
+    tbody.drop_tree()
+    tbody = html.Element("tbody")
+    for hr, vr in zip(hidden_rows, visible_rows):
+        tbody.append(vr)
+        tbody.append(hr)
+    table_root.append(tbody)
+    return html.tostring(table_root).decode("utf-8")
+
+
 def format_url(df):
     """
     Replace index column values with html anchor pointing at URL in URL column
@@ -134,7 +253,7 @@ def merge_table_header(table):
     return html.tostring(tabroot).decode("utf-8")
 
 
-def df_to_html(df):
+def df_to_html(dfs, id):
     """
     Return formatted html table from Pandas DataFrame
 
@@ -146,22 +265,27 @@ def df_to_html(df):
 
     Parameters
     ----------
-    df : DataFrame
-        Pandas DataFrame to be converted to html
+    dfs : tuple(DataFrame)
+        primary and item detail DataFrames to be converted to html
+    id : css id of generated html table
 
     Returns
     -------
     table : str
         html fragment containing <table> element
     """
+    df = dfs[0]
+    items_df = dfs[1]
     df = format_url(df)
     df = df.rename(columns=lambda x: selective_title(x))
     df = add_definitions(df)
     table = df.to_html(
         escape=True,
         classes=["table", "thead-light", "table-bordered", "table-sm"],
+        table_id=id,
     )
     table = markupsafe.Markup(table).unescape()
+    table = add_item_rows(table, items_df)
     table = merge_table_header(table)
 
     return table
@@ -228,8 +352,8 @@ def write_to_template(
 
     context = {
         "entity_name": selective_title(entity_name),
-        "table_high": df_to_html(table_high),
-        "table_low": df_to_html(table_low),
+        "table_high": df_to_html(table_high, "table_high"),
+        "table_low": df_to_html(table_low, "table_low"),
     }
 
     with open(output_path, "w") as f:

@@ -182,8 +182,8 @@ def get_entity_names(name, measure):
     measure_name = measure.split("_")[-1]
 
     def make_link(x):
-        url_stub = '<a href="https://openprescribing.net/measure/'
-        return f'{url_stub}{measure_name}/{entity_type}/{x[0]}/">{x[1]}</a>'
+        stub = '<a target="_blank" href="https://openprescribing.net/measure/'
+        return f'{stub}{measure_name}/{entity_type}/{x[0]}/">{x[1]}</a>'
 
     entity_names["link"] = entity_names[["code", "name"]].apply(
         make_link,
@@ -273,6 +273,68 @@ def bnf_query(bnf_code, bnf_name):
         f"../data/{bnf_name}_names.csv", dtype={bnf_code: str}
     )
     return bnf_names.set_index(bnf_code)
+
+
+def items_query(entity_type, code, chemicals):
+    """
+    Get counts of BNF items prescribed for a given entity and chemicals list
+
+    Parameters
+    ----------
+    entity_type : str
+        practice/ccg/pcn
+    code : str
+        id code of entity
+    chemicals : list[str]
+        BNF chemical identifiers to filter query
+    Returns
+    -------
+    bnf_items : DataFrame
+       bnf code, bnf name, bnf chemical, numerator(count)
+    """
+
+    chemicals = ",".join([f"'{c}'" for c in chemicals])
+    entity_fields = {
+        "practice": "practices.code",
+        "ccg": "practices.pcn_id",
+        "pcn": "practices.pcn_id",
+    }
+    entity_filter = f"{entity_fields[entity_type]} = '{code}'"
+    sql = f"""
+        SELECT
+            prescribing.bnf_code,
+            prescribing.bnf_name,
+            SUBSTR(bnf_code, 1, 9) AS chemical,
+            SUM(items) AS numerator
+        FROM
+            ebmdatalab.hscic.normalised_prescribing_standard AS prescribing
+        INNER JOIN
+            ebmdatalab.hscic.practices AS practices
+        ON
+            practices.code = prescribing.practice
+        WHERE
+            practices.setting = 4
+            AND practices.status_code ='A'
+            AND month BETWEEN TIMESTAMP('2019-07-01')
+            AND TIMESTAMP('2019-12-01')
+            AND SUBSTR(bnf_code, 1, 2) <'18'
+            AND {entity_filter}
+            and substr(bnf_code,1,9) in
+            (
+                {chemicals}
+            )
+        GROUP BY
+            prescribing.bnf_code,
+            prescribing.bnf_name,
+            SUBSTR(bnf_code, 1, 9)
+    """
+    bnf_items = bq.cached_read(
+        sql, csv_path=f"../data/{entity_type}_{code}_items.csv"
+    )
+    bnf_items = pd.read_csv(
+        f"../data/{entity_type}_{code}_items.csv", dtype={"bnf_code": str}
+    )
+    return bnf_items.set_index("bnf_code")
 
 
 # Static outliers
@@ -651,7 +713,7 @@ def add_openprescribing_analyse_url(df, attr, code):
     def format_entity(entity):
         return entity.upper() if entity == "ccg" else entity
 
-    url_org = f'org={format_entity(attr.entity_type)}&orgIds={code}'
+    url_org = f"org={format_entity(attr.entity_type)}&orgIds={code}"
 
     def format_denom(denom):
         """
@@ -666,11 +728,11 @@ def add_openprescribing_analyse_url(df, attr, code):
         ]:
             substrings = []
             for i in range(0, len(denom), 2):
-                sub = denom[i:i+2]
+                sub = denom[i: i + 2]
                 if sub == "00" or len(sub) == 1:
                     continue
-                substrings.append(sub.lstrip('0'))
-            return '.'.join(substrings)
+                substrings.append(sub.lstrip("0"))
+            return ".".join(substrings)
         else:
             return denom
 
@@ -678,10 +740,11 @@ def add_openprescribing_analyse_url(df, attr, code):
         """assembles url elements in order"""
         url_num = f"&numIds={x[attr.num_code]}"
         url_denom = f"&denomIds={format_denom(x[attr.denom_code])}"
-        return url_base+url_org+url_num+url_denom+url_selected
+        return url_base + url_org + url_num + url_denom + url_selected
+
     ix_col = df.index.name
     df = df.reset_index()
-    df['URL'] = df.apply(build_url, axis=1)
+    df["URL"] = df.apply(build_url, axis=1)
     df = df.set_index(ix_col)
     return df
 
@@ -731,14 +794,16 @@ def get_entity_table(df, attr, code):
 
     Returns
     -------
-    pandas df
-        Dataframe to be passed to the HTML template writer.
+    tuple of DataFrame
+        Primary and item breakdown dataframes
+        to be passed to the HTML template writer.
     """
     df_ent = df.loc[code].copy()
+    df_items = items_query(attr.entity_type, code, df_ent.index)
     df_ent = add_plots(df_ent, attr.measure)
     df_ent = add_openprescribing_analyse_url(df_ent, attr, code)
     df_ent = tidy_table(df_ent, attr)
-    return df_ent
+    return (df_ent, df_items)
 
 
 def loop_over_everything(
@@ -760,9 +825,7 @@ def loop_over_everything(
     template_path : str
         Path to jinja2 html template file
     """
-    urlprefix = (
-        "https://raw.githack.com/ebmdatalab/outliers/master/"
-    )
+    urlprefix = "https://raw.githack.com/ebmdatalab/outliers/master/"
     toc = MarkdownToC(urlprefix)
 
     for ent_type in entities:
