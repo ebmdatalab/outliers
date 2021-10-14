@@ -1,5 +1,8 @@
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from io import BytesIO
 from base64 import b64encode
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,6 +12,7 @@ from ebmdatalab import bq
 from lib.make_html import write_to_template
 from lib.table_of_contents import MarkdownToC
 from os import path
+import argparse
 
 # reset to matplotlib defaults rather than seaborn ones
 plt.rcdefaults()
@@ -160,7 +164,7 @@ def html_plt(plt):
 
 
 # Main data set
-def get_chems_per_para(date_from="2019-07-01", date_to="2019-12-01"):
+def get_chems_per_para(date_from, date_to, data_dir):
     """
     Gets prescription counts aggregated by chemical,ccg,pcn,practice
 
@@ -191,7 +195,7 @@ def get_chems_per_para(date_from="2019-07-01", date_to="2019-12-01"):
             SUBSTR(bnf_code, 1, 9) AS chemical,
             SUM(items) AS numerator
         FROM
-            ebmdatalab.hscic.normalised_prescribing_standard AS prescribing
+            ebmdatalab.hscic.normalised_prescribing AS prescribing
         INNER JOIN
             ebmdatalab.hscic.practices AS practices
         ON
@@ -209,18 +213,21 @@ def get_chems_per_para(date_from="2019-07-01", date_to="2019-12-01"):
             practice
     )
     """
-    chem_per_para = bq.cached_read(query, csv_path="../data/chem_per_para.zip")
+    csv_path = path.join(data_dir, "chem_per_para.zip")
+    chem_per_para = bq.cached_read(
+        query, csv_path=csv_path
+    )
 
     # reload specifying data type currently required
     # due to https://github.com/ebmdatalab/datalab-pandas/issues/26
     chem_per_para = pd.read_csv(
-        "../data/chem_per_para.zip", dtype={"subpara": str}
+        csv_path, dtype={"subpara": str}
     )
     return chem_per_para
 
 
 # Entity & bnf names
-def get_entity_names(name, measure):
+def get_entity_names(name, measure, data_dir):
     """Takes entity name from entity_names_query and converts into a
     link to the corresponding measure on OpenPrescribing
 
@@ -237,7 +244,7 @@ def get_entity_names(name, measure):
         Link to the measure/entity on OpenPrescribing
     """
     entity_type = name.split("_")[0]
-    entity_names = entity_names_query(entity_type)
+    entity_names = entity_names_query(entity_type, data_dir)
     entity_names["code"] = entity_names.index
     measure_name = measure.split("_")[-1]
 
@@ -252,7 +259,7 @@ def get_entity_names(name, measure):
     return entity_names
 
 
-def entity_names_query(entity_type):
+def entity_names_query(entity_type, data_dir):
     """Queries the corresponding table for the entity and returns names with
     entity codes as the index
 
@@ -276,12 +283,12 @@ def entity_names_query(entity_type):
       name IS NOT NULL
     """
     entity_names = bq.cached_read(
-        query, csv_path=f"../data/{entity_type}_names.csv"
+        query, csv_path=path.join(data_dir, f"{entity_type}_names.csv")
     )
     return entity_names.set_index("code")
 
 
-def get_bnf_names(bnf_level):
+def get_bnf_names(bnf_level, data_dir):
     """Takes in input like "chemical" and passes the appropriate fields
     to bnf_query
 
@@ -299,11 +306,11 @@ def get_bnf_names(bnf_level):
     """
     bnf_code = f"{bnf_level}_code"
     bnf_name = bnf_level
-    names = bnf_query(bnf_code, bnf_name)
+    names = bnf_query(bnf_code, bnf_name, data_dir)
     return names
 
 
-def bnf_query(bnf_code, bnf_name):
+def bnf_query(bnf_code, bnf_name, data_dir):
     """Queries bnf table in BQ and returns a list of BNF names
     mapped to BNF codes
 
@@ -328,9 +335,10 @@ def bnf_query(bnf_code, bnf_name):
     WHERE
       {bnf_name} IS NOT NULL
     """
-    bnf_names = bq.cached_read(query, csv_path=f"../data/{bnf_name}_names.csv")
+    csv_path = path.join(data_dir, "{bnf_name}_names.csv")
+    bnf_names = bq.cached_read(query, csv_path=csv_path)
     bnf_names = pd.read_csv(
-        f"../data/{bnf_name}_names.csv", dtype={bnf_code: str}
+        csv_path, dtype={bnf_code: str}
     )
     return bnf_names.set_index(bnf_code)
 
@@ -370,7 +378,7 @@ def fill_zeroes(df, entity_type, denom_code, num_code):
     return df
 
 
-def static_data_reshaping(df, entity_type, denom_code, num_code):
+def static_data_reshaping(df, entity_type, denom_code, num_code, data_dir):
     """Some data management to aggregate data, and calculate some columns
 
     Parameters
@@ -404,7 +412,7 @@ def static_data_reshaping(df, entity_type, denom_code, num_code):
     # Merge BNF names
     for x in [num_code, denom_code]:
         df = df.merge(
-            get_bnf_names(x), how="left", left_on=x, right_index=True
+            get_bnf_names(x, data_dir), how="left", left_on=x, right_index=True
         )
 
     # Calculate denominator
@@ -538,6 +546,7 @@ class StaticOutlierStats:
         entity_type,
         num_code,
         denom_code,
+        data_dir,
         measure="ratio",
         stat_parameters=None,
         trim=True,
@@ -549,6 +558,7 @@ class StaticOutlierStats:
         self.measure = measure
         self.stat_parameters = stat_parameters
         self.trim = trim
+        self.data_dir = data_dir
 
     def get_table(self):
         """Activate getting the stats table
@@ -563,6 +573,7 @@ class StaticOutlierStats:
             self.entity_type,
             self.denom_code,
             self.num_code,
+            self.data_dir
         )
         stats = get_stats(
             df=shaped_df,
@@ -726,7 +737,7 @@ def add_openprescribing_analyse_url(df, attr, code):
         ]:
             substrings = []
             for i in range(0, len(denom), 2):
-                sub = denom[i:i + 2]
+                sub = denom[i : i + 2]
                 if sub == "00" or len(sub) == 1:
                     continue
                 substrings.append(sub.lstrip("0"))
@@ -804,10 +815,10 @@ def get_entity_table(df, attr, code):
 
 def loop_over_everything(
     entities,
-    output_dir="../data",
-    template_path="../data/template.html",
-    date_from="2019-07-01",
-    date_to="2019-12-01",
+    date_from,
+    date_to,
+    output_dir,
+    template_path,
 ):
     """Loops over all entities to generate HTML for each.
 
@@ -822,17 +833,18 @@ def loop_over_everything(
     template_path : str
         Path to jinja2 html template file
     """
-    df = get_chems_per_para(date_from, date_to)
+    df = get_chems_per_para(date_from, date_to, output_dir)
     urlprefix = "https://raw.githack.com/ebmdatalab/outliers/master/"
     toc = MarkdownToC(urlprefix)
 
     for ent_type in entities:
-        entity_names = entity_names_query(ent_type)
+        entity_names = entity_names_query(ent_type, output_dir)
         stats_class = StaticOutlierStats(
             df=df,
             entity_type=ent_type,
             num_code="chemical",
             denom_code="subpara",
+            data_dir=output_dir
         )
         stats = stats_class.get_table()
 
@@ -902,9 +914,9 @@ def sparkline_series(df, column, subset=None):
     return series
 
 
-def sparkline_table(change_df, name, measure):
+def sparkline_table(change_df, name, measure, data_dir):
     data = pd.read_csv(
-        "../data/{}/bq_cache.csv".format(name), index_col="code"
+        path.join(data_dir, f"/{name}/bq_cache.csv"), index_col="code"
     )
     data["month"] = pd.to_datetime(data["month"])
     data["rate"] = data["numerator"] / data["denominator"]
@@ -933,7 +945,7 @@ def sparkline_table(change_df, name, measure):
     ).head(10)
     plot_series = sparkline_series(data, "rate", subset=filtered.index)
 
-    entity_names = get_entity_names(name, measure)
+    entity_names = get_entity_names(name, measure, data_dir)
 
     # create output table
     out_table = filtered[["is.tfirst.big", "is.intlev.levdprop"]]
@@ -956,3 +968,97 @@ def month_integer_to_dates(input_df, change_df):
         axis=1,
     )
     return change_df
+
+
+# Main function
+def main():
+    FMT = "%Y-%m-%d"
+
+    def minus_six_months(datestr):
+        if not datestr:
+            return None
+        sma = date.fromisoformat(datestr) + relativedelta(months=-6)
+        if sma < date.fromisoformat("2021-04-01"):
+            sma = date.fromisoformat("2021-04-01")
+        return date.strftime(sma, FMT)
+
+    today = date.strftime(date.today(), FMT)
+    six_months_ago = minus_six_months(today)
+    end_date = os.environ.get("OUTLIERS_START_DATE") or today
+    start_date = (
+        os.environ.get("OUTLIERS_END_DATE")
+        or minus_six_months(os.environ.get("OUTLIERS_START_DATE"))
+        or six_months_ago
+    )
+
+    output_dir = os.environ.get("OUTLIERS_OUTPUT_DIR") or "./data"
+    template_path = (
+        os.environ.get("OUTLIERS_TEMPLATE_PATH") or "./data/template.html"
+    )
+    entities = (
+        os.environ.get("OUTLIERS_ENTITIES").split(",")
+        if os.environ.get("OUTLIERS_ENTITIES")
+        else [
+            "practice",
+            "pcn",
+            "ccg",
+        ]
+    )
+
+    parser = argparse.ArgumentParser(
+        prog="outliers", description="Run outlier prescribing reports"
+    )
+    parser.add_argument(
+        "-s",
+        "--start_date",
+        type=str,
+        help="Start date for outlier report."
+        "Defaults to $OUTLIERS_START_DATE or six months ago (post April 2021)",
+    )
+    parser.add_argument(
+        "-e",
+        "--end_date",
+        type=str,
+        help="End date for outlier report. "
+        "Defaults to $OUTLIERS_END_DATE or today",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=str,
+        help="Output directory for reports. "
+        "Defaults to $OUTLIERS_OUTPUT_DIR OR ./data",
+    )
+    parser.add_argument(
+        "-t",
+        "--template-path",
+        type=str,
+        help="Path to html template file. "
+        "Defaults to $OUTLIERS_TEMPLATE_PATH OR ./data/template.html",
+    )
+    parser.add_argument(
+        "-n",
+        "--entities",
+        action="append",
+        help="Entites to report, can be specified multiple times. "
+        "Defaults to ['practice', 'pcn', 'ccg']",
+    )
+    args = parser.parse_args()
+
+    entities = args.entities or entities
+    start_date = args.start_date or start_date
+    end_date = args.end_date or minus_six_months(args.start_date) or end_date
+    output_dir = args.output_dir or output_dir
+    template_path = args.template_path or template_path
+
+    loop_over_everything(
+        entities=entities,
+        date_from=start_date,
+        date_to=end_date,
+        output_dir=output_dir,
+        template_path=template_path,
+    )
+
+
+if __name__ == "__main__":
+    main()
