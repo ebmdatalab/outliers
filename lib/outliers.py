@@ -160,16 +160,55 @@ def html_plt(plt):
 
 
 # Main data set
-def get_chems_per_para():
+def get_chems_per_para(date_from="2019-07-01", date_to="2019-12-01"):
     """
     Gets prescription counts aggregated by chemical,ccg,pcn,practice
 
+    Parameters
+    ----------
+    date_from : str
+        ISO8601 format date indicating start of query range
+    date_to : str
+        ISO8601 format date indicating end of query range
     Returns
     -------
     chem_per_para : pandas DataFrame
     """
-    with open("../data/static_outlier_sql/chem_per_para.sql") as sql:
-        query = sql.read()
+
+    query = f"""
+    SELECT
+        practice,
+        pcn,
+        ccg,
+        chemical,
+        SUBSTR(chemical, 1, 7) AS subpara,
+        numerator
+    FROM (
+        SELECT
+            practice,
+            pcn_id AS pcn,
+            ccg_id AS ccg,
+            SUBSTR(bnf_code, 1, 9) AS chemical,
+            SUM(items) AS numerator
+        FROM
+            ebmdatalab.hscic.normalised_prescribing_standard AS prescribing
+        INNER JOIN
+            ebmdatalab.hscic.practices AS practices
+        ON
+            practices.code = prescribing.practice
+        WHERE
+            practices.setting = 4
+            AND practices.status_code ='A'
+            AND month BETWEEN TIMESTAMP('{date_from}')
+            AND TIMESTAMP('{date_to}')
+            AND SUBSTR(bnf_code, 1, 2) <'18'
+        GROUP BY
+            chemical,
+            ccg_id,
+            pcn_id,
+            practice
+    )
+    """
     chem_per_para = bq.cached_read(query, csv_path="../data/chem_per_para.zip")
 
     # reload specifying data type currently required
