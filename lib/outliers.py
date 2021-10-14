@@ -803,10 +803,11 @@ def get_entity_table(df, attr, code):
 
 
 def loop_over_everything(
-    df,
     entities,
     output_dir="../data",
     template_path="../data/template.html",
+    date_from="2019-07-01",
+    date_to="2019-12-01",
 ):
     """Loops over all entities to generate HTML for each.
 
@@ -821,6 +822,7 @@ def loop_over_everything(
     template_path : str
         Path to jinja2 html template file
     """
+    df = get_chems_per_para(date_from, date_to)
     urlprefix = "https://raw.githack.com/ebmdatalab/outliers/master/"
     toc = MarkdownToC(urlprefix)
 
