@@ -296,7 +296,7 @@ def items_query(entity_type, code, chemicals):
     chemicals = ",".join([f"'{c}'" for c in chemicals])
     entity_fields = {
         "practice": "practices.code",
-        "ccg": "practices.pcn_id",
+        "ccg": "practices.ccg_id",
         "pcn": "practices.pcn_id",
     }
     entity_filter = f"{entity_fields[entity_type]} = '{code}'"
