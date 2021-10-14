@@ -159,6 +159,27 @@ def html_plt(plt):
     return html_plot
 
 
+# Main data set
+def get_chems_per_para():
+    """
+    Gets prescription counts aggregated by chemical,ccg,pcn,practice
+
+    Returns
+    -------
+    chem_per_para : pandas DataFrame
+    """
+    with open("../data/static_outlier_sql/chem_per_para.sql") as sql:
+        query = sql.read()
+    chem_per_para = bq.cached_read(query, csv_path="../data/chem_per_para.zip")
+
+    # reload specifying data type currently required
+    # due to https://github.com/ebmdatalab/datalab-pandas/issues/26
+    chem_per_para = pd.read_csv(
+        "../data/chem_per_para.zip", dtype={"subpara": str}
+    )
+    return chem_per_para
+
+
 # Entity & bnf names
 def get_entity_names(name, measure):
     """Takes entity name from entity_names_query and converts into a
@@ -651,7 +672,7 @@ def add_openprescribing_analyse_url(df, attr, code):
     def format_entity(entity):
         return entity.upper() if entity == "ccg" else entity
 
-    url_org = f'org={format_entity(attr.entity_type)}&orgIds={code}'
+    url_org = f"org={format_entity(attr.entity_type)}&orgIds={code}"
 
     def format_denom(denom):
         """
@@ -666,11 +687,11 @@ def add_openprescribing_analyse_url(df, attr, code):
         ]:
             substrings = []
             for i in range(0, len(denom), 2):
-                sub = denom[i:i+2]
+                sub = denom[i:i + 2]
                 if sub == "00" or len(sub) == 1:
                     continue
-                substrings.append(sub.lstrip('0'))
-            return '.'.join(substrings)
+                substrings.append(sub.lstrip("0"))
+            return ".".join(substrings)
         else:
             return denom
 
@@ -678,10 +699,11 @@ def add_openprescribing_analyse_url(df, attr, code):
         """assembles url elements in order"""
         url_num = f"&numIds={x[attr.num_code]}"
         url_denom = f"&denomIds={format_denom(x[attr.denom_code])}"
-        return url_base+url_org+url_num+url_denom+url_selected
+        return url_base + url_org + url_num + url_denom + url_selected
+
     ix_col = df.index.name
     df = df.reset_index()
-    df['URL'] = df.apply(build_url, axis=1)
+    df["URL"] = df.apply(build_url, axis=1)
     df = df.set_index(ix_col)
     return df
 
@@ -760,9 +782,7 @@ def loop_over_everything(
     template_path : str
         Path to jinja2 html template file
     """
-    urlprefix = (
-        "https://raw.githack.com/ebmdatalab/outliers/master/"
-    )
+    urlprefix = "https://raw.githack.com/ebmdatalab/outliers/master/"
     toc = MarkdownToC(urlprefix)
 
     for ent_type in entities:
