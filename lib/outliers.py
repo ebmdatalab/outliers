@@ -876,6 +876,8 @@ def loop_over_everything(
                 get_entity_table(table_low, stats_class, code),
                 output_path=output_file,
                 template_path=template_path,
+                date_from=date_from,
+                date_to=date_to
             )
             toc.add_file(output_file, entity=ent_type)
     toc.write_toc(output_dir)

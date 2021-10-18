@@ -198,6 +198,8 @@ def write_to_template(
     table_low,
     output_path,
     template_path,
+    date_from,
+    date_to
 ):
     """
     Populate jinja template with outlier report data
@@ -230,6 +232,8 @@ def write_to_template(
         "entity_name": selective_title(entity_name),
         "table_high": df_to_html(table_high),
         "table_low": df_to_html(table_low),
+        "date_from": date_from,
+        "date_to": date_to
     }
 
     with open(output_path, "w") as f:
