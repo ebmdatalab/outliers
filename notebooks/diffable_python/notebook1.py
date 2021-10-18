@@ -19,20 +19,34 @@
 import pandas as pd
 from ebmdatalab import bq
 from lib.outliers import *
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
-# ## Load data
+# ## Set parameters
 
 # +
-with open("../data/static_outlier_sql/chem_per_para.sql") as sql:
-    query = sql.read()
-chem_per_para = bq.cached_read(query, csv_path='../data/chem_per_para.zip')
+FMT = "%Y-%m-%d"
+def minus_six_months(datestr):
+    if not datestr:
+        return None
+    sma = date.fromisoformat(datestr) + relativedelta(months=-6)
+    if sma < date.fromisoformat("2021-04-01"):
+        sma = date.fromisoformat("2021-04-01")
+    return date.strftime(sma, FMT)
+end_date = date.strftime(date.today(), FMT)
+start_date = six_months_ago = minus_six_months(end_date)
 
-## reload specifying data type currently required
-## due to https://github.com/ebmdatalab/datalab-pandas/issues/26
-chem_per_para = pd.read_csv('../data/chem_per_para.zip',dtype={'subpara': str})
-chem_per_para.head()
+entities = ['practice','pcn','ccg',]
+output_dir = '../data'
+template_path = '../data/template.html'
 # -
 
 # ## Generate HTML for practices, CCGs etc
 
-loop_over_everything(chem_per_para, ['practice','pcn','ccg',])
+loop_over_everything(
+        entities=entities,
+        date_from=start_date,
+        date_to=end_date,
+        output_dir=output_dir,
+        template_path=template_path,
+    )
