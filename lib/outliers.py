@@ -335,7 +335,7 @@ def bnf_query(bnf_code, bnf_name, data_dir):
     WHERE
       {bnf_name} IS NOT NULL
     """
-    csv_path = path.join(data_dir, "{bnf_name}_names.csv")
+    csv_path = path.join(data_dir, f"{bnf_name}_names.csv")
     bnf_names = bq.cached_read(query, csv_path=csv_path)
     bnf_names = pd.read_csv(
         csv_path, dtype={bnf_code: str}
