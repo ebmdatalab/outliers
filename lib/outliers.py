@@ -307,7 +307,7 @@ def items_query(entity_type, code, chemicals):
             SUBSTR(bnf_code, 1, 9) AS chemical,
             SUM(items) AS numerator
         FROM
-            ebmdatalab.hscic.normalised_prescribing_standard AS prescribing
+            ebmdatalab.hscic.normalised_prescribing AS prescribing
         INNER JOIN
             ebmdatalab.hscic.practices AS practices
         ON
