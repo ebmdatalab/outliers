@@ -435,7 +435,7 @@ class Report:
 
     def _tidy_table(self, df: pd.DataFrame) -> pd.DataFrame:
         """Rounds figures, drops unnecessary columns and changes column names to be
-        easier to read (according to col_names).
+        easier to read (according to col_names), reorders columns.
 
         Parameters
         ----------
@@ -473,6 +473,19 @@ class Report:
                 ][1],
             }
         )
+        column_order = [
+            self._COL_NAMES[self.build.numerator_column][0],
+            self._COL_NAMES[self.build.numerator_column][1],
+            self._COL_NAMES[self.build.denominator_column][0],
+            self._COL_NAMES[self.build.denominator_column][1],
+            "ratio",
+            "mean",
+            "std",
+            "z_score",
+            "plots",
+            "URL"
+        ]
+        df = df[column_order]
         df = df.set_index(self._COL_NAMES[self.build.numerator_column][0])
         return df
 
