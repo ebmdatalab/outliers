@@ -353,7 +353,7 @@ class Report:
             .query(f'{self.entity_type} == "{self.entity_code}"')
             .query(f"{rank_column} <= {self.build.n_outliers}")
             .copy()
-            .sort_values({rank_column})
+            .sort_values(rank_column)
         )
 
     def _create_items_table(self, h_l: str) -> pd.DataFrame:
@@ -462,13 +462,15 @@ class Report:
                 f"{self.build.numerator_column}_name": self._COL_NAMES[
                     self.build.numerator_column
                 ][0],
-                "numerator": self._COL_NAMES[self.build.numerator_column][1],
+                f"{self.build.numerator_column}_items": self._COL_NAMES[
+                    self.build.numerator_column
+                ][1],
                 f"{self.build.denominator_column}_name": self._COL_NAMES[
                     self.build.denominator_column
                 ][0],
-                "denominator": self._COL_NAMES[self.build.denominator_column][
-                    1
-                ],
+                f"{self.build.denominator_column}_items": self._COL_NAMES[
+                        self.build.denominator_column
+                ][1],
             }
         )
         df = df.set_index(self._COL_NAMES[self.build.numerator_column][0])
