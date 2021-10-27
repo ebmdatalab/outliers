@@ -11,8 +11,6 @@ import seaborn as sns
 from lib.table_of_contents import MarkdownToC
 from lib.make_html import write_to_template
 import traceback
-import gc
-from tqdm.auto import tqdm
 from pqdm.processes import pqdm
 
 
@@ -207,12 +205,14 @@ class DatasetBuild:
                 f"../data/{entity}_measure_arrays.zip",
                 use_cache=(not self.force_rebuild),
             )
-        except:
+        except Exception:
             print(f"Error getting BQ data for {entity}")
             traceback.print_stack()
         try:
-            res.array = res.array.apply(lambda x: np.fromstring(x[1:-1], sep=','))
-        except:
+            res.array = res.array.apply(
+                lambda x: np.fromstring(x[1:-1], sep=',')
+                )
+        except Exception:
             print(f"Error doing array conversion for {entity}")
             traceback.print_stack()
         self.results_measure_arrays[entity] = res.set_index("chemical")
@@ -383,7 +383,7 @@ class Report:
         ]:
             substrings = []
             for i in range(0, len(denominator_code), 2):
-                sub = denominator_code[i : i + 2]
+                sub = denominator_code[i: i + 2]
                 if sub == "00" or len(sub) == 1:
                     continue
                 substrings.append(sub.lstrip("0"))
@@ -586,8 +586,7 @@ class Plots:
             bw=Plots._bw_scott(distribution),
             ax=ax,
             linewidth=0.9,
-            legend=False,
-            warn_singular=False
+            legend=False
         )
         ax.axvline(org_value, color="r", linewidth=1)
         lower_limit = max(
@@ -694,6 +693,7 @@ class Runner:
         output_dir="../data",
         template_path="../data/template.html",
         url_prefix="https://raw.githack.com/ebmdatalab/outliers/master/",
+        n_jobs=8
     ) -> None:
         self.build = DatasetBuild(
             from_date=from_date,
@@ -706,6 +706,7 @@ class Runner:
         self.template_path = template_path
         self.toc = MarkdownToC(url_prefix)
         self.entity_limit = entity_limit
+        self.n_jobs = n_jobs
 
     def run(self):
         # run main build process on bigquery and fetch results
@@ -739,31 +740,11 @@ class Runner:
     def _run_entity_report(self, entity):
         codes = self.build.results[entity].index.get_level_values(0).unique()
         if self.entity_limit:
-            codes = codes[0 : self.entity_limit]
-            
-        kwargs = [{"entity":entity,"code":c} for c in codes]
-        pqdm(kwargs, self._run_item_report,n_jobs=8,argument_type='kwargs')
-        # for code in tqdm(codes, desc=f"Writing HTML: {entity}"):
-        #     report = Report(
-        #         entity_type=entity,
-        #         entity_code=code,
-        #         build=self.build,
-        #     )
-        #     report.format()
-        #     output_file = path.join(
-        #         self.output_dir,
-        #         "html",
-        #         f"static_{entity}_{code}.html",
-        #     )
-        #     write_to_template(
-        #         entity_name=report.entity_name,
-        #         tables_high=(report.table_high, report.items_high),
-        #         tables_low=(report.table_low, report.items_low),
-        #         output_path=output_file,
-        #         template_path=self.template_path,
-        #     )
-        #     gc.collect()
-        #     if gc.garbage:
-        #         print("uncollectables:")
-        #         for g in gc.garbage:
-        #             print(f"\t{g}")
+            codes = codes[0: min(self.entity_limit, len(codes))]
+        kwargs = [{"entity": entity, "code": c} for c in codes]
+        pqdm(
+            kwargs,
+            self._run_item_report,
+            n_jobs=self.n_jobs,
+            argument_type='kwargs'
+            )
