@@ -4,7 +4,7 @@ from os import path
 from matplotlib import pyplot as plt
 import numpy as np
 from ebmdatalab import bq
-from typing import List
+from typing import Dict, List
 import pandas as pd
 from datetime import date
 import seaborn as sns
@@ -74,9 +74,9 @@ class DatasetBuild:
         self.numerator_column = numerator_column
         self.denominator_column = denominator_column
 
-        self.results = {}
-        self.results_items = {}
-        self.results_measure_arrays = {}
+        self.results: Dict[str, pd.DataFrame] = {}
+        self.results_items: Dict[str, pd.DataFrame] = {}
+        self.results_measure_arrays: Dict[str, pd.DataFrame] = {}
 
     def run(self) -> None:
         """
@@ -352,6 +352,8 @@ class Report:
             self.build.results[self.entity_type]
             .query(f'{self.entity_type} == "{self.entity_code}"')
             .query(f"{rank_column} <= {self.build.n_outliers}")
+            .copy()
+            .sort_values({rank_column})
         )
 
     def _create_items_table(self, h_l: str) -> pd.DataFrame:
