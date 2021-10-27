@@ -318,8 +318,8 @@ def selective_title(str):
 
 def write_to_template(
     entity_name,
-    table_high,
-    table_low,
+    tables_high,
+    tables_low,
     output_path,
     template_path,
 ):
@@ -334,9 +334,9 @@ def write_to_template(
     ----------
     entity_name : str
         Name of entity for which report is being run
-    table_high : DataFrame
+    tables_high : tuple(DataFrame)
         Table of items which entity prescribes higher than average
-    table_low : DataFrame
+    tables_low : tuple(DataFrame)
         Table of items which entity prescribes lower than average
     output_file : str
         file name (not full path) of html file to be written
@@ -352,8 +352,8 @@ def write_to_template(
 
     context = {
         "entity_name": selective_title(entity_name),
-        "table_high": df_to_html(table_high, "table_high"),
-        "table_low": df_to_html(table_low, "table_low"),
+        "table_high": df_to_html(tables_high, "table_high"),
+        "table_low": df_to_html(tables_low, "table_low"),
     }
 
     with open(output_path, "w") as f:
