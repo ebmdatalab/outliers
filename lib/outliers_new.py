@@ -13,6 +13,7 @@ from lib.make_html import write_to_template
 import traceback
 import gc
 from tqdm.auto import tqdm
+from pqdm.processes import pqdm
 
 
 class DatasetBuild:
@@ -586,6 +587,7 @@ class Plots:
             ax=ax,
             linewidth=0.9,
             legend=False,
+            warn_singular=False
         )
         ax.axvline(org_value, color="r", linewidth=1)
         lower_limit = max(
@@ -714,32 +716,54 @@ class Runner:
         for e in self.build.entities:
             self._run_entity_report(e)
 
-    def _run_entity_report(self, entity):
-        codes = self.build.results[entity].index.get_level_values(0).unique()
-        if self.entity_limit:
-            codes = codes[0 : self.entity_limit]
-
-        for code in tqdm(codes, desc=f"Writing HTML: {entity}"):
-            report = Report(
+    def _run_item_report(self, entity, code):
+        report = Report(
                 entity_type=entity,
                 entity_code=code,
                 build=self.build,
             )
-            report.format()
-            output_file = path.join(
-                self.output_dir,
-                "html",
-                f"static_{entity}_{code}.html",
-            )
-            write_to_template(
-                entity_name=report.entity_name,
-                tables_high=(report.table_high, report.items_high),
-                tables_low=(report.table_low, report.items_low),
-                output_path=output_file,
-                template_path=self.template_path,
-            )
-            gc.collect()
-            if gc.garbage:
-                print("uncollectables:")
-                for g in gc.garbage:
-                    print(f"\t{g}")
+        report.format()
+        output_file = path.join(
+            self.output_dir,
+            "html",
+            f"static_{entity}_{code}.html",
+        )
+        write_to_template(
+            entity_name=report.entity_name,
+            tables_high=(report.table_high, report.items_high),
+            tables_low=(report.table_low, report.items_low),
+            output_path=output_file,
+            template_path=self.template_path,
+        )
+
+    def _run_entity_report(self, entity):
+        codes = self.build.results[entity].index.get_level_values(0).unique()
+        if self.entity_limit:
+            codes = codes[0 : self.entity_limit]
+            
+        kwargs = [{"entity":entity,"code":c} for c in codes]
+        pqdm(kwargs, self._run_item_report,n_jobs=8,argument_type='kwargs')
+        # for code in tqdm(codes, desc=f"Writing HTML: {entity}"):
+        #     report = Report(
+        #         entity_type=entity,
+        #         entity_code=code,
+        #         build=self.build,
+        #     )
+        #     report.format()
+        #     output_file = path.join(
+        #         self.output_dir,
+        #         "html",
+        #         f"static_{entity}_{code}.html",
+        #     )
+        #     write_to_template(
+        #         entity_name=report.entity_name,
+        #         tables_high=(report.table_high, report.items_high),
+        #         tables_low=(report.table_low, report.items_low),
+        #         output_path=output_file,
+        #         template_path=self.template_path,
+        #     )
+        #     gc.collect()
+        #     if gc.garbage:
+        #         print("uncollectables:")
+        #         for g in gc.garbage:
+        #             print(f"\t{g}")
