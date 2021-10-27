@@ -454,7 +454,9 @@ class Report:
             df = df.merge(
                 self.build.names[x], how="left", left_on=x, right_index=True
             )
-        df = df.drop(columns=self.build.denominator_column)
+        df = df.drop(
+            columns=[self.build.denominator_column, "rank_high", "rank_low"]
+            )
         df = df.rename(
             columns={
                 f"{self.build.numerator_column}_name": self._COL_NAMES[
