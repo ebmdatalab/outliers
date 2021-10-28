@@ -715,7 +715,11 @@ class Runner:
 
         # loop through entity types, generated a report for each entity item
         for e in self.build.entities:
-            self._run_entity_report(e)
+            for f in self._run_entity_report(e):
+                self.toc.add_file(f, e)
+        
+        #write out toc
+        self.toc.write_toc(self.output_dir)
 
     def _run_item_report(self, entity, code):
         report = Report(
@@ -736,15 +740,17 @@ class Runner:
             output_path=output_file,
             template_path=self.template_path,
         )
+        return output_file
 
     def _run_entity_report(self, entity):
         codes = self.build.results[entity].index.get_level_values(0).unique()
         if self.entity_limit:
             codes = codes[0: min(self.entity_limit, len(codes))]
         kwargs = [{"entity": entity, "code": c} for c in codes]
-        pqdm(
+        files = pqdm(
             kwargs,
             self._run_item_report,
             n_jobs=self.n_jobs,
             argument_type='kwargs'
             )
+        return files
