@@ -8,7 +8,7 @@ from typing import Dict, List
 import pandas as pd
 from datetime import date
 import seaborn as sns
-from lib.table_of_contents import MarkdownToC
+from lib.table_of_contents import TableOfContents
 from lib.make_html import write_to_template
 import traceback
 from pqdm.processes import pqdm
@@ -76,6 +76,7 @@ class DatasetBuild:
         self.results: Dict[str, pd.DataFrame] = {}
         self.results_items: Dict[str, pd.DataFrame] = {}
         self.results_measure_arrays: Dict[str, pd.DataFrame] = {}
+        self.entity_hierarchy: Dict[str, Dict[str, List[str]]] = {}
 
     def run(self) -> None:
         """
@@ -98,7 +99,7 @@ class DatasetBuild:
                 AND to_date = '{self.to_date.strftime(self._DATEFMT)}'
                 AND n ={self.n_outliers}"""
         res = bq.cached_read(
-            sql, csv_path="../data/build_result.csv", use_cache=False
+            sql, csv_path="../data/bq_cache/build_result.zip", use_cache=False
         )
         self.build_id = res["build_id"].values[0]
 
@@ -112,15 +113,56 @@ class DatasetBuild:
             self._get_entity_items(e)
             self._get_entity_measure_arrays(e)
         self._get_lookups()
+        self._get_hierarchy()
+
+    def _get_hierarchy(self) -> None:
+        """
+        Gets ccg-pcn-practice hierachy as dictionary
+        """
+        sql = """
+        SELECT
+            code as `practice_code`,
+            pcn_id as `pcn_code`,
+            ccg_id as `ccg_code`
+        FROM
+            `ebmdatalab.hscic.practices`
+        WHERE
+            setting=4
+            AND status_code = 'A'
+            AND pcn_id is not null
+        """
+        csv_path = "../data/bq_cache/entity_hierarchy.zip"
+        res: pd.DataFrame = bq.cached_read(
+            sql,
+            csv_path,
+            use_cache=(not self.force_rebuild),
+        )
+        res = res.set_index(["ccg_code", "pcn_code"])
+
+        # only include practices for which there are results
+        res = res[
+            res.practice_code.isin(
+                self.results["practice"].index.get_level_values(0).unique()
+            )
+        ]
+
+        # convert to hierarchial dict
+        for ccg_code in res.index.get_level_values(0).unique():
+            pcns = {}
+            for pcn_code in res.loc[ccg_code, slice(None)].index.unique():
+                pcns[pcn_code] = (
+                    res.loc[ccg_code, slice(None)]
+                    .query(f"pcn_code=='{pcn_code}'")
+                    .practice_code.tolist()
+                )
+            self.entity_hierarchy[ccg_code] = pcns
 
     def _get_lookups(self) -> None:
         """
         Fetches entity code:name mapping tables for each entity, plus
         bnf code:name mapping tables for numerator and denominator
         """
-        self.names = {
-            e: self._entity_names_query(e) for e in self.entities
-        }
+        self.names = {e: self._entity_names_query(e) for e in self.entities}
         self.names[self.numerator_column] = self._get_bnf_names(
             self.numerator_column
         )
@@ -152,7 +194,7 @@ class DatasetBuild:
                 );
         """
 
-        csv_path = f"../data/{entity}_results.zip"
+        csv_path = f"../data/bq_cache/{entity}_results.zip"
         res = bq.cached_read(
             sql,
             csv_path,
@@ -162,8 +204,8 @@ class DatasetBuild:
         # see https://github.com/ebmdatalab/datalab-pandas/issues/26
         res = pd.read_csv(
             csv_path,
-            dtype={self.numerator_column: str, self.denominator_column: str}
-            )
+            dtype={self.numerator_column: str, self.denominator_column: str},
+        )
         res = res.set_index([entity, self.numerator_column])
         self.results[entity] = res
 
@@ -184,7 +226,7 @@ class DatasetBuild:
 
         res = bq.cached_read(
             sql,
-            f"../data/{entity}_items.zip",
+            f"../data/bq_cache/{entity}_items.zip",
             use_cache=(not self.force_rebuild),
         )
         self.results_items[entity] = res
@@ -202,7 +244,7 @@ class DatasetBuild:
         try:
             res = bq.cached_read(
                 sql,
-                f"../data/{entity}_measure_arrays.zip",
+                f"../data/bq_cache/{entity}_measure_arrays.zip",
                 use_cache=(not self.force_rebuild),
             )
         except Exception:
@@ -210,8 +252,8 @@ class DatasetBuild:
             traceback.print_stack()
         try:
             res.array = res.array.apply(
-                lambda x: np.fromstring(x[1:-1], sep=',')
-                )
+                lambda x: np.fromstring(x[1:-1], sep=",")
+            )
         except Exception:
             print(f"Error doing array conversion for {entity}")
             traceback.print_stack()
@@ -241,8 +283,9 @@ class DatasetBuild:
         name IS NOT NULL
         """
         entity_names = bq.cached_read(
-            query, csv_path=f"../data/{entity_type}_names.csv",
-            use_cache=(not self.force_rebuild)
+            query,
+            csv_path=f"../data/bq_cache/{entity_type}_names.zip",
+            use_cache=(not self.force_rebuild),
         )
         return entity_names.set_index("code")
 
@@ -293,11 +336,12 @@ class DatasetBuild:
         {bnf_name} IS NOT NULL
         """
         bnf_names = bq.cached_read(
-            query, csv_path=f"../data/{bnf_name}_names.csv",
+            query,
+            csv_path=f"../data/bq_cache/{bnf_name}_names.zip",
             use_cache=(not self.force_rebuild),
         )
         bnf_names = pd.read_csv(
-            f"../data/{bnf_name}_names.csv", dtype={bnf_code: str}
+            f"../data/bq_cache/{bnf_name}_names.zip", dtype={bnf_code: str}
         )
         return bnf_names.set_index(bnf_code)
 
@@ -383,7 +427,7 @@ class Report:
         ]:
             substrings = []
             for i in range(0, len(denominator_code), 2):
-                sub = denominator_code[i: i + 2]
+                sub = denominator_code[i : i + 2]
                 if sub == "00" or len(sub) == 1:
                     continue
                 substrings.append(sub.lstrip("0"))
@@ -457,7 +501,7 @@ class Report:
             )
         df = df.drop(
             columns=[self.build.denominator_column, "rank_high", "rank_low"]
-            )
+        )
         df = df.rename(
             columns={
                 f"{self.build.numerator_column}_name": self._COL_NAMES[
@@ -470,7 +514,7 @@ class Report:
                     self.build.denominator_column
                 ][0],
                 f"{self.build.denominator_column}_items": self._COL_NAMES[
-                        self.build.denominator_column
+                    self.build.denominator_column
                 ][1],
             }
         )
@@ -484,7 +528,7 @@ class Report:
             "std",
             "z_score",
             "plots",
-            "URL"
+            "URL",
         ]
         df = df[column_order]
         df = df.set_index(self._COL_NAMES[self.build.numerator_column][0])
@@ -501,9 +545,12 @@ class Report:
         return df
 
     def format(self) -> None:
-        self.entity_name = self.build.names[self.entity_type].loc[
-            self.entity_code, "name"
-        ]
+        if self.entity_code in self.build.names[self.entity_type].index:
+            self.entity_name = self.build.names[self.entity_type].loc[
+                self.entity_code, "name"
+            ]
+        else:
+            self.entity_name = "Unknown"
         self.table_high = self._create_out_table("h")
         self.table_low = self._create_out_table("l")
         self.items_high = self._create_items_table("h")
@@ -586,7 +633,7 @@ class Plots:
             bw=Plots._bw_scott(distribution),
             ax=ax,
             linewidth=0.9,
-            legend=False
+            legend=False,
         )
         ax.axvline(org_value, color="r", linewidth=1)
         lower_limit = max(
@@ -693,7 +740,7 @@ class Runner:
         output_dir="../data",
         template_path="../data/template.html",
         url_prefix="https://raw.githack.com/ebmdatalab/outliers/master/",
-        n_jobs=8
+        n_jobs=8,
     ) -> None:
         self.build = DatasetBuild(
             from_date=from_date,
@@ -704,7 +751,7 @@ class Runner:
         )
         self.output_dir = output_dir
         self.template_path = template_path
-        self.toc = MarkdownToC(url_prefix)
+        self.toc = TableOfContents(url_prefix=url_prefix)
         self.entity_limit = entity_limit
         self.n_jobs = n_jobs
 
@@ -712,21 +759,128 @@ class Runner:
         # run main build process on bigquery and fetch results
         self.build.run()
         self.build.fetch_results()
+        self._truncate_entites()
+        self._trim_results()
+        self.toc.hierarchy = self.build.entity_hierarchy
 
         # loop through entity types, generated a report for each entity item
         for e in self.build.entities:
             for f in self._run_entity_report(e):
-                self.toc.add_file(f, e)
+                self.toc.add_item(**f)
 
         # write out toc
-        self.toc.write_toc(self.output_dir)
+        self.toc.write_html(self.output_dir)
+        self.toc.write_markdown(self.output_dir, True)
+
+    def _truncate_entites(self):
+        """
+        Evenly discard entities throughout hierarchy so n<=limit for all levels
+        """
+        if not self.entity_limit:
+            return
+
+        # discard ccgs until limit
+        while self.entity_limit < len(self.build.entity_hierarchy.keys()):
+            self.build.entity_hierarchy.popitem()
+
+        # if limit <= |ccgs| then only one practice per pcn per ccg
+        if self.entity_limit <= len(self.build.entity_hierarchy.keys()):
+            for ccg, pcns in self.build.entity_hierarchy.items():
+                pcn_code = list(pcns.keys())[0]
+                self.build.entity_hierarchy[ccg] = {
+                    pcn_code: pcns[pcn_code][0:1]
+                }
+            return
+
+        # if limit <= |pcns| then discard until limit
+        # and then only one practice per pcn
+        pcn_count = sum(
+            [len(v.keys()) for v in self.build.entity_hierarchy.values()]
+        )
+        if self.entity_limit <= pcn_count:
+            # discard pcns until limit
+            while self.entity_limit < sum(
+                [len(v.keys()) for v in self.build.entity_hierarchy.values()]
+            ):
+                for _, pcns in self.build.entity_hierarchy.items():
+                    pcns.popitem()
+            # one practice per pcn
+            for _, pcns in self.build.entity_hierarchy.items():
+                pcn_code = list(pcns.keys())[0]
+                pcns = {pcn_code: pcns[pcn_code][0:1]}
+            return
+
+        # count bottom level of hierarchy
+        def practice_count():
+            return len(
+                [
+                    p
+                    for q in [
+                        y
+                        for x in [
+                            list(v.values())
+                            for v in self.build.entity_hierarchy.values()
+                        ]
+                        for y in x
+                    ]
+                    for p in q
+                ]
+            )
+
+        # if num practices over limit then discard evenly
+        if practice_count() > self.entity_limit:
+            while True:
+                for ccg, pcns in self.build.entity_hierarchy.items():
+                    for pcn, practices in pcns.items():
+                        if len(practices) > 1:
+                            self.build.entity_hierarchy[ccg][pcn] = practices[
+                                :-1
+                            ]
+                        if practice_count() <= self.entity_limit:
+                            break
+                    else:
+                        continue
+                    break
+                else:
+                    continue
+                break
+
+    def _trim_results(self):
+        # trim build entity results to match limited entities
+        ccgs = list(self.build.entity_hierarchy.keys())
+        self.build.results["ccg"] = self.build.results["ccg"].loc[
+            ccgs, slice(None)
+        ]
+
+        pcns = [
+            y
+            for x in [
+                list(v.keys()) for v in self.build.entity_hierarchy.values()
+            ]
+            for y in x
+        ]
+        self.build.results["pcn"] = self.build.results["pcn"].loc[
+            pcns, slice(None)
+        ]
+
+        practices = [p for q in [
+            y
+            for x in [
+                list(v.values()) for v in self.build.entity_hierarchy.values()
+            ]
+            for y in x
+        ] for p in q]
+
+        self.build.results["practice"] = self.build.results["practice"].loc[
+            practices, slice(None)
+        ]
 
     def _run_item_report(self, entity, code):
         report = Report(
-                entity_type=entity,
-                entity_code=code,
-                build=self.build,
-            )
+            entity_type=entity,
+            entity_code=code,
+            build=self.build,
+        )
         report.format()
         output_file = path.join(
             self.output_dir,
@@ -740,17 +894,20 @@ class Runner:
             output_path=output_file,
             template_path=self.template_path,
         )
-        return output_file
+        return {
+            "code": code,
+            "name": report.entity_name,
+            "entity": entity,
+            "file_path": output_file,
+        }
 
     def _run_entity_report(self, entity):
         codes = self.build.results[entity].index.get_level_values(0).unique()
-        if self.entity_limit:
-            codes = codes[0: min(self.entity_limit, len(codes))]
         kwargs = [{"entity": entity, "code": c} for c in codes]
         files = pqdm(
             kwargs,
             self._run_item_report,
             n_jobs=self.n_jobs,
-            argument_type='kwargs'
-            )
+            argument_type="kwargs",
+        )
         return files
