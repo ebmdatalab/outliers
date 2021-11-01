@@ -1,1 +1,1 @@
-# [Table of contents](https://raw.githack.com/ebmdatalab/outliers/master/index.html)
+# [Table of contents](https://raw.githack.com/ebmdatalab/outliers/master/data/index.html)
