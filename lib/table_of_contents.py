@@ -49,21 +49,27 @@ class TableOfContents:
 
     def _get_context(self, output_path):
         ctx = {"header": self.heading}
-        ctx["ccgs"] = []
-        for ccg_code, pcns in self.hierarchy.items():
-            ccg_item = self._get_item_context(ccg_code, "ccg", output_path)
-            ccg_item["pcns"] = []
-            for pcn_code, practices in pcns.items():
-                pcn_item = self._get_item_context(pcn_code, "pcn", output_path)
-                pcn_item["practices"] = []
-                for practice_code in practices:
-                    pcn_item["practices"].append(
-                        self._get_item_context(
-                            practice_code, "practice", output_path
-                        )
+        ctx["stps"] = []
+        for stp_code, ccgs in self.hierarchy.items():
+            stp_item = self._get_item_context(stp_code, "stp", output_path)
+            stp_item["ccgs"] = []
+            for ccg_code, pcns in ccgs.items():
+                ccg_item = self._get_item_context(ccg_code, "ccg", output_path)
+                ccg_item["pcns"] = []
+                for pcn_code, practices in pcns.items():
+                    pcn_item = self._get_item_context(
+                        pcn_code, "pcn", output_path
                     )
-                ccg_item["pcns"].append(pcn_item)
-            ctx["ccgs"].append(ccg_item)
+                    pcn_item["practices"] = []
+                    for practice_code in practices:
+                        pcn_item["practices"].append(
+                            self._get_item_context(
+                                practice_code, "practice", output_path
+                            )
+                        )
+                    ccg_item["pcns"].append(pcn_item)
+                stp_item["ccgs"].append(ccg_item)
+            ctx["stps"].append(stp_item)
         return ctx
 
     def _get_item_context(self, entity_code, entity_type, output_path):

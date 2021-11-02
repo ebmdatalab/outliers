@@ -42,7 +42,7 @@ class DatasetBuild:
 
     # consts
     _DATEFMT = "%Y-%m-%d"
-    _KNOWN_ENTITIES = ["practice", "ccg", "pcn"]
+    _KNOWN_ENTITIES = ["practice", "ccg", "pcn", "stp"]
 
     def __init__(
         self,
@@ -121,15 +121,20 @@ class DatasetBuild:
         """
         sql = """
         SELECT
-            code as `practice_code`,
-            pcn_id as `pcn_code`,
-            ccg_id as `ccg_code`
+            p.code as `practice_code`,
+            p.pcn_id as `pcn_code`,
+            p.ccg_id as `ccg_code`,
+            c.stp_id as `stp_code`
         FROM
-            `ebmdatalab.hscic.practices`
+            `ebmdatalab.hscic.practices` as p
+        INNER JOIN
+            `ebmdatalab.hscic.ccgs` as c
+            ON p.ccg_id = c.code
         WHERE
-            setting=4
+            p.setting=4
             AND status_code = 'A'
-            AND pcn_id is not null
+            AND p.pcn_id is not null
+            AND c.stp_id is not null
         """
         csv_path = "../data/bq_cache/entity_hierarchy.zip"
         res: pd.DataFrame = bq.cached_read(
@@ -137,7 +142,7 @@ class DatasetBuild:
             csv_path,
             use_cache=(not self.force_rebuild),
         )
-        res = res.set_index(["ccg_code", "pcn_code"])
+        res = res.set_index(["stp_code", "ccg_code", "pcn_code"])
 
         # only include practices for which there are results
         res = res[
@@ -147,15 +152,24 @@ class DatasetBuild:
         ]
 
         # convert to hierarchial dict
-        for ccg_code in res.index.get_level_values(0).unique():
-            pcns = {}
-            for pcn_code in res.loc[ccg_code, slice(None)].index.unique():
-                pcns[pcn_code] = (
-                    res.loc[ccg_code, slice(None)]
-                    .query(f"pcn_code=='{pcn_code}'")
-                    .practice_code.tolist()
-                )
-            self.entity_hierarchy[ccg_code] = pcns
+        for stp_code in res.index.get_level_values(0).unique():
+            ccgs = {}
+            for ccg_code in (
+                res.loc[stp_code, slice(None), slice(None)]
+                .index.get_level_values(0)
+                .unique()
+            ):
+                pcns = {}
+                for pcn_code in res.loc[
+                    stp_code, ccg_code, slice(None)
+                ].index.unique():
+                    pcns[pcn_code] = (
+                        res.loc[stp_code, ccg_code, slice(None)]
+                        .query(f"pcn_code=='{pcn_code}'")
+                        .practice_code.tolist()
+                    )
+                ccgs[ccg_code] = pcns
+            self.entity_hierarchy[stp_code] = ccgs
 
     def _get_lookups(self) -> None:
         """
@@ -275,7 +289,7 @@ class DatasetBuild:
         """
         query = f"""
         SELECT
-        DISTINCT code,
+        DISTINCT {'ons_' if entity_type=='stp' else ''}code as `code`,
         name
         FROM
         ebmdatalab.hscic.{entity_type}s
@@ -759,8 +773,8 @@ class Runner:
         # run main build process on bigquery and fetch results
         self.build.run()
         self.build.fetch_results()
-        self._truncate_entites()
-        self._trim_results()
+        self._truncate_entities()
+        self._truncate_results()
         self.toc.hierarchy = self.build.entity_hierarchy
 
         # loop through entity types, generated a report for each entity item
@@ -772,72 +786,122 @@ class Runner:
         self.toc.write_html(self.output_dir)
         self.toc.write_markdown(self.output_dir, True)
 
-    def _truncate_entites(self):
+    def _truncate_entities(self):
         """
         Evenly discard entities throughout hierarchy so n<=limit for all levels
         """
-        if not self.entity_limit:
-            return
 
-        # discard ccgs until limit
-        while self.entity_limit < len(self.build.entity_hierarchy.keys()):
-            self.build.entity_hierarchy.popitem()
+        def stp_count():
+            return len(self.build.entity_hierarchy.keys())
 
-        # if limit <= |ccgs| then only one practice per pcn per ccg
-        if self.entity_limit <= len(self.build.entity_hierarchy.keys()):
-            for ccg, pcns in self.build.entity_hierarchy.items():
-                pcn_code = list(pcns.keys())[0]
-                self.build.entity_hierarchy[ccg] = {
-                    pcn_code: pcns[pcn_code][0:1]
-                }
-            return
-
-        # if limit <= |pcns| then discard until limit
-        # and then only one practice per pcn
-        pcn_count = sum(
-            [len(v.keys()) for v in self.build.entity_hierarchy.values()]
-        )
-        if self.entity_limit <= pcn_count:
-            # discard pcns until limit
-            while self.entity_limit < sum(
+        def ccg_count():
+            return sum(
                 [len(v.keys()) for v in self.build.entity_hierarchy.values()]
-            ):
-                for _, pcns in self.build.entity_hierarchy.items():
-                    pcns.popitem()
-            # one practice per pcn
-            for _, pcns in self.build.entity_hierarchy.items():
-                pcn_code = list(pcns.keys())[0]
-                pcns = {pcn_code: pcns[pcn_code][0:1]}
-            return
+            )
 
-        # count bottom level of hierarchy
-        def practice_count():
-            return len(
+        def pcn_count():
+            return sum(
                 [
-                    p
+                    len(x.keys())
+                    for y in [
+                        v.values()
+                        for v in self.build.entity_hierarchy.values()
+                    ]
+                    for x in y
+                ]
+            )
+
+        def practice_count():
+            return sum(
+                [
+                    len(p)
                     for q in [
-                        y
-                        for x in [
-                            list(v.values())
+                        x.values()
+                        for y in [
+                            v.values()
                             for v in self.build.entity_hierarchy.values()
                         ]
-                        for y in x
+                        for x in y
                     ]
                     for p in q
                 ]
             )
 
-        # if num practices over limit then discard evenly
-        if practice_count() > self.entity_limit:
-            while True:
-                for ccg, pcns in self.build.entity_hierarchy.items():
+        def one_practice_per_pcn():
+            for stp, ccgs in self.build.entity_hierarchy.items():
+                for ccg, pcns in ccgs.items():
                     for pcn, practices in pcns.items():
-                        if len(practices) > 1:
-                            self.build.entity_hierarchy[ccg][pcn] = practices[
-                                :-1
-                            ]
-                        if practice_count() <= self.entity_limit:
+                        self.build.entity_hierarchy[stp][ccg][pcn] = practices[
+                            0:1
+                        ]
+
+        def one_pcn_per_ccg():
+            for stp, ccgs in self.build.entity_hierarchy.items():
+                for ccg, pcns in ccgs.items():
+                    pcn = list(pcns.keys())[0]
+                    self.build.entity_hierarchy[stp][ccg] = {pcn: pcns[pcn]}
+
+        def one_ccg_per_stp():
+            for stp, ccgs in self.build.entity_hierarchy.items():
+                ccg = list(ccgs.keys())[0]
+                self.build.entity_hierarchy[stp] = {ccg: ccgs[ccg]}
+
+        if not self.entity_limit:
+            return
+
+        if self.entity_limit <= stp_count():
+            while self.entity_limit < stp_count():
+                self.build.entity_hierarchy.popitem()
+            one_ccg_per_stp()
+            one_pcn_per_ccg()
+            one_practice_per_pcn()
+            return
+
+        if self.entity_limit <= ccg_count():
+            if self.entity_limit < ccg_count():
+                while True:
+                    for ccgs in self.build.entity_hierarchy.values():
+                        if len(ccgs) > 1:
+                            ccgs.popitem()
+                        if self.entity_limit == ccg_count():
                             break
+                    else:
+                        continue
+                    break
+            one_pcn_per_ccg()
+            one_practice_per_pcn()
+            return
+
+        if self.entity_limit <= pcn_count():
+            if self.entity_limit < pcn_count():
+                while True:
+                    for ccgs in self.build.entity_hierarchy.values():
+                        for pcns in ccgs.values():
+                            if len(pcns) > 1:
+                                pcns.popitem()
+                            if self.entity_limit == pcn_count():
+                                break
+                        else:
+                            continue
+                        break
+                    else:
+                        continue
+                    break
+            one_practice_per_pcn()
+            return
+
+        if self.entity_limit < practice_count():
+            while True:
+                for _, ccgs in self.build.entity_hierarchy.items():
+                    for _, pcns in ccgs.values():
+                        for _, practices in pcns.items():
+                            if len(practices) > 1:
+                                practices.pop()
+                            if self.entity_limit == practice_count():
+                                break
+                        else:
+                            continue
+                        break
                     else:
                         continue
                     break
@@ -845,31 +909,56 @@ class Runner:
                     continue
                 break
 
-    def _trim_results(self):
-        # trim build entity results to match limited entities
-        ccgs = list(self.build.entity_hierarchy.keys())
+    def _truncate_results(self):
+        """ trims build entity results to match truncated entity hierarchy"""
+        if not self.entity_limit:
+            return
+        stps = list(self.build.entity_hierarchy.keys())
+        self.build.results["stp"] = self.build.results["stp"].loc[
+            stps,
+            slice(None),
+        ]
+
+        ccgs = [
+            x
+            for y in [v.keys() for v in self.build.entity_hierarchy.values()]
+            for x in y
+        ]
         self.build.results["ccg"] = self.build.results["ccg"].loc[
             ccgs, slice(None)
         ]
 
         pcns = [
-            y
-            for x in [
-                list(v.keys()) for v in self.build.entity_hierarchy.values()
+            p
+            for q in [
+                x.keys()
+                for y in [
+                    v.values() for v in self.build.entity_hierarchy.values()
+                ]
+                for x in y
             ]
-            for y in x
+            for p in q
         ]
         self.build.results["pcn"] = self.build.results["pcn"].loc[
             pcns, slice(None)
         ]
 
-        practices = [p for q in [
-            y
-            for x in [
-                list(v.values()) for v in self.build.entity_hierarchy.values()
+        practices = [
+            a
+            for b in [
+                p
+                for q in [
+                    x.values()
+                    for y in [
+                        v.values()
+                        for v in self.build.entity_hierarchy.values()
+                    ]
+                    for x in y
+                ]
+                for p in q
             ]
-            for y in x
-        ] for p in q]
+            for a in b
+        ]
 
         self.build.results["practice"] = self.build.results["practice"].loc[
             practices, slice(None)
