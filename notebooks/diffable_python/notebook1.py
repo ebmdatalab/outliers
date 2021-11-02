@@ -19,6 +19,6 @@ from datetime import date
 
 from_date = date(year=2021,month=4,day=1)
 to_date = date(year=2021,month=10,day=1)
-r = Runner(from_date,to_date,5,["practice","ccg","pcn"],False,100)
+r = Runner(from_date,to_date,5,["practice","ccg","pcn","stp"],False,100)
 
 r.run()
