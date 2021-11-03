@@ -310,7 +310,7 @@ def selective_title(str):
         Selectively title-cased string
 
     """
-    ALLCAPS = ["NHS", "PCN", "CCG", "BNF", "std", "STP"]
+    ALLCAPS = ["NHS", "PCN", "CCG", "BNF", "std", "STP", "(STP)", "NHS"]
     return " ".join(
         [w.title() if w not in ALLCAPS else w for w in str.split(" ")]
     )

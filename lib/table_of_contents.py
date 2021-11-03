@@ -1,5 +1,6 @@
 import os.path
 import jinja2
+from make_html import selective_title
 
 
 class TableOfContents:
@@ -76,7 +77,7 @@ class TableOfContents:
         entity_item = self.items[entity_type][entity_code]
         return {
             "code": entity_code,
-            "name": entity_item["name"],
+            "name": selective_title(entity_item["name"]),
             "href": self.url_prefix
             + self._full_path(
                 output_path,
