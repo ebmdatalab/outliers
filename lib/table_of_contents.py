@@ -1,6 +1,6 @@
 import os.path
 import jinja2
-from make_html import selective_title
+from lib.make_html import selective_title
 
 
 class TableOfContents:
