@@ -69,6 +69,10 @@ BEGIN
         WHERE
             build_id = v__build_id;
 
+        DELETE `ebmdatalab.outlier_detection.stp_ranked`
+        WHERE
+            build_id = v__build_id;
+
         DELETE `ebmdatalab.outlier_detection.practice_outlier_items`
         WHERE
             build_id = v__build_id;
@@ -78,6 +82,26 @@ BEGIN
             build_id = v__build_id;
 
         DELETE `ebmdatalab.outlier_detection.ccg_outlier_items`
+        WHERE
+            build_id = v__build_id;
+
+        DELETE `ebmdatalab.outlier_detection.stp_outlier_items`
+        WHERE
+            build_id = v__build_id;
+
+        DELETE `ebmdatalab.outlier_detection.practice_measure_arrays`
+        WHERE
+            build_id = v__build_id;
+
+        DELETE `ebmdatalab.outlier_detection.pcn_measure_arrays`
+        WHERE
+            build_id = v__build_id;
+
+        DELETE `ebmdatalab.outlier_detection.ccg_measure_arrays`
+        WHERE
+            build_id = v__build_id;
+
+        DELETE `ebmdatalab.outlier_detection.stp_measure_arrays`
         WHERE
             build_id = v__build_id;
 
@@ -847,6 +871,240 @@ BEGIN
         array_agg(r.z_score) as meausure_array
     FROM
         `ebmdatalab.outlier_detection.ccg_ranked` r
+    INNER JOIN ranked_chemicals as c
+        ON r.chemical = c.chemical
+    WHERE
+        r.build_id = v__build_id
+    GROUP BY 
+        v__build_id,
+        r.chemical;
+
+    --stp-level
+    INSERT
+        ebmdatalab.outlier_detection.stp_ranked (
+            build_id,
+            stp,
+            subpara,
+            subpara_items,
+            chemical,
+            chemical_items,
+            ratio,
+            mean,
+            std,
+            z_score,
+            rank_high,
+            rank_low
+        ) 
+    WITH stp_chems_subparas AS (
+        SELECT
+            c.stp_id AS stp,
+            subpara,
+            chemical,
+            sum(numerator) AS numerator
+        FROM
+            ebmdatalab.outlier_detection.summed s
+            JOIN `ebmdatalab.hscic.practices` p 
+                ON s.practice = p.code
+            JOIN `ebmdatalab.hscic.ccgs` c
+                ON p.ccg_id = c.code
+        WHERE
+            s.subpara IS NOT NULL
+            AND s.build_id = v__build_id
+        GROUP BY
+            c.stp_id,
+            s.subpara,
+            s.chemical
+    ),
+    stp_ratios AS (
+        SELECT
+            c.stp,
+            c.subpara,
+            c.chemical,
+            c.numerator AS chemical_items,
+            s.numerator AS subpara_items,
+            COALESCE(SAFE_DIVIDE(c.numerator,s.numerator),0) AS ratio,
+        FROM
+            (
+                SELECT
+                    stp,
+                    subpara,
+                    chemical,
+                    sum(numerator) AS numerator
+                FROM
+                    stp_chems_subparas
+                WHERE
+                    chemical IS NOT NULL
+                GROUP BY
+                    stp,
+                    subpara,
+                    chemical
+            ) c
+            JOIN (
+                SELECT
+                    stp,
+                    subpara,
+                    sum(numerator) AS numerator
+                FROM
+                    stp_chems_subparas
+                WHERE
+                    chemical IS NULL
+                GROUP BY
+                    stp,
+                    subpara
+            ) s 
+                ON c.stp = s.stp
+            AND c.subpara = s.subpara
+    ),
+    stp_chemical_trimvalues AS (
+        SELECT
+            chemical,
+            APPROX_QUANTILES(ratio, 1000) [offset(999)] AS trim_high,
+            APPROX_QUANTILES(ratio, 1000) [offset(1)] AS trim_low
+        FROM
+            stp_ratios
+        GROUP BY
+            chemical
+    ),
+    stp_chemical_stats AS (
+        SELECT
+            r.chemical,
+            avg(r.ratio) AS mean,
+            stddev(r.ratio) AS std
+        FROM
+            stp_ratios r
+            INNER JOIN stp_chemical_trimvalues t 
+                ON r.chemical = t.chemical
+        WHERE
+            r.ratio <= t.trim_high
+            AND r.ratio >= t.trim_low
+        GROUP BY
+            r.chemical
+    ),
+    stp_zscores AS (
+        SELECT
+            r.stp,
+            r.subpara,
+            r.subpara_items,
+            r.chemical,
+            r.chemical_items,
+            r.ratio,
+            s.mean,
+            COALESCE(s.std,0) AS std,
+            COALESCE(SAFE_DIVIDE((r.ratio - s.mean), s.std), 0) AS z_score
+        FROM
+            stp_ratios r
+            INNER JOIN stp_chemical_stats s 
+                ON r.chemical = s.chemical
+    )
+    SELECT
+        v__build_id, 
+        stp,
+        subpara,
+        subpara_items,
+        chemical,
+        chemical_items,
+        ratio,
+        mean,
+        std,
+        z_score,
+        DENSE_RANK() over (
+            PARTITION BY stp
+            ORDER BY
+                z_score DESC
+        ) AS rank_high,
+        DENSE_RANK() over (
+            PARTITION BY stp
+            ORDER BY
+                z_score ASC
+        ) AS rank_low
+    FROM
+        stp_zscores;
+
+--stp-level items
+    INSERT
+        `ebmdatalab.outlier_detection.stp_outlier_items`(
+            build_id,
+            stp,
+            bnf_code,
+            bnf_name,
+            chemical,
+            high_low,
+            numerator
+        ) 
+    WITH outlier_stp_chemicals AS (
+        SELECT
+            stp,
+            chemical,
+            CASE
+                WHEN rank_high <= p__n THEN 'h'
+                ELSE 'l'
+            END AS high_low
+        FROM
+            ebmdatalab.outlier_detection.stp_ranked
+        WHERE
+            build_id = v__build_id
+            AND (
+                rank_high <= p__n
+                OR rank_low <= p__n
+            )
+    ),
+    aggregated as (
+        SELECT
+            ccgs.stp_id AS stp,
+            prescribing.bnf_code,
+            prescribing.bnf_name,
+            SUBSTR(bnf_code, 1, 9) AS chemical,
+            o.high_low,
+            SUM(items) AS numerator
+        FROM
+            ebmdatalab.hscic.normalised_prescribing AS prescribing
+            INNER JOIN ebmdatalab.hscic.practices AS practices 
+                ON practices.code = prescribing.practice
+            INNER JOIN `ebmdatalab.hscic.ccgs` ccgs
+                ON ccgs.code = practices.ccg_id
+            INNER JOIN outlier_stp_chemicals o 
+                ON o.chemical = substr(bnf_code, 1, 9)
+                AND o.stp = ccgs.stp_id
+        WHERE
+            MONTH BETWEEN TIMESTAMP(p__from_date)
+            AND TIMESTAMP(p__to_date)
+        GROUP BY
+            ccgs.stp_id,
+            prescribing.bnf_code,
+            prescribing.bnf_name,
+            SUBSTR(bnf_code, 1, 9),
+            o.high_low
+    )
+    SELECT 
+        v__build_id,
+        *
+    FROM aggregated;
+
+--stp-level measure arrays
+    INSERT
+        `ebmdatalab.outlier_detection.stp_measure_arrays` (
+            build_id,
+            chemical,
+            measure_array
+        )
+    WITH ranked_chemicals as (
+        SELECT DISTINCT
+            chemical
+        FROM
+            `ebmdatalab.outlier_detection.stp_ranked` AS r
+        WHERE
+            r.build_id = v__build_id
+            AND (
+                r.rank_high <= p__n
+                OR r.rank_low <= p__n
+            )
+    )
+    SELECT 
+        v__build_id,
+        r.chemical,
+        array_agg(r.z_score) as meausure_array
+    FROM
+        `ebmdatalab.outlier_detection.stp_ranked` r
     INNER JOIN ranked_chemicals as c
         ON r.chemical = c.chemical
     WHERE

@@ -256,10 +256,16 @@ class DatasetBuild:
                 build_id = {self.build_id};
         """
         try:
+            csv_path = f"../data/bq_cache/{entity}_measure_arrays.zip"
             res = bq.cached_read(
                 sql,
-                f"../data/bq_cache/{entity}_measure_arrays.zip",
+                csv_path,
                 use_cache=(not self.force_rebuild),
+            )
+
+            res = pd.read_csv(
+                csv_path,
+                dtype={'chemical': str, 'array': str}
             )
         except Exception:
             print(f"Error getting BQ data for {entity}")
