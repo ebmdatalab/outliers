@@ -68,9 +68,13 @@ class TableOfContents:
                                 practice_code, "practice", output_path
                             )
                         )
+                    pcn_item["practices"].sort(key=lambda x: x["name"])
                     ccg_item["pcns"].append(pcn_item)
+                ccg_item["pcns"].sort(key=lambda x: x["name"])
                 stp_item["ccgs"].append(ccg_item)
+            stp_item["ccgs"].sort(key=lambda x: x["name"])
             ctx["stps"].append(stp_item)
+        ctx["stps"].sort(key=lambda x: x["name"])
         return ctx
 
     def _get_item_context(self, entity_code, entity_type, output_path):
