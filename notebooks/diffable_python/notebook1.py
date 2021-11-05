@@ -14,7 +14,7 @@
 #     name: python3
 # ---
 
-from lib.outliers import Runner, Report
+from lib.outliers import Runner
 from datetime import date
 
 from_date = date(year=2021,month=4,day=1)
