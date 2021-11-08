@@ -1068,7 +1068,7 @@ BEGIN
             o.high_low,
             SUM(items) AS numerator
         FROM
-            `ebmdatalab.hscic.normalised_prescribing `AS prescribing
+            `ebmdatalab.hscic.normalised_prescribing` AS prescribing
             INNER JOIN `ebmdatalab.hscic.practices` AS practices 
                 ON practices.code = prescribing.practice
             INNER JOIN `ebmdatalab.hscic.ccgs` AS ccgs
