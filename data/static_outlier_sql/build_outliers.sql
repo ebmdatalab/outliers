@@ -40,7 +40,7 @@ BEGIN
         SELECT
             b.build_id
         FROM
-            `ebmdatalab.outlier_detection.builds` b
+            `ebmdatalab.outlier_detection.builds` AS b
         WHERE
             b.from_date = p__from_date
             AND b.to_date = p__to_date
@@ -109,9 +109,9 @@ BEGIN
     ELSE
         SET v__build_id = ( 
             SELECT
-                1 + max(b.build_id)
+                1 + MAX(build_id)
             FROM
-                `ebmdatalab.outlier_detection.builds` b);
+                `ebmdatalab.outlier_detection.builds`);
 
         INSERT
             `ebmdatalab.outlier_detection.builds`(build_id, to_date, from_date, n)
@@ -122,7 +122,7 @@ BEGIN
 
     -- prescribing in date range summed to practice/chemical/subpara level
     INSERT
-        ebmdatalab.outlier_detection.summed (
+        `ebmdatalab.outlier_detection.summed` (
             build_id,
             practice,
             chemical,
@@ -137,19 +137,26 @@ BEGIN
             items
         FROM
             `ebmdatalab.hscic.normalised_prescribing` AS prescribing
-            INNER JOIN `ebmdatalab.hscic.practices` AS practices ON practices.code = prescribing.practice
-            INNER JOIN `ebmdatalab.hscic.ccgs` AS ccgs ON practices.ccg_id = ccgs.code
         WHERE
-            practices.setting = 4
-            AND practices.status_code = 'A'
-            AND MONTH BETWEEN TIMESTAMP(p__from_date)
+            MONTH BETWEEN TIMESTAMP(p__from_date)
             AND TIMESTAMP(p__to_date)
             AND SUBSTR(bnf_code, 1, 2) < '18'
-            AND practices.pcn_id is not null 
-            AND ccgs.stp_id is not null
-            
+            AND EXISTS (
+                SELECT 1
+                FROM `ebmdatalab.hscic.practices` AS practices
+                WHERE practices.code = prescribing.practice
+                AND practices.setting = 4
+                AND practices.status_code = 'A'
+                AND practices.pcn_id IS NOT NULL 
+                AND EXISTS ( 
+                    SELECT 1 
+                    FROM `ebmdatalab.hscic.ccgs` AS ccgs 
+                    WHERE ccgs.stp_id IS NOT NULL 
+                    AND practices.ccg_id = ccgs.code
+                )
+            )
     ),
-    agg as (
+    agg AS (
         SELECT
             practice,
             chemical,
@@ -163,10 +170,10 @@ BEGIN
                 subpara,
                 chemical
             ))
-    select 
-    v__build_id,
-    *
-    from agg;
+    SELECT 
+        v__build_id,
+        *
+    FROM agg;
 
     --add zero-numerator rows for every chemical+practice where no existing prescribing of that chemical
     -- but there exists prescribing of other chemicals in that subpara BY any practices
@@ -199,13 +206,13 @@ BEGIN
                     WHERE
                         build_id = v__build_id
                 ) p
-                CROSS JOIN `ebmdatalab.hscic.bnf` b
+                CROSS JOIN `ebmdatalab.hscic.bnf` AS b
             WHERE
                 EXISTS(
                     SELECT
                         s.subpara
                     FROM
-                        `ebmdatalab.outlier_detection.summed` s
+                        `ebmdatalab.outlier_detection.summed` AS s
                     WHERE
                         b.subpara_code = s.subpara
                         AND build_id = v__build_id
@@ -224,7 +231,7 @@ BEGIN
 
     --practice-level
     INSERT
-        ebmdatalab.outlier_detection.practice_ranked (
+        `ebmdatalab.outlier_detection.practice_ranked` (
             build_id,
             practice,
             subpara,
@@ -245,7 +252,7 @@ BEGIN
             s.chemical,
             s.numerator
         FROM
-            ebmdatalab.outlier_detection.summed AS s
+            `ebmdatalab.outlier_detection.summed` AS s
         WHERE
             s.practice IS NOT NULL
             AND s.subpara IS NOT NULL
@@ -335,7 +342,7 @@ BEGIN
 
     --practice-level items
     INSERT
-        ebmdatalab.outlier_detection.practice_outlier_items (
+        `ebmdatalab.outlier_detection.practice_outlier_items` (
             build_id,
             practice,
             bnf_code,
@@ -353,7 +360,7 @@ BEGIN
                 ELSE 'l'
             END AS high_low
         FROM
-            ebmdatalab.outlier_detection.practice_ranked AS r
+            `ebmdatalab.outlier_detection.practice_ranked` AS r
         WHERE
             r.build_id = v__build_id
             AND (
@@ -361,7 +368,7 @@ BEGIN
                 OR r.rank_low <= p__n
             )
     ),
-    aggregated as (
+    aggregated AS (
         SELECT
             prescribing.practice,
             prescribing.bnf_code,
@@ -370,10 +377,12 @@ BEGIN
             o.high_low,
             SUM(items) AS numerator
         FROM
-            ebmdatalab.hscic.normalised_prescribing AS prescribing
-            INNER JOIN ebmdatalab.hscic.practices AS practices ON practices.code = prescribing.practice
-            INNER JOIN outlier_practice_chemicals o ON o.chemical = substr(bnf_code, 1, 9)
-            AND o.practice = practices.code
+            `ebmdatalab.hscic.normalised_prescribing`AS prescribing
+            INNER JOIN `ebmdatalab.hscic.practices` AS practices 
+                ON practices.code = prescribing.practice
+            INNER JOIN `outlier_practice_chemicals` AS o 
+                ON o.chemical = substr(bnf_code, 1, 9)
+                AND o.practice = practices.code
         WHERE
             MONTH BETWEEN TIMESTAMP(p__from_date)
             AND TIMESTAMP(p__to_date)
@@ -396,7 +405,7 @@ BEGIN
             chemical,
             measure_array
         )
-    WITH ranked_chemicals as (
+    WITH ranked_chemicals AS (
         SELECT DISTINCT
             chemical
         FROM
@@ -411,10 +420,10 @@ BEGIN
     SELECT 
         v__build_id,
         r.chemical,
-        array_agg(r.z_score) as meausure_array
+        ARRAY_AGG(r.ratio) AS measure_array
     FROM
-        `ebmdatalab.outlier_detection.practice_ranked` r
-    INNER JOIN ranked_chemicals as c
+        `ebmdatalab.outlier_detection.practice_ranked` AS r
+    INNER JOIN ranked_chemicals AS c
         ON r.chemical = c.chemical
     WHERE
         r.build_id = v__build_id
@@ -424,7 +433,7 @@ BEGIN
 
     --pcn-level
     INSERT
-        ebmdatalab.outlier_detection.pcn_ranked (
+        `ebmdatalab.outlier_detection.pcn_ranked` (
             build_id,
             pcn,
             subpara,
@@ -444,8 +453,9 @@ BEGIN
                 chemical,
                 sum(numerator) AS numerator
             FROM
-                ebmdatalab.outlier_detection.summed s
-                JOIN `ebmdatalab.hscic.practices` p ON s.practice = p.code
+                `ebmdatalab.outlier_detection.summed` AS s
+                JOIN `ebmdatalab.hscic.practices` AS p 
+                    ON s.practice = p.code
             WHERE
                 s.subpara IS NOT NULL
                 AND s.build_id = v__build_id
@@ -510,7 +520,8 @@ BEGIN
                 stddev(r.ratio) AS std
             FROM
                 pcn_ratios r
-                INNER JOIN pcn_chemical_trimvalues t ON r.chemical = t.chemical
+                INNER JOIN pcn_chemical_trimvalues t
+                     ON r.chemical = t.chemical
             WHERE
                 r.ratio <= t.trim_high
                 AND r.ratio >= t.trim_low
@@ -559,7 +570,7 @@ BEGIN
 
     --pcn-level items
     INSERT
-        ebmdatalab.outlier_detection.pcn_outlier_items (
+        `ebmdatalab.outlier_detection.pcn_outlier_items` (
             build_id,
             pcn,
             bnf_code,
@@ -585,7 +596,7 @@ BEGIN
                 OR rank_low <= p__n
             )
     ),
-    aggregated as (
+    aggregated AS (
         SELECT
             practices.pcn_id AS pcn,
             prescribing.bnf_code,
@@ -594,8 +605,8 @@ BEGIN
             o.high_low,
             SUM(items) AS numerator
         FROM
-            ebmdatalab.hscic.normalised_prescribing AS prescribing
-            INNER JOIN ebmdatalab.hscic.practices AS practices 
+            `ebmdatalab.hscic.normalised_prescribing` AS prescribing
+            INNER JOIN `ebmdatalab.hscic.practices` AS practices 
                 ON practices.code = prescribing.practice
             INNER JOIN outlier_pcn_chemicals o 
                 ON o.chemical = substr(bnf_code, 1, 9)
@@ -623,7 +634,7 @@ BEGIN
             chemical,
             measure_array
         )
-    WITH ranked_chemicals as (
+    WITH ranked_chemicals AS (
         SELECT DISTINCT
             chemical
         FROM
@@ -638,10 +649,10 @@ BEGIN
     SELECT 
         v__build_id,
         r.chemical,
-        array_agg(r.z_score) as meausure_array
+        ARRAY_AGG(r.ratio) AS measure_array
     FROM
-        `ebmdatalab.outlier_detection.pcn_ranked` r
-    INNER JOIN ranked_chemicals as c
+        `ebmdatalab.outlier_detection.pcn_ranked` AS r
+    INNER JOIN ranked_chemicals AS c
         ON r.chemical = c.chemical
     WHERE
         r.build_id = v__build_id
@@ -651,7 +662,7 @@ BEGIN
 
     --ccg-level
     INSERT
-        ebmdatalab.outlier_detection.ccg_ranked (
+        `ebmdatalab.outlier_detection.ccg_ranked` (
             build_id,
             ccg,
             subpara,
@@ -672,8 +683,8 @@ BEGIN
             chemical,
             sum(numerator) AS numerator
         FROM
-            ebmdatalab.outlier_detection.summed s
-            JOIN `ebmdatalab.hscic.practices` p 
+            `ebmdatalab.outlier_detection.summed` AS s
+            JOIN `ebmdatalab.hscic.practices` AS p 
                 ON s.practice = p.code
         WHERE
             s.subpara IS NOT NULL
@@ -808,7 +819,7 @@ BEGIN
                 ELSE 'l'
             END AS high_low
         FROM
-            ebmdatalab.outlier_detection.ccg_ranked
+            `ebmdatalab.outlier_detection.ccg_ranked`
         WHERE
             build_id = v__build_id
             AND (
@@ -816,7 +827,7 @@ BEGIN
                 OR rank_low <= p__n
             )
     ),
-    aggregated as (
+    aggregated AS (
         SELECT
             practices.ccg_id AS ccg,
             prescribing.bnf_code,
@@ -825,8 +836,8 @@ BEGIN
             o.high_low,
             SUM(items) AS numerator
         FROM
-            ebmdatalab.hscic.normalised_prescribing AS prescribing
-            INNER JOIN ebmdatalab.hscic.practices AS practices 
+            `ebmdatalab.hscic.normalised_prescribing` AS prescribing
+            INNER JOIN `ebmdatalab.hscic.practices` AS practices 
                 ON practices.code = prescribing.practice
             INNER JOIN outlier_ccg_chemicals o 
                 ON o.chemical = substr(bnf_code, 1, 9)
@@ -853,7 +864,7 @@ BEGIN
             chemical,
             measure_array
         )
-    WITH ranked_chemicals as (
+    WITH ranked_chemicals AS (
         SELECT DISTINCT
             chemical
         FROM
@@ -868,10 +879,10 @@ BEGIN
     SELECT 
         v__build_id,
         r.chemical,
-        array_agg(r.z_score) as meausure_array
+        ARRAY_AGG(r.ratio) AS measure_array
     FROM
-        `ebmdatalab.outlier_detection.ccg_ranked` r
-    INNER JOIN ranked_chemicals as c
+        `ebmdatalab.outlier_detection.ccg_ranked` AS r
+    INNER JOIN ranked_chemicals AS c
         ON r.chemical = c.chemical
     WHERE
         r.build_id = v__build_id
@@ -881,7 +892,7 @@ BEGIN
 
     --stp-level
     INSERT
-        ebmdatalab.outlier_detection.stp_ranked (
+        `ebmdatalab.outlier_detection.stp_ranked` (
             build_id,
             stp,
             subpara,
@@ -902,10 +913,10 @@ BEGIN
             chemical,
             sum(numerator) AS numerator
         FROM
-            ebmdatalab.outlier_detection.summed s
-            JOIN `ebmdatalab.hscic.practices` p 
+            `ebmdatalab.outlier_detection.summed` AS s
+            JOIN `ebmdatalab.hscic.practices` AS p 
                 ON s.practice = p.code
-            JOIN `ebmdatalab.hscic.ccgs` c
+            JOIN `ebmdatalab.hscic.ccgs` AS c
                 ON p.ccg_id = c.code
         WHERE
             s.subpara IS NOT NULL
@@ -1040,7 +1051,7 @@ BEGIN
                 ELSE 'l'
             END AS high_low
         FROM
-            ebmdatalab.outlier_detection.stp_ranked
+            `ebmdatalab.outlier_detection.stp_ranked`
         WHERE
             build_id = v__build_id
             AND (
@@ -1048,7 +1059,7 @@ BEGIN
                 OR rank_low <= p__n
             )
     ),
-    aggregated as (
+    aggregated AS (
         SELECT
             ccgs.stp_id AS stp,
             prescribing.bnf_code,
@@ -1057,10 +1068,10 @@ BEGIN
             o.high_low,
             SUM(items) AS numerator
         FROM
-            ebmdatalab.hscic.normalised_prescribing AS prescribing
-            INNER JOIN ebmdatalab.hscic.practices AS practices 
+            `ebmdatalab.hscic.normalised_prescribing `AS prescribing
+            INNER JOIN `ebmdatalab.hscic.practices` AS practices 
                 ON practices.code = prescribing.practice
-            INNER JOIN `ebmdatalab.hscic.ccgs` ccgs
+            INNER JOIN `ebmdatalab.hscic.ccgs` AS ccgs
                 ON ccgs.code = practices.ccg_id
             INNER JOIN outlier_stp_chemicals o 
                 ON o.chemical = substr(bnf_code, 1, 9)
@@ -1087,7 +1098,7 @@ BEGIN
             chemical,
             measure_array
         )
-    WITH ranked_chemicals as (
+    WITH ranked_chemicals AS (
         SELECT DISTINCT
             chemical
         FROM
@@ -1102,10 +1113,10 @@ BEGIN
     SELECT 
         v__build_id,
         r.chemical,
-        array_agg(r.z_score) as meausure_array
+        ARRAY_AGG(r.ratio) AS measure_array
     FROM
-        `ebmdatalab.outlier_detection.stp_ranked` r
-    INNER JOIN ranked_chemicals as c
+        `ebmdatalab.outlier_detection.stp_ranked` AS r
+    INNER JOIN ranked_chemicals AS c
         ON r.chemical = c.chemical
     WHERE
         r.build_id = v__build_id
