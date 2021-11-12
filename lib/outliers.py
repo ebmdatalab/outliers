@@ -263,10 +263,7 @@ class DatasetBuild:
                 use_cache=(not self.force_rebuild),
             )
 
-            res = pd.read_csv(
-                csv_path,
-                dtype={'chemical': str, 'array': str}
-            )
+            res = pd.read_csv(csv_path, dtype={"chemical": str, "array": str})
         except Exception:
             print(f"Error getting BQ data for {entity}")
             traceback.print_stack()
@@ -918,7 +915,7 @@ class Runner:
                 break
 
     def _truncate_results(self):
-        """ trims build entity results to match truncated entity hierarchy"""
+        """trims build entity results to match truncated entity hierarchy"""
         if not self.entity_limit:
             return
         stps = list(self.build.entity_hierarchy.keys())

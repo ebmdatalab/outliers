@@ -61,6 +61,7 @@ def add_item_rows(table, items_df):
     table_root : str
         utf-8 encoded string of html table root element
     """
+
     def make_hidden_row(df, id, analyse_url):
         """
         Builds tr of precription items hidden by bootstrap collapse class
@@ -326,7 +327,7 @@ def write_to_template(
     output_path,
     template_path,
     from_date: date,
-    to_date: date
+    to_date: date,
 ):
     """
     Populate jinja template with outlier report data
@@ -360,7 +361,7 @@ def write_to_template(
         "table_high": df_to_html(tables_high, "table_high"),
         "table_low": df_to_html(tables_low, "table_low"),
         "from_date": from_date.strftime(REPORT_DATE_FORMAT),
-        "to_date": to_date.strftime(REPORT_DATE_FORMAT)
+        "to_date": to_date.strftime(REPORT_DATE_FORMAT),
     }
 
     with open(output_path, "w") as f:

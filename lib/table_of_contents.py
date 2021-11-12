@@ -27,14 +27,14 @@ class TableOfContents:
         from_date: date,
         to_date: date,
         heading="Table of contents",
-        html_template="../data/toc_template.html"
+        html_template="../data/toc_template.html",
     ):
         self.items = {}
         self.hierarchy = {}
         self.url_prefix = url_prefix
         self.heading = heading
         self.html_template = html_template
-        self.from_date = from_date,
+        self.from_date = from_date
         self.to_date = to_date
 
     def add_item(self, code, name, file_path, entity=""):
@@ -55,8 +55,8 @@ class TableOfContents:
 
     def _get_context(self, output_path):
         ctx = {"header": self.heading}
-        ctx['from_date'] = self.from_date.strftime(REPORT_DATE_FORMAT)
-        ctx['to_date'] = self.from_date.strftime(REPORT_DATE_FORMAT)
+        ctx["from_date"] = self.from_date.strftime(REPORT_DATE_FORMAT)
+        ctx["to_date"] = self.from_date.strftime(REPORT_DATE_FORMAT)
         ctx["stps"] = []
         for stp_code, ccgs in self.hierarchy.items():
             stp_item = self._get_item_context(stp_code, "stp", output_path)
