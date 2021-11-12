@@ -1,165 +1,175 @@
-<html>
-
-<head>
-    <link href="./static/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link href="./static/css/outliers.css" rel="stylesheet">
-    <meta charset="UTF-8">
-</head>
-
-<body>
-    <div class="container">
-        <h1>Static outliers for Haden Vale Surgery</h1>
-        This is some intro text. Please fill in our feedback <a href="https://docs.google.com/forms/d/e/1FAIpQLSeH4ai_qyetAY4UAgZSWGnYQHkXNr9efFBmQvdrBi5uuXvgnQ/viewform?usp=pp_url&entry.2016356131=%20">survey</a>.
-
-        <h2>Prescribing where Haden Vale Surgery is higher than most</h2>
-        <table border="1" class="dataframe table thead-light table-bordered table-sm" id="table_high">
-  <thead>
-    
-    
-  <tr><th>BNF Chemical</th>
-      <th><abbr title="number of prescribed items containing this chemical">Chemical Items</abbr></th>
-      <th>BNF Subparagraph</th>
-      <th><abbr title="count of all prescribed items from this subparagraph">Subparagraph Items</abbr></th>
-      <th><abbr title="Ratio of chemical items to subparagraph items">Ratio</abbr></th>
-      <th><abbr title="Population mean number of chemical items prescribed">Mean</abbr></th>
-      <th><abbr title="Standard Deviation">std</abbr></th>
-      <th><abbr title="Number of standard deviations prescribeditem count is away from the mean">Z_Score</abbr></th>
-      <th>Plots</th>
-    </tr></thead>
-  
-<tbody><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0902011P0&amp;denomIds=9.2.1&amp;selectedTab=summary">Sodium polystyrene sulfonate</a><button type="button" data-toggle="collapse" data-target="#table_high_0_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>3</td>
-      <td>Oral potassium</td>
-      <td>3</td>
-      <td>1.00</td>
-      <td>0.00</td>
-      <td>0.01</td>
-      <td>70.67</td>
-      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAD4klEQVR4nO3dvYtcZRiG8evNGvyKMYVGO4dIbMRYWK3fjTYBCys7i4VgZWOz9iILNoJNEAx+/AHaLCIIxoC4IBHB0oALgmBAMQQ1CLuPxTnq7Mksm8l5Z84Mz/WDw2RnZzf3zsy97zPvHJISEUjK4dDQASTNj4WXErHwUiIWXkrEwkuJWHgpEQsvJWLhpUQsvJSIhZcSsfDSvJUy2PnsvQo/Wt88USuIpNnru8KfrJJC0lz0LfzdVVJImou+hT9WJYWkubDwUiKO9FIirvBSIhZeSsSRXkrEFV5KxMJLiTjSS4n0LfwtVVJImou+hd8ZrW9aemlJ9C38FeBojSCSZq9v4X/HjTtpadRY4S28tCRqrPDu1EtLwpFeSsSRXkrEkV5KxJFeSsSRXkrEkV5KxJFeSsSRXkrEFV5KxMJLifQt/DXg8Gh987YaYSTNVq/Cb2+cDuB74FSdOJJmqcZ/F30ReKzC95E0YxZeSsTCS4nUKPxPwHE37qTF17vwYxt3j/SPI2mWaqzw4FgvLYVa/8T0Z8BHo/XNI8DPwP3t5VXgOM379b8CR4DDNCfsrAB3AH8CfwO3A7vtbaH5ZTR+BLDT3ubfo7SfG7+M9tgdu6T93KTLrriBP0+y3/eb1kF/z82qle8gNfJ3s07KftDPcyOPYznggL3Pt12a59lK59ihed7e2h5/tLc7BvzVHve11/2yDYzWN1+jeTn8zfbG6R8P+FmqKRE3//iUUs5ExLsV81RnxjrMWM+QOfuO9GeqpJgtM9ZhxnoGy1nrNbykJWDhpUT6Fn7hXy9hxlrMWM9gOXtt2klaLo70UiJTvQ9fSnkaeBy4HBHnSikvAg8ClyLi41kEnNaEjC8DDwOfRsQXw6b7Xzdne91Z4P2I2Bo0XGvCffkUsApsRcSFYdM1JmRcA+4CiIi3Bw3XKqU8C7wSES+1H6/RvC//ZUR8Nc8s067wqxGxAdzbfnwyIt4CHqobq5c9GSPiA+AscGLQVNfbk7P95Xl+0ETX6z7eL9CcRLK7/5fMXTfjCk2ZLg8Xaa+IOA98N3bVPRHxJvDkvLNMW/juC/5F3ADYk6mUciewBnw4TJx9de+7UzRPgCcGyLKfbsajEfEO8PwQYfbRzXgoIl6nmTwX1WC9mWrTrh2fVoHfgG+BB2ju2B8i4pOZJJzShIyvApeAzyPi6yGzjevmjIiL7eh3bcFG+u7jPQKuRMR7A0b7z4SMz9CcFnt1Uc66K6U8CrwBbNEsPM/RTCEX5j3Su0svJeIuvZSIhZcSsfBSIhZeSsTCS4lYeCkRCy8lYuGlRCy8lIiFlxKx8FIi/wDEcCG4Bo2giwAAAABJRU5ErkJggg=="></td>
-    </tr>
-    <tr id="table_high_0_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0902011P0BBAAAA&amp;denomIds=9.2.1&amp;selectedTab=summary" target="_blank">Resonium A powder : 3</a></div></td></tr><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0606020T0&amp;denomIds=6.6.2&amp;selectedTab=summary">Sodium clodronate</a><button type="button" data-toggle="collapse" data-target="#table_high_1_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>8</td>
-      <td>Bisphosphonates and other drugs</td>
-      <td>151</td>
-      <td>0.05</td>
-      <td>0.00</td>
-      <td>0.01</td>
-      <td>10.22</td>
-      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAEp0lEQVR4nO3dTahUZRzH8e/J1CRIQqpFhBOVvW0igtDEok3ZFL1IgbRo56ql5YAtElxML4syiChoVYsK0aChSNA21SYiqbTIaiBIKKk0FMzq3+LMQsTx3rnzPOee7vP9wIF75w7P79x75zfnOWfOzKkiAkllOG++V0BScyy8VBALLxXEwksFsfBSQSy8VBALLxXEwksFsfBSQSy8VBALr/lXVZ7f3ZAkhe/0Bts6vcH1KcaSlM/Uhe/0BlcCW4F106+OpJxSbOGfAD4BbkgwlqSMUhT+HmAL4JRearkUhX8Z2A9cl2AsSRmlKPwrw373BHCq0xtclGA8SZlMXfhhv3ts9OVBnNZLrZbydfgDWHip1VIW/iAeqZdazS28VJCUhf8GCy+1WrLCD/vdo8CSTm+wLNWYktJK/eaZb4FrE48pKZHUhXc/XmqxHIX3SL3UUqkL78k3Uou5hZcKkrTww373CLC80xssTjmupDRyfMTVIeDqDONKmlKOwrsfL7VUjsK7Hy+1lFt4qSBu4aWC5Cj8z8CKTm+wPMPYkqaQvPDDfjeAD4D1qceWNJ1cV57ZBTyQaWxJc5Sr8HuBtZ3eYGmm8SXNQZbCD/vdk8DHwJ05xpc0NzkvJum0XmqZnIV/H1jf6Q0WZcyQNIFshR995NUB4NZcGZImk/v68LtxWi+1Ru7Cvwvc3+kNqsw5kmYha+GH/e5h4Dc81VZqhdxbeKin9Vs7vYFXl5XmWRURWQNGV5R9HHgQuJD65bofgJNzWP4a9rv/Zl1hNa+qggh3+xqQvfCn6/QGVwD3AZcDS89YlpzltrPd5/RZSTDBkwXw9xyXcU8y4/543j7B7cNn7t3Z2fLehrasz//p9mG/u2fMfceMEDHVAmyadoy25i3UrIX8u/l3PPeSYh9+U4Ix2pq3ULOazluoWU3nTZ3VxEE7SS1h4aWCpCj8qwnGaGveQs1qOm+hZjWdN3VWo0fpJc0vp/RSQc6f5M5VVa0D1gC/RMTrVVU9BFxFfbWZr4FHgd8j4oUUKzdD3o9APyLubiDrj9HP/oyIHZmzDgF3Aaci4sWcWRGxq6qqjcDKiOhPmzVTHvXryLcAeyNib+asT6mPan8fEW9mzvoJWAusiYhHps2aRd6vwO3AxRGxeZJxJ93Crx49MC4ZfX9NRDwHrAK6wHbqE2RSGZsXEV8AHzWUtQ/oAysayPqS+v+yLHdWVVU3AocT5cyYBxwHTgEXNJD1MHCU8SdNJcuKiM+At4F9ibLOmUd9ItmlwIlJB5208Gfu8Oc+ANBk3kxZTwKvNZEVEc8CxxrIWg3cBNyWKOuceRGxJyK2ATfnzgIWU38IS6qLosz0+NgA7EyUNVPeKmAr9ZPnRCY6aDeaZqymfgfc58BK6mnGd9RXnNlIPaWfeio6i7z9wA7gjYh4K3PWZdRT0Q8j4p3MWcdHPzsREc/nzIqI3aP79BJP6cf9bkeAO4CjEfFS5qyvgMeAfyLi6ZxZEbG7qqrtEfHUtDmzyaN+jKwFFk2a6VF6qSAepZcKYuGlglh4qSAWXiqIhZcKYuGlglh4qSAWXiqIhZcKYuGlglh4qSD/AWIO0ZfRjT3+AAAAAElFTkSuQmCC"></td>
-    </tr>
-    <tr id="table_high_1_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0606020T0AAAEAE&amp;denomIds=6.6.2&amp;selectedTab=summary" target="_blank">Sodium clodronate 800mg tablets : 8</a></div></td></tr><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0704010W0&amp;denomIds=7.4.1&amp;selectedTab=summary">Solifenacin/tamsulosin</a><button type="button" data-toggle="collapse" data-target="#table_high_2_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>28</td>
-      <td>Drugs for urinary retention</td>
-      <td>196</td>
-      <td>0.14</td>
-      <td>0.01</td>
-      <td>0.02</td>
-      <td>9.03</td>
-      <td><img class="zoom" src="data:image/png;base64,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"></td>
-    </tr>
-    <tr id="table_high_2_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0704010W0BBAAAA&amp;denomIds=7.4.1&amp;selectedTab=summary" target="_blank">Vesomni 6mg/0.4mg modified-release tablets : 2</a><br><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0704010W0AAAAAA&amp;denomIds=7.4.1&amp;selectedTab=summary" target="_blank">Solifenacin 6mg / Tamsulosin 400microgram MR tab : 26</a></div></td></tr><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1104020W0&amp;denomIds=11.4.2&amp;selectedTab=summary">Azelastine hydrochloride</a><button type="button" data-toggle="collapse" data-target="#table_high_3_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>17</td>
-      <td>Other anti-inflammatory preparations</td>
-      <td>36</td>
-      <td>0.47</td>
-      <td>0.06</td>
-      <td>0.08</td>
-      <td>5.33</td>
-      <td><img class="zoom" src="data:image/png;base64,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"></td>
-    </tr>
-    <tr id="table_high_3_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1104020W0BBAAAA&amp;denomIds=11.4.2&amp;selectedTab=summary" target="_blank">Optilast 0.05% eye drops : 7</a><br><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1104020W0AAAAAA&amp;denomIds=11.4.2&amp;selectedTab=summary" target="_blank">Azelastine 0.05% eye drops : 10</a></div></td></tr><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=090101100&amp;denomIds=9.1.1&amp;selectedTab=summary">Other oral iron preparations</a><button type="button" data-toggle="collapse" data-target="#table_high_4_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>4</td>
-      <td>Oral iron</td>
-      <td>134</td>
-      <td>0.03</td>
-      <td>0.00</td>
-      <td>0.01</td>
-      <td>4.41</td>
-      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAEeElEQVR4nO3dTYjcZBzH8e/TrlZQ0EWsCEJDpRWpiKKgq6LgNYKgeCgK4mWvFiwaqQcPIhFfUNGLgnoRBA96MAgi9mj1oKBVkfqSkwXF3VrdQqnbv4dkoK47k5md58kLz+8DYfZl5p8fw/w2mWxmxpkZIhKHbV0HEJH2qPAiEVHhRSKiwotERIUXiYgKLxIRFV4kIiq8SERUeJGIqPAiEVHhfXNO5ypLb6nwIhGZu/BJVlzkI4iIhOdjC/+Ihxki0gIfhV9OsmLRwxwRCcxH4d8CDnqYIyKB+Sj8i8CDSVbs9DBLRAKau/Blnp4EXgWemD+OiITk699yrwH3JFlxpad5IhKAl8KXeXoKeAE45GOeiISx4HHW28B3HueJiGfezrQr83QNWNFuvUh/+T619ghwi+eZIuKJCi8SERVeJCK+C38M2J1kxfme54qIB14LX+bpWeBr4Dqfc0XEjxCvh9duvUhPqfAiEQlR+C+AmwPMFZE5eS98macrwHqSFZf5ni0i8wn1nnZH0FZepHdCFl7P40V6RoUXiUiowh8F9iVZsT3QfBHZgiCFL/P0H+AH4JoQ80Vka0J+EIV260V6RoUXiUjIwn+OCi/SK8EKX+bpcWBHkhVXh1qHiMwm9IdJHgDeTbLigsDrEZEpBC18macF8AnVO9qKSMfa+LjoQ8CNSVbc18K6RGQCZ2bBV5JkRQIcBu4q8/SX4CvsknOGmes6hshm2tjCU+ZpCTxK9Xxeb38l0pFWtvAjSVY8AzwM/Ah8VS/fAD8Dq2WethcmFG3hpcdaLTxAfX79HuAG4HrgWmA3sAj8CpTAH8CJelk95+vR9yeBv4G1+jTe/lDhpcdaL/w4SVZsA64AEqryLwKXbFhGP7sYuLBeFgAHnAbWqP8QAGeAdeBsvayPufT6u/LZu59PHv/wQMPtRnf6Vi/nuW2b65QWlHn66bTXnbvwzrllM3t9riEdGGLuIWaGYeYeYuZp+Dhot+xhRheGmHuImWGYuYeYuVErR+lFpB9UeJGI+Cj8UJ/nDDH3EDPDMHMPMXOj3hylF5HwtEsvEpGFWa7snLsDuBX4zczedM7dC1xFdebct8ADwKqZveQ96Rwacp+of/eXmb3SYcz/mJTZzN53zu0HdplZ3mnQczTcz59RHfn+ycze6TDm/zTk/h24E1g0s4MdxvRi1i38Uv0AG32qzB4zew7YC6TA08AOj/l8GZvbzA4DOXBpZ+k2Nzazc24fcLy7aGNNenzcD/xJdeJR30zKfRrYCZzqKpxPsxZ+4xP+oRwAaMr9GPBGS1mmNSnzEtVpybe1F2cqkzKfB3xEP9/JeFLuvVQv8T7TXpxwZjpoV+/6LAErwJfALqpdn2PA98B+ql36l/1H3bqG3JcDNwEfm9l7nYXcYFJmM/ugvk7Ww136cffzUeAhYN3Mnuoq42Yacq8BtwPbzezJzkJ6oqP0IhHRUXqRiKjwIhFR4UUiosKLRESFF4mICi8SERVeJCIqvEhEVHiRiKjwIhFR4UUi8i9Xf5oLPMSd+AAAAABJRU5ErkJggg=="></td>
-    </tr>
-  <tr id="table_high_4_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=090101100BBBNA0&amp;denomIds=9.1.1&amp;selectedTab=summary" target="_blank">Spatone Original 20ml sachets : 4</a></div></td></tr></tbody></table>
-
-        <h2>Prescribing where Haden Vale Surgery is lower than most</h2>
-        <table border="1" class="dataframe table thead-light table-bordered table-sm" id="table_low">
-  <thead>
-    
-    
-  <tr><th>BNF Chemical</th>
-      <th><abbr title="number of prescribed items containing this chemical">Chemical Items</abbr></th>
-      <th>BNF Subparagraph</th>
-      <th><abbr title="count of all prescribed items from this subparagraph">Subparagraph Items</abbr></th>
-      <th><abbr title="Ratio of chemical items to subparagraph items">Ratio</abbr></th>
-      <th><abbr title="Population mean number of chemical items prescribed">Mean</abbr></th>
-      <th><abbr title="Standard Deviation">std</abbr></th>
-      <th><abbr title="Number of standard deviations prescribeditem count is away from the mean">Z_Score</abbr></th>
-      <th>Plots</th>
-    </tr></thead>
-  
-<tbody><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0902011U0&amp;denomIds=9.2.1&amp;selectedTab=summary">Potassium chloride</a><button type="button" data-toggle="collapse" data-target="#table_low_0_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>0</td>
-      <td>Oral potassium</td>
-      <td>3</td>
-      <td>0.00</td>
-      <td>0.98</td>
-      <td>0.12</td>
-      <td>-8.30</td>
-      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAEpUlEQVR4nO3dT2gcZRzG8e+7KZRU/HNQq3hwUKuioKCnWOOfg4pstFIvwYMeIqUnL15GzyIDHlS8FEHR3jxVwUGQgGm0NCCtgqCIEdZrQUFEtFX78zC7kEx2s9mdmZ335X0+MOyfZH/zNMnTmZ2dZJ2ZISJx6LQdQERmR4UXiYgKLxIRFV4kIiq8SERUeJGIqPAiEVHhRSKiwotERIUXiUi1wjun83JFAqItvEggkjS/M0nzj6rMUOFFwvEy8E2VAftqCiIiDUrSfB54Erijyhxt4UXC8BSw2su6f1YZosKLhOF54GTVISq8iOeSND8I3AWsVZ2lwov4bwk41cu6l6sOUuFF/LcInK5jkAov4r/DwJk6BqnwIh5L0vxG4FIv6/5axzwVXsRvi8CXdQ1T4UX89iAqvEg0FoGv6hqmwot4Kknzq4Freln3l7pmqvAi/loAztY5UIUX8Vetz99BhRfxWa1H6EGFF/FSkub7gduA7+ucq8KL+Ol+4Hwd589vpcKL+KnWl+MGVHgRP9V+wA5UeBHvJGneAe4DztU9W4UX8c/dwGYv616se7AKL+KfJ4DVJgar8CL+eQb4pInBKryIR5I0vx64AfiuifkqvIhfloBPe1m3kbdxU+FF/HKEhnbnQYUX8UaS5gcozrCr/fX3ARVexB/PAp/3su6/Ta1A7y0n4oEkzfcBrwJHm1yPtvAifniO4pdlfmhyJdrCi7Rsy9b9SNPr0hZepEVJmjvgTWC9l3V/bHp92sKLtKT/SzJvAzcBy7NYpwovMkNJms8Dh4BHgePA18ByL+temsX6Kxc+SfMXKZ4aDJbLwD+7LOW/4OEmvD3pY9wu9437+DSPaWLmtDk6FN/juRGXDviP4nsybBn3Mbdl6VS4DmBbLssLpc91I+4bzB21jPv4Xj/PDbkcXJ8D5oED/WVwfX//33IR2KQo+lIv6/7MDDmz6c/gc84dM7N3a8zTqNDyQniZQ8sL4WWukrfqQbtjFR8/a6HlhfAyh5YXwss8dV4dpReJiAovEpGqhQ/meU9faHkhvMyh5YXwMk+dt9JBOxEJi3bpRSIy0evwzrmHgAeAC2b2vnPuKHArsGlmp5oIWNWQzC9Q/FXQz8zsi3bT7VTO27/vBPCBmW20Gm6EIV/jRYp3Pt0ws/V20+00JO8KcCWAmb3VargRnHOPAMfNbLl/ewU4CJw2szN7nTPpFn7BzDLguv7tQ2b2BnD7hHNmaVtmM/sQOAHc0mqq0bbl7f+nutZqovHKPxdPA3+x8yQrX5TzzlGU50J7kXZnZmvAt1vuutbMXqd4w4o9m7Tw5Sf8IRwA2JbROXcFsAKcbCfOWOWv6T0U39TDLWTZq3Lmq8zsHeDxNsLsQTlvx8xeodhbDcVU3ZvooF1/V2gB+A04D9xM8UX6ycw+niZA04Zkfoni1MZVMzvbZrZhynnN7Fx/d+5vz3fpyz8XCfC7mb3XYrShhuR9mOLU2D98PePOOXcv8BqwQbGxeoxir2R9kl16HaUXiYiO0otERIUXiYgKLxIRFV4kIiq8SERUeJGIqPAiEVHhRSKiwotERIUXiYgKLxKR/wE/VEsFe9eNsAAAAABJRU5ErkJggg=="></td>
-    </tr>
-    <tr id="table_low_0_items" class="collapse"><td colspan="9" class="hiddenRow"><div></div></td></tr><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1002020C0&amp;denomIds=10.2.2&amp;selectedTab=summary">Baclofen</a><button type="button" data-toggle="collapse" data-target="#table_low_1_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>27</td>
-      <td>Skeletal muscle relaxants</td>
-      <td>76</td>
-      <td>0.36</td>
-      <td>0.83</td>
-      <td>0.18</td>
-      <td>-2.56</td>
-      <td><img class="zoom" src="data:image/png;base64,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"></td>
-    </tr>
-    <tr id="table_low_1_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1002020C0AAAIAI&amp;denomIds=10.2.2&amp;selectedTab=summary" target="_blank">Baclofen 10mg tablets : 27</a></div></td></tr><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0602020D0&amp;denomIds=6.2.2&amp;selectedTab=summary">Carbimazole</a><button type="button" data-toggle="collapse" data-target="#table_low_2_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>11</td>
-      <td>Antithyroid drugs</td>
-      <td>16</td>
-      <td>0.69</td>
-      <td>0.93</td>
-      <td>0.11</td>
-      <td>-2.30</td>
-      <td><img class="zoom" src="data:image/png;base64,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"></td>
-    </tr>
-    <tr id="table_low_2_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0602020D0AAAAAA&amp;denomIds=6.2.2&amp;selectedTab=summary" target="_blank">Carbimazole 5mg tablets : 11</a></div></td></tr><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1501043A0&amp;denomIds=15.1.4&amp;selectedTab=summary">Alfentanil hydrochloride</a><button type="button" data-toggle="collapse" data-target="#table_low_3_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>0</td>
-      <td>Opioid analgesics</td>
-      <td>1</td>
-      <td>0.00</td>
-      <td>0.82</td>
-      <td>0.37</td>
-      <td>-2.21</td>
-      <td><img class="zoom" src="data:image/png;base64,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"></td>
-    </tr>
-    <tr id="table_low_3_items" class="collapse"><td colspan="9" class="hiddenRow"><div></div></td></tr><tr>
-      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0105020A0&amp;denomIds=1.5.2&amp;selectedTab=summary">Budesonide</a><button type="button" data-toggle="collapse" data-target="#table_low_4_items" class="btn btn-default btn-xs">&#9776;</button></th>
-      <td>0</td>
-      <td>Corticosteroids</td>
-      <td>2</td>
-      <td>0.00</td>
-      <td>0.70</td>
-      <td>0.34</td>
-      <td>-2.08</td>
-      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAGm0lEQVR4nO3dW6wdUxzH8e+UVltaetFTlzJBiYpLRCR1KRFEMlLBS5+QVNQD4kFihHgQZMKLRFwiIXggEtfqxINbNS6Nu5REFJmmtFqlpVRL9e9hrRPn7O7jnLMvs2bM75OszD6nzd7/Mz2/rjVrr1k7MjNEpBkmhC5ARMqjwIs0iAIv0iAKvEiDKPAiDaLAizSIAi/SIAq8SIMo8CINosCLNEh3gY8ircsVqZF9QxcgIu3FaT4DuNy3OcAkYGORJRd2+pwKvEjFxGm+P3A7sAR4AbgDWAf8CRzTzXMr8CIVEqf5+cCDwHPA8UWW7Gj5K1u6eX4FXqQC4jSPgBuBq4HLiyxZ04/XUeBFAovTfF/gIeAI4MwiS7b167X0tpxIQHGaTwSe9l8m/Qw7KPAiwcRpPgl4BtgMLCuyZHe/X1OBFwkgTvP9gGeB9cB1RZbsKeN1FXiRksVpPhl4HlgL3FhkSWkL2BR4kRLFaT4FeBH4HLipzLCDAi9SmjjNpwLLgY+AtOywgwIvUgq/em4F8C5wW4iwg96HF+m7OM1n4cK+osiSu0LWoh5epI/iNJ8HrASeCB12UA8v0jdxmp8OPIW7Xn82dD2gHl6kL+I0vwoX9iVVCTuohxfpqTjNZwL3A4fj1sVvClzSMAq8SA/4u90uBe4FHgCuKLLk77BV7U2BF+lSnOZnAPcA23E3wHwZuKQRKfAiHfBr4S8DrsfNhd1aZMnrYasanQIvMkZxmg8Ai4BLgHOBN3Br4d8PWdd4RGZdLPiJIsMs6l05ImH5G1sOGdKOA04ETgX2AG8DLwOvFlnyR6g6O6XASyPEaT6N4UFu12YBO4EfgI2+rQXWAJ8VWfJj+ZX3lgIvteVnxmcyepCn4SbUNo7Sfg61xr0sCrxUjr+rbACY69tAy3EucChun/atjBzgDbh93LeX/CNUlgIvpfCz2nPYO8StgZ4O7MANqzf5Y9vHdbyGDq3rwMc3r5gDbCuy5K+eVSWliNN8H2AKMHXIcTIwsYM2CTgQN8Se0XKcgvsQhVFDDPz2fx9Wh9SLwK8BDsL9o68HvgQ+BN7BTXT0fWM+Gc5f284CjhrSYlwPOwc4GHdduwf4HdejDrZdwF/jbLtxgd6GG2L/PPSonrg6ejakj9N8AjAPWACcDpzlH6/CvY3xSpElW7stWBwf6gHgWGC+Px6DC/chwE/At8A3/rgO14tuBn5EPWkj9fUa3u/fdR5wMXAR7pduOfBSkSXfdP7CzeCH3AO4DyiYz7/Bng8chgvwV7i3jr4CvsYF/AeFWdopbdLO90inAItxK5Um4sK/HPigrG16q8DPQs/2bZY/DuDusJrnj4fjztEm3KXSYKgHjxuadM6kN4LN0sdpfgT/hn8BbmO/Vb59UrVJQD/LfADu2ndah49n4EK8A/ehgFtwQ+8tuKH2euA7374vsmRnOT+dNEUl3pbzYToNt055EXAybvj/Ba4328jw1U+/ArvbDVv953RNxs0MT/ZtKp0HdT/AcJNS24Hf/PG/Ho/0Z9uKLPmz2/Ml0qlKBL6Vv3aNgRNwE1FzGb5yajoj3/izG7c8crD94dtoIW37uMiSXb3++URCqWTgRaQ/tKedSIMo8CIN0lXgI1jWq0LKEEXRNaFrGK+61Vy3eqF+NXdTb7c9fK1OFPWrF+pXc93qhfrVHCzwIlIjCrxIg3Qb+Ed6UkV56lYv1K/mutUL9au543q7ex9eRGpFQ3qRBhnXvvRRFC0CzgA2m9ljURRdBhwNfG1mL/SjwG61qflK3JLdV8zszbDV7a21Xv+9h4HHzWx10OJG0OYcnw0sBFab2aqw1e2tTb1LcfdNYGb3BS1uBFEUnQtca2ZL/NdLcXdYvmVm74z1ecbbwy80swy3YwrAfDO7F3ePdlUNq9nMngAexm0UUUXD6vX/qa4MWtHoWn8vFuPuX6jq7but9Q7uO7A5XEn/zcxWAp8O+dZsM7sbt9HMmI038K0X/HWYABhWYxRF+wNLgSfDlDOq1nN6Eu4f9cwAtYxVa83Tzex+4MIQxYxBa70TzOwW3Gi1LjrK3rgm7fxQaCFur7KPgSNxJ2mtmb3YSQH91qbmG3A7w7xmZu+FrK2d1nrN7CM/nNtZ8SF96+9FDPxiZo8GLK2tNvWeA0TAdjOr5Ix9FEUnA3cCq3Gd1QW4Ucmq8QzpNUsv0iCapRdpEAVepEEUeJEGUeBFGkSBF2kQBV6kQRR4kQZR4EUaRIEXaRAFXqRBFHiRBvkHT+Z7VG46HqUAAAAASUVORK5CYII="></td>
-    </tr>
-  <tr id="table_low_4_items" class="collapse"><td colspan="9" class="hiddenRow"><div></div></td></tr></tbody></table>
-
-    </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-</body>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>&#13;
+&#13;
+<head>&#13;
+    <link href="./static/vendor/bootstrap/css/bootstrap.css" rel="stylesheet"/>&#13;
+    <link href="./static/css/outliers.css" rel="stylesheet"/>&#13;
+    <meta charset="UTF-8"/>&#13;
+</head>&#13;
+&#13;
+<body>&#13;
+    <div class="container"><h1>Static outliers for Haden Vale Surgery</h1>
+<p>There is substantial variation in prescribing behaviours, across various different areas of medicine. Some variation can be explained by demographic changes, or local policies or guidelines, but much of the remaining variation is less easy to
+    explain. At <a href="https://openprescribing.net/">OpenPrescribing</a> we are piloting a number of data-driven approaches to: identify unusual prescribing, collect feedback on this prescribing to inform development of new tools to support
+    prescribers and organisations to audit and review prescribing.</p>
+<p>The below reports have been developed to use &#8220;z-scores&#8221; to automatically identify prescribing patterns at a chemical level which are furthest away from &#8220;typical prescribing&#8221; and can be classified as an &#8220;outlier&#8221;. It is important to remember that
+    this information was generated automatically and it is therefore likely that some of the behaviour is warranted. This report seeks only to collect information about where this variation may be warranted and where it might not. Our full analytical
+    method code is openly available on GitHub <a href="https://github.com/ebmdatalab/outliers/">here</a> but briefly we calculate the number of prescriptions for each chemical in the BNF coding system using the BNF subparagraph as a denominator.
+    We used the time period from 1 April 2021 to 1 August 2021. We then calculate the mean and standard deviation for each numerator and denominator pair across all practices/CCGs/PCNs. From this we can calculate the &#8220;z-score&#8221;, which is a measure
+    of how many standard deviations a given practice/CCG/PCN is from the population mean. We then rank your &#8220;z-scores&#8221; to find the top 5 results where prescribing is an outlier for prescribing higher than its peers and those where it is an outlier
+    for prescribing lower than its peers.</p>
+<p>The DataLab is keen to hear your feedback on the results. You can do this by completing the following <a href="https://docs.google.com/forms/d/e/1FAIpQLSeH4ai_qyetAY4UAgZSWGnYQHkXNr9efFBmQvdrBi5uuXvgnQ/viewform?usp=pp_url&amp;entry.2016356131=practice+M88043">survey</a>
+    or emailing us at
+    <a href="mailto:ebmdatalab@phc.ox.ac.uk?subject=OpenPrescribing%20outliers%20feedback">ebmdatalab@phc.ox.ac.uk</a>. Please DO NOT INCLUDE IDENTIFIABLE PATIENT information in your feedback. All feedback is helpful, you can send short or detailed
+    feedback.
+</p><h2>Prescribing where Haden Vale Surgery is higher than most</h2>&#13;
+        <table border="1" class="dataframe table thead-light table-bordered table-sm" id="table_high">&#13;
+  <thead>&#13;
+    &#13;
+    &#13;
+  <tr><th>BNF Chemical</th>&#13;
+      <th><abbr title="number of prescribed items containing this chemical">Chemical Items</abbr></th>&#13;
+      <th>BNF Subparagraph</th>&#13;
+      <th><abbr title="count of all prescribed items from this subparagraph">Subparagraph Items</abbr></th>&#13;
+      <th><abbr title="Ratio of chemical items to subparagraph items">Ratio</abbr></th>&#13;
+      <th><abbr title="Population mean number of chemical items prescribed">Mean</abbr></th>&#13;
+      <th><abbr title="Standard Deviation">std</abbr></th>&#13;
+      <th><abbr title="Number of standard deviations prescribeditem count is away from the mean">Z_Score</abbr></th>&#13;
+      <th>Plots</th>&#13;
+    </tr></thead>&#13;
+  &#13;
+<tbody><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0902011P0&amp;denomIds=9.2.1&amp;selectedTab=summary">Sodium polystyrene sulfonate</a><button type="button" data-toggle="collapse" data-target="#table_high_0_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>3</td>&#13;
+      <td>Oral potassium</td>&#13;
+      <td>3</td>&#13;
+      <td>1.00</td>&#13;
+      <td>0.00</td>&#13;
+      <td>0.01</td>&#13;
+      <td>70.67</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAD4klEQVR4nO3dvYtcZRiG8evNGvyKMYVGO4dIbMRYWK3fjTYBCys7i4VgZWOz9iILNoJNEAx+/AHaLCIIxoC4IBHB0oALgmBAMQQ1CLuPxTnq7Mksm8l5Z84Mz/WDw2RnZzf3zsy97zPvHJISEUjK4dDQASTNj4WXErHwUiIWXkrEwkuJWHgpEQsvJWLhpUQsvJSIhZcSsfDSvJUy2PnsvQo/Wt88USuIpNnru8KfrJJC0lz0LfzdVVJImou+hT9WJYWkubDwUiKO9FIirvBSIhZeSsSRXkrEFV5KxMJLiTjSS4n0LfwtVVJImou+hd8ZrW9aemlJ9C38FeBojSCSZq9v4X/HjTtpadRY4S28tCRqrPDu1EtLwpFeSsSRXkrEkV5KxJFeSsSRXkrEkV5KxJFeSsSRXkrEFV5KxMJLifQt/DXg8Gh987YaYSTNVq/Cb2+cDuB74FSdOJJmqcZ/F30ReKzC95E0YxZeSsTCS4nUKPxPwHE37qTF17vwYxt3j/SPI2mWaqzw4FgvLYVa/8T0Z8BHo/XNI8DPwP3t5VXgOM379b8CR4DDNCfsrAB3AH8CfwO3A7vtbaH5ZTR+BLDT3ubfo7SfG7+M9tgdu6T93KTLrriBP0+y3/eb1kF/z82qle8gNfJ3s07KftDPcyOPYznggL3Pt12a59lK59ihed7e2h5/tLc7BvzVHve11/2yDYzWN1+jeTn8zfbG6R8P+FmqKRE3//iUUs5ExLsV81RnxjrMWM+QOfuO9GeqpJgtM9ZhxnoGy1nrNbykJWDhpUT6Fn7hXy9hxlrMWM9gOXtt2klaLo70UiJTvQ9fSnkaeBy4HBHnSikvAg8ClyLi41kEnNaEjC8DDwOfRsQXw6b7Xzdne91Z4P2I2Bo0XGvCffkUsApsRcSFYdM1JmRcA+4CiIi3Bw3XKqU8C7wSES+1H6/RvC//ZUR8Nc8s067wqxGxAdzbfnwyIt4CHqobq5c9GSPiA+AscGLQVNfbk7P95Xl+0ETX6z7eL9CcRLK7/5fMXTfjCk2ZLg8Xaa+IOA98N3bVPRHxJvDkvLNMW/juC/5F3ADYk6mUciewBnw4TJx9de+7UzRPgCcGyLKfbsajEfEO8PwQYfbRzXgoIl6nmTwX1WC9mWrTrh2fVoHfgG+BB2ju2B8i4pOZJJzShIyvApeAzyPi6yGzjevmjIiL7eh3bcFG+u7jPQKuRMR7A0b7z4SMz9CcFnt1Uc66K6U8CrwBbNEsPM/RTCEX5j3Su0svJeIuvZSIhZcSsfBSIhZeSsTCS4lYeCkRCy8lYuGlRCy8lIiFlxKx8FIi/wDEcCG4Bo2giwAAAABJRU5ErkJggg=="/></td>&#13;
+    </tr>&#13;
+    <tr id="table_high_0_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0902011P0BBAAAA&amp;denomIds=9.2.1&amp;selectedTab=summary" target="_blank">Resonium A powder : 3</a></div></td></tr><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0606020T0&amp;denomIds=6.6.2&amp;selectedTab=summary">Sodium clodronate</a><button type="button" data-toggle="collapse" data-target="#table_high_1_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>8</td>&#13;
+      <td>Bisphosphonates and other drugs</td>&#13;
+      <td>151</td>&#13;
+      <td>0.05</td>&#13;
+      <td>0.00</td>&#13;
+      <td>0.01</td>&#13;
+      <td>10.22</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAEp0lEQVR4nO3dTahUZRzH8e/J1CRIQqpFhBOVvW0igtDEok3ZFL1IgbRo56ql5YAtElxML4syiChoVYsK0aChSNA21SYiqbTIaiBIKKk0FMzq3+LMQsTx3rnzPOee7vP9wIF75w7P79x75zfnOWfOzKkiAkllOG++V0BScyy8VBALLxXEwksFsfBSQSy8VBALLxXEwksFsfBSQSy8VBALr/lXVZ7f3ZAkhe/0Bts6vcH1KcaSlM/Uhe/0BlcCW4F106+OpJxSbOGfAD4BbkgwlqSMUhT+HmAL4JRearkUhX8Z2A9cl2AsSRmlKPwrw373BHCq0xtclGA8SZlMXfhhv3ts9OVBnNZLrZbydfgDWHip1VIW/iAeqZdazS28VJCUhf8GCy+1WrLCD/vdo8CSTm+wLNWYktJK/eaZb4FrE48pKZHUhXc/XmqxHIX3SL3UUqkL78k3Uou5hZcKkrTww373CLC80xssTjmupDRyfMTVIeDqDONKmlKOwrsfL7VUjsK7Hy+1lFt4qSBu4aWC5Cj8z8CKTm+wPMPYkqaQvPDDfjeAD4D1qceWNJ1cV57ZBTyQaWxJc5Sr8HuBtZ3eYGmm8SXNQZbCD/vdk8DHwJ05xpc0NzkvJum0XmqZnIV/H1jf6Q0WZcyQNIFshR995NUB4NZcGZImk/v68LtxWi+1Ru7Cvwvc3+kNqsw5kmYha+GH/e5h4Dc81VZqhdxbeKin9Vs7vYFXl5XmWRURWQNGV5R9HHgQuJD65bofgJNzWP4a9rv/Zl1hNa+qggh3+xqQvfCn6/QGVwD3AZcDS89YlpzltrPd5/RZSTDBkwXw9xyXcU8y4/543j7B7cNn7t3Z2fLehrasz//p9mG/u2fMfceMEDHVAmyadoy25i3UrIX8u/l3PPeSYh9+U4Ix2pq3ULOazluoWU3nTZ3VxEE7SS1h4aWCpCj8qwnGaGveQs1qOm+hZjWdN3VWo0fpJc0vp/RSQc6f5M5VVa0D1gC/RMTrVVU9BFxFfbWZr4FHgd8j4oUUKzdD3o9APyLubiDrj9HP/oyIHZmzDgF3Aaci4sWcWRGxq6qqjcDKiOhPmzVTHvXryLcAeyNib+asT6mPan8fEW9mzvoJWAusiYhHps2aRd6vwO3AxRGxeZJxJ93Crx49MC4ZfX9NRDwHrAK6wHbqE2RSGZsXEV8AHzWUtQ/oAysayPqS+v+yLHdWVVU3AocT5cyYBxwHTgEXNJD1MHCU8SdNJcuKiM+At4F9ibLOmUd9ItmlwIlJB5208Gfu8Oc+ANBk3kxZTwKvNZEVEc8CxxrIWg3cBNyWKOuceRGxJyK2ATfnzgIWU38IS6qLosz0+NgA7EyUNVPeKmAr9ZPnRCY6aDeaZqymfgfc58BK6mnGd9RXnNlIPaWfeio6i7z9wA7gjYh4K3PWZdRT0Q8j4p3MWcdHPzsREc/nzIqI3aP79BJP6cf9bkeAO4CjEfFS5qyvgMeAfyLi6ZxZEbG7qqrtEfHUtDmzyaN+jKwFFk2a6VF6qSAepZcKYuGlglh4qSAWXiqIhZcKYuGlglh4qSAWXiqIhZcKYuGlglh4qSD/AWIO0ZfRjT3+AAAAAElFTkSuQmCC"/></td>&#13;
+    </tr>&#13;
+    <tr id="table_high_1_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0606020T0AAAEAE&amp;denomIds=6.6.2&amp;selectedTab=summary" target="_blank">Sodium clodronate 800mg tablets : 8</a></div></td></tr><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0704010W0&amp;denomIds=7.4.1&amp;selectedTab=summary">Solifenacin/tamsulosin</a><button type="button" data-toggle="collapse" data-target="#table_high_2_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>28</td>&#13;
+      <td>Drugs for urinary retention</td>&#13;
+      <td>196</td>&#13;
+      <td>0.14</td>&#13;
+      <td>0.01</td>&#13;
+      <td>0.02</td>&#13;
+      <td>9.03</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,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"/></td>&#13;
+    </tr>&#13;
+    <tr id="table_high_2_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0704010W0BBAAAA&amp;denomIds=7.4.1&amp;selectedTab=summary" target="_blank">Vesomni 6mg/0.4mg modified-release tablets : 2</a><br/><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0704010W0AAAAAA&amp;denomIds=7.4.1&amp;selectedTab=summary" target="_blank">Solifenacin 6mg / Tamsulosin 400microgram MR tab : 26</a></div></td></tr><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1104020W0&amp;denomIds=11.4.2&amp;selectedTab=summary">Azelastine hydrochloride</a><button type="button" data-toggle="collapse" data-target="#table_high_3_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>17</td>&#13;
+      <td>Other anti-inflammatory preparations</td>&#13;
+      <td>36</td>&#13;
+      <td>0.47</td>&#13;
+      <td>0.06</td>&#13;
+      <td>0.08</td>&#13;
+      <td>5.33</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,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"/></td>&#13;
+    </tr>&#13;
+    <tr id="table_high_3_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1104020W0BBAAAA&amp;denomIds=11.4.2&amp;selectedTab=summary" target="_blank">Optilast 0.05% eye drops : 7</a><br/><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1104020W0AAAAAA&amp;denomIds=11.4.2&amp;selectedTab=summary" target="_blank">Azelastine 0.05% eye drops : 10</a></div></td></tr><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=090101100&amp;denomIds=9.1.1&amp;selectedTab=summary">Other oral iron preparations</a><button type="button" data-toggle="collapse" data-target="#table_high_4_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>4</td>&#13;
+      <td>Oral iron</td>&#13;
+      <td>134</td>&#13;
+      <td>0.03</td>&#13;
+      <td>0.00</td>&#13;
+      <td>0.01</td>&#13;
+      <td>4.41</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAEeElEQVR4nO3dTYjcZBzH8e/TrlZQ0EWsCEJDpRWpiKKgq6LgNYKgeCgK4mWvFiwaqQcPIhFfUNGLgnoRBA96MAgi9mj1oKBVkfqSkwXF3VrdQqnbv4dkoK47k5md58kLz+8DYfZl5p8fw/w2mWxmxpkZIhKHbV0HEJH2qPAiEVHhRSKiwotERIUXiYgKLxIRFV4kIiq8SERUeJGIqPAiEVHhfXNO5ypLb6nwIhGZu/BJVlzkI4iIhOdjC/+Ihxki0gIfhV9OsmLRwxwRCcxH4d8CDnqYIyKB+Sj8i8CDSVbs9DBLRAKau/Blnp4EXgWemD+OiITk699yrwH3JFlxpad5IhKAl8KXeXoKeAE45GOeiISx4HHW28B3HueJiGfezrQr83QNWNFuvUh/+T619ghwi+eZIuKJCi8SERVeJCK+C38M2J1kxfme54qIB14LX+bpWeBr4Dqfc0XEjxCvh9duvUhPqfAiEQlR+C+AmwPMFZE5eS98macrwHqSFZf5ni0i8wn1nnZH0FZepHdCFl7P40V6RoUXiUiowh8F9iVZsT3QfBHZgiCFL/P0H+AH4JoQ80Vka0J+EIV260V6RoUXiUjIwn+OCi/SK8EKX+bpcWBHkhVXh1qHiMwm9IdJHgDeTbLigsDrEZEpBC18macF8AnVO9qKSMfa+LjoQ8CNSVbc18K6RGQCZ2bBV5JkRQIcBu4q8/SX4CvsknOGmes6hshm2tjCU+ZpCTxK9Xxeb38l0pFWtvAjSVY8AzwM/Ah8VS/fAD8Dq2WethcmFG3hpcdaLTxAfX79HuAG4HrgWmA3sAj8CpTAH8CJelk95+vR9yeBv4G1+jTe/lDhpcdaL/w4SVZsA64AEqryLwKXbFhGP7sYuLBeFgAHnAbWqP8QAGeAdeBsvayPufT6u/LZu59PHv/wQMPtRnf6Vi/nuW2b65QWlHn66bTXnbvwzrllM3t9riEdGGLuIWaGYeYeYuZp+Dhot+xhRheGmHuImWGYuYeYuVErR+lFpB9UeJGI+Cj8UJ/nDDH3EDPDMHMPMXOj3hylF5HwtEsvEpGFWa7snLsDuBX4zczedM7dC1xFdebct8ADwKqZveQ96Rwacp+of/eXmb3SYcz/mJTZzN53zu0HdplZ3mnQczTcz59RHfn+ycze6TDm/zTk/h24E1g0s4MdxvRi1i38Uv0AG32qzB4zew7YC6TA08AOj/l8GZvbzA4DOXBpZ+k2Nzazc24fcLy7aGNNenzcD/xJdeJR30zKfRrYCZzqKpxPsxZ+4xP+oRwAaMr9GPBGS1mmNSnzEtVpybe1F2cqkzKfB3xEP9/JeFLuvVQv8T7TXpxwZjpoV+/6LAErwJfALqpdn2PA98B+ql36l/1H3bqG3JcDNwEfm9l7nYXcYFJmM/ugvk7Ww136cffzUeAhYN3Mnuoq42Yacq8BtwPbzezJzkJ6oqP0IhHRUXqRiKjwIhFR4UUiosKLRESFF4mICi8SERVeJCIqvEhEVHiRiKjwIhFR4UUi8i9Xf5oLPMSd+AAAAABJRU5ErkJggg=="/></td>&#13;
+    </tr>&#13;
+  <tr id="table_high_4_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=090101100BBBNA0&amp;denomIds=9.1.1&amp;selectedTab=summary" target="_blank">Spatone Original 20ml sachets : 4</a></div></td></tr></tbody></table>&#13;
+&#13;
+        <h2>Prescribing where Haden Vale Surgery is lower than most</h2>&#13;
+        <table border="1" class="dataframe table thead-light table-bordered table-sm" id="table_low">&#13;
+  <thead>&#13;
+    &#13;
+    &#13;
+  <tr><th>BNF Chemical</th>&#13;
+      <th><abbr title="number of prescribed items containing this chemical">Chemical Items</abbr></th>&#13;
+      <th>BNF Subparagraph</th>&#13;
+      <th><abbr title="count of all prescribed items from this subparagraph">Subparagraph Items</abbr></th>&#13;
+      <th><abbr title="Ratio of chemical items to subparagraph items">Ratio</abbr></th>&#13;
+      <th><abbr title="Population mean number of chemical items prescribed">Mean</abbr></th>&#13;
+      <th><abbr title="Standard Deviation">std</abbr></th>&#13;
+      <th><abbr title="Number of standard deviations prescribeditem count is away from the mean">Z_Score</abbr></th>&#13;
+      <th>Plots</th>&#13;
+    </tr></thead>&#13;
+  &#13;
+<tbody><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0902011U0&amp;denomIds=9.2.1&amp;selectedTab=summary">Potassium chloride</a><button type="button" data-toggle="collapse" data-target="#table_low_0_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>0</td>&#13;
+      <td>Oral potassium</td>&#13;
+      <td>3</td>&#13;
+      <td>0.00</td>&#13;
+      <td>0.98</td>&#13;
+      <td>0.12</td>&#13;
+      <td>-8.30</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAEpUlEQVR4nO3dT2gcZRzG8e+7KZRU/HNQq3hwUKuioKCnWOOfg4pstFIvwYMeIqUnL15GzyIDHlS8FEHR3jxVwUGQgGm0NCCtgqCIEdZrQUFEtFX78zC7kEx2s9mdmZ335X0+MOyfZH/zNMnTmZ2dZJ2ZISJx6LQdQERmR4UXiYgKLxIRFV4kIiq8SERUeJGIqPAiEVHhRSKiwotERIUXiUi1wjun83JFAqItvEggkjS/M0nzj6rMUOFFwvEy8E2VAftqCiIiDUrSfB54Erijyhxt4UXC8BSw2su6f1YZosKLhOF54GTVISq8iOeSND8I3AWsVZ2lwov4bwk41cu6l6sOUuFF/LcInK5jkAov4r/DwJk6BqnwIh5L0vxG4FIv6/5axzwVXsRvi8CXdQ1T4UX89iAqvEg0FoGv6hqmwot4Kknzq4Freln3l7pmqvAi/loAztY5UIUX8Vetz99BhRfxWa1H6EGFF/FSkub7gduA7+ucq8KL+Ol+4Hwd589vpcKL+KnWl+MGVHgRP9V+wA5UeBHvJGneAe4DztU9W4UX8c/dwGYv616se7AKL+KfJ4DVJgar8CL+eQb4pInBKryIR5I0vx64AfiuifkqvIhfloBPe1m3kbdxU+FF/HKEhnbnQYUX8UaS5gcozrCr/fX3ARVexB/PAp/3su6/Ta1A7y0n4oEkzfcBrwJHm1yPtvAifniO4pdlfmhyJdrCi7Rsy9b9SNPr0hZepEVJmjvgTWC9l3V/bHp92sKLtKT/SzJvAzcBy7NYpwovMkNJms8Dh4BHgePA18ByL+temsX6Kxc+SfMXKZ4aDJbLwD+7LOW/4OEmvD3pY9wu9437+DSPaWLmtDk6FN/juRGXDviP4nsybBn3Mbdl6VS4DmBbLssLpc91I+4bzB21jPv4Xj/PDbkcXJ8D5oED/WVwfX//33IR2KQo+lIv6/7MDDmz6c/gc84dM7N3a8zTqNDyQniZQ8sL4WWukrfqQbtjFR8/a6HlhfAyh5YXwss8dV4dpReJiAovEpGqhQ/meU9faHkhvMyh5YXwMk+dt9JBOxEJi3bpRSIy0evwzrmHgAeAC2b2vnPuKHArsGlmp5oIWNWQzC9Q/FXQz8zsi3bT7VTO27/vBPCBmW20Gm6EIV/jRYp3Pt0ws/V20+00JO8KcCWAmb3VargRnHOPAMfNbLl/ewU4CJw2szN7nTPpFn7BzDLguv7tQ2b2BnD7hHNmaVtmM/sQOAHc0mqq0bbl7f+nutZqovHKPxdPA3+x8yQrX5TzzlGU50J7kXZnZmvAt1vuutbMXqd4w4o9m7Tw5Sf8IRwA2JbROXcFsAKcbCfOWOWv6T0U39TDLWTZq3Lmq8zsHeDxNsLsQTlvx8xeodhbDcVU3ZvooF1/V2gB+A04D9xM8UX6ycw+niZA04Zkfoni1MZVMzvbZrZhynnN7Fx/d+5vz3fpyz8XCfC7mb3XYrShhuR9mOLU2D98PePOOXcv8BqwQbGxeoxir2R9kl16HaUXiYiO0otERIUXiYgKLxIRFV4kIiq8SERUeJGIqPAiEVHhRSKiwotERIUXiYgKLxKR/wE/VEsFe9eNsAAAAABJRU5ErkJggg=="/></td>&#13;
+    </tr>&#13;
+    <tr id="table_low_0_items" class="collapse"><td colspan="9" class="hiddenRow"><div/></td></tr><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1002020C0&amp;denomIds=10.2.2&amp;selectedTab=summary">Baclofen</a><button type="button" data-toggle="collapse" data-target="#table_low_1_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>27</td>&#13;
+      <td>Skeletal muscle relaxants</td>&#13;
+      <td>76</td>&#13;
+      <td>0.36</td>&#13;
+      <td>0.83</td>&#13;
+      <td>0.18</td>&#13;
+      <td>-2.56</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPwAAABICAYAAADS8JgEAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAG2klEQVR4nO3da4wdZR3H8e/0ghSkUBUlVWQstAkhWDEaqUKtXDQyFEKJCq+QNBJfERMTMsbEkCAwiTGREA0x4RpiuEhKIQNiitRK00ZBRXkhNzNSL9xsaUnbLQX+vPg/mz17etrunrPnPDM7v0/yZM7ZzZ7zy2Z/nWemz8xJzAwRaYc5sQOIyOio8CItosKLtIgKL9IiKrxIi6jwIi2iwou0iAov0iIqvEiLqPAiLaLCx5IkWtMsIzcvdgAROVCalwmwBvgOcBwwBlxTFdkfB3ndRBfPRJIkhlkSO4bUT5qXS4Dbgd3AdcB/gU8BvwDWVUX2w35fW3t4kRpJ8/JM4FfA96siW9fxrX+lefk54NeDvL6O4UVqIs3LNcDdwKVdZQegKrI9wJWDvIem9LFoSi9BOF7/HvBtYHVVZC8P6700pReJKM3LI4CbgFOAlVWR7Rzm+2lKLxJJmpcnAL8D9gEXDLvsoD28yMiFKfzlwPXAtVWR3Tmq91bhRUYozcszgBvx2fVXqiKrRvn+KrzIkIU9+irgamAJ8CPgoarIRn7GXIUXGZI0L5cB38Kn7/8Gfg48XBXZe7EyqfAiMyjNyxT4JnAZkAD3AhdWRfbPmLnGqfAiA0rzcjHwDbzkC/GSX14V2XNRg/WghTexaOFNo6V5eTxwKV7yxcD9wD3AszGOzadKhY9FhW+cNC8XAZfgx+VLgQfwvfnTdS55JxU+FhW+EdK8PAZYje/JlwPr8ZJviXnyrV8qfCwqfG2lebkAyPA9+ZnAI/h0fVNVZO/GzDYoFT4WFb5W0rz8APBVvOSrgA34nnxDVWT7I0abUSp8LCp8dGlezgPOwUv+NeAP+J78sarIxmJmGxYVPhYVPoo0L+cCZ+ElvxB4Ci95WRXZ7pjZRkGFj0WFH5k0L+cAX8RLfhHwd+A+4MGqyHbFzDZqKnwsKvxQhZJ/AS/5xcA/8GPy9VWR7YiZLSYVPhYVfsaleTkfn66vxkv+Er4nX1cV2f9jZqsLFT4WFX5GhMUwX8dLfjZ+TP4wfjXa6zGz1ZEKH4sK35ewF/88fnb9POAk4Dd4yZ+oimxvxHi1p8LHosJPSTgWX44X/BzgDOAvwOP47aGeacqy1jpQ4WNR4XsKN4tYBpyLF3wF8Bxe7seBp2bTQphRU+FjUeGBSQU/C1/hthL/pJXxgm/RNH3mqPCxtLTw4bbMn8UL/iX8eHwbsBnYiK9Xb9X/jY+SCh/LLC982HN/GDgVPwb/TBiL8WPwzcCTwJ+0Bx8dFT6WWVL4cPnoUnxavqzj8SeB7fjx9zPAX8N4WSfZ4lHhY6lx4cPe+ShgEfChMD4OfAI4sWOcAOwFngdeCNvxsa3pl5LORip8LCMsfCjwQrygvcZH8XIvAo4NP7YH2BHGduA/+J1Xt3VsX1Gpm0WFj2XAwocSHwsc3zEOVugFwE7gf8ArPcbreKl3ALuaeCcXmRrdtXYEQjnnAUeOj8q/fnp4vgD4IHBMGAsP8fg4/GRYgpf4DbywbzBR6L8xUeZXw8cMi7Sz8OGa6COA+XjhjsaPWcfHVJ8feZiRABa2+4GxjgHwU/yDBMeAt8LYFbavAi92PB/fvgls11Ra+jHQlD7Ny98C73WMd/E/7LfxP+S3O8a+rsfvAHM7xpwez+czUcx+t/N7RB/PuR8/6bQH2B223Y8P9b29TBR4H5MLve+QU+Man7ST2WugwidJcpWZ/XIG8wxV0/JC8zI3LS80L/MgeQf9fPirBvz5UWtaXmhe5qblheZl7jvvoIUXkQZR4UVaZNDCN+a4J2haXmhe5qblheZl7juvFt6ItIim9CItMq2FN0mSrMTv7/2amd2WJMka4GTgRTNbN4yAg+qR+QrgNOBRM3sibroDdecNX7sFuMPMtkYNdxA9fsdn43eq2Wpmm+KmO1CPvGvxlYyY2c+ihjuIJElWAd81s8vC87XAx4Dfm9nmqb7OdPfwK8yswNdtAyw1s5/gl0PW1aTMZnYncAuwJGqqg5uUN/yjujFqosPr/ru4CF+UVNc1+d155+LleS1epEMzs4345cXjPmJmN+A3Epmy6Ra++4C/CScAJmVMkuRoYC1wV5w4h9X9O/00E3eHqavuzAvN7Gb8wxnrqDvvHDP7AT5bbYq+ujetk3ZhKrQCv7Lqz/gtgk8GXjCzB/sJMGw9Ml+Nr1HfYGZbYmbrpTuvmT0dpnNjNZ/Sd/9dpMBOM7s1YrSeeuT9Mn69w1t1XXGXJMly4MfAVnxndT4+K9k0nSm9ztKLtIjO0ou0iAov0iIqvEiLqPAiLaLCi7SICi/SIiq8SIuo8CItosKLtIgKL9IiKrxIi7wPDCCybCtK14sAAAAASUVORK5CYII="/></td>&#13;
+    </tr>&#13;
+    <tr id="table_low_1_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1002020C0AAAIAI&amp;denomIds=10.2.2&amp;selectedTab=summary" target="_blank">Baclofen 10mg tablets : 27</a></div></td></tr><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0602020D0&amp;denomIds=6.2.2&amp;selectedTab=summary">Carbimazole</a><button type="button" data-toggle="collapse" data-target="#table_low_2_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>11</td>&#13;
+      <td>Antithyroid drugs</td>&#13;
+      <td>16</td>&#13;
+      <td>0.69</td>&#13;
+      <td>0.93</td>&#13;
+      <td>0.11</td>&#13;
+      <td>-2.30</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,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"/></td>&#13;
+    </tr>&#13;
+    <tr id="table_low_2_items" class="collapse"><td colspan="9" class="hiddenRow"><div><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0602020D0AAAAAA&amp;denomIds=6.2.2&amp;selectedTab=summary" target="_blank">Carbimazole 5mg tablets : 11</a></div></td></tr><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=1501043A0&amp;denomIds=15.1.4&amp;selectedTab=summary">Alfentanil hydrochloride</a><button type="button" data-toggle="collapse" data-target="#table_low_3_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>0</td>&#13;
+      <td>Opioid analgesics</td>&#13;
+      <td>1</td>&#13;
+      <td>0.00</td>&#13;
+      <td>0.82</td>&#13;
+      <td>0.37</td>&#13;
+      <td>-2.21</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,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"/></td>&#13;
+    </tr>&#13;
+    <tr id="table_low_3_items" class="collapse"><td colspan="9" class="hiddenRow"><div/></td></tr><tr>&#13;
+      <th><a href="https://openprescribing.net/analyse/#org=practice&amp;orgIds=M88043&amp;numIds=0105020A0&amp;denomIds=1.5.2&amp;selectedTab=summary">Budesonide</a><button type="button" data-toggle="collapse" data-target="#table_low_4_items" class="btn btn-default btn-xs">&#9776;</button></th>&#13;
+      <td>0</td>&#13;
+      <td>Corticosteroids</td>&#13;
+      <td>2</td>&#13;
+      <td>0.00</td>&#13;
+      <td>0.70</td>&#13;
+      <td>0.34</td>&#13;
+      <td>-2.08</td>&#13;
+      <td><img class="zoom" src="data:image/png;base64,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"/></td>&#13;
+    </tr>&#13;
+  <tr id="table_low_4_items" class="collapse"><td colspan="9" class="hiddenRow"><div/></td></tr></tbody></table>&#13;
+&#13;
+    </div><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"/>&#13;
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"/>&#13;
+</body>&#13;
+&#13;
 </html>

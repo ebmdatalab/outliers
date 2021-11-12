@@ -2,6 +2,7 @@
 Partly adapted from https://github.com/ebmdatalab/html-template-demo
 """
 
+from datetime import date
 import markupsafe
 import jinja2
 from lxml import html
@@ -16,6 +17,8 @@ definitions = {
     "Z_Score": "Number of standard deviations prescribed"
     "item count is away from the mean",
 }
+
+REPORT_DATE_FORMAT = "%-d %B %Y"
 
 
 def add_definitions(df):
@@ -58,6 +61,7 @@ def add_item_rows(table, items_df):
     table_root : str
         utf-8 encoded string of html table root element
     """
+
     def make_hidden_row(df, id, analyse_url):
         """
         Builds tr of precription items hidden by bootstrap collapse class
@@ -322,6 +326,8 @@ def write_to_template(
     tables_low,
     output_path,
     template_path,
+    from_date: date,
+    to_date: date,
 ):
     """
     Populate jinja template with outlier report data
@@ -354,6 +360,8 @@ def write_to_template(
         "entity_name": selective_title(entity_name),
         "table_high": df_to_html(tables_high, "table_high"),
         "table_low": df_to_html(tables_low, "table_low"),
+        "from_date": from_date.strftime(REPORT_DATE_FORMAT),
+        "to_date": to_date.strftime(REPORT_DATE_FORMAT),
     }
 
     with open(output_path, "w") as f:
