@@ -771,7 +771,9 @@ class Runner:
         )
         self.output_dir = output_dir
         self.template_path = template_path
-        self.toc = TableOfContents(url_prefix=url_prefix)
+        self.toc = TableOfContents(
+            url_prefix=url_prefix, from_date=from_date, to_date=to_date
+        )
         self.entity_limit = entity_limit
         self.n_jobs = n_jobs
 
