@@ -386,6 +386,15 @@ BEGIN
         WHERE
             MONTH BETWEEN TIMESTAMP(p__from_date)
             AND TIMESTAMP(p__to_date)
+            AND practices.setting = 4
+                AND practices.status_code = 'A'
+                AND practices.pcn_id IS NOT NULL 
+                AND EXISTS ( 
+                    SELECT 1 
+                    FROM `ebmdatalab.hscic.ccgs` AS ccgs 
+                    WHERE ccgs.stp_id IS NOT NULL 
+                    AND practices.ccg_id = ccgs.code
+                )
         GROUP BY
             prescribing.practice,
             prescribing.bnf_code,
@@ -614,6 +623,15 @@ BEGIN
         WHERE
             MONTH BETWEEN TIMESTAMP(p__from_date)
             AND TIMESTAMP(p__to_date)
+            AND practices.setting = 4
+                AND practices.status_code = 'A'
+                AND practices.pcn_id IS NOT NULL 
+                AND EXISTS ( 
+                    SELECT 1 
+                    FROM `ebmdatalab.hscic.ccgs` AS ccgs 
+                    WHERE ccgs.stp_id IS NOT NULL 
+                    AND practices.ccg_id = ccgs.code
+                )
         GROUP BY
             practices.pcn_id,
             prescribing.bnf_code,
@@ -845,6 +863,15 @@ BEGIN
         WHERE
             MONTH BETWEEN TIMESTAMP(p__from_date)
             AND TIMESTAMP(p__to_date)
+            AND practices.setting = 4
+                AND practices.status_code = 'A'
+                AND practices.pcn_id IS NOT NULL 
+                AND EXISTS ( 
+                    SELECT 1 
+                    FROM `ebmdatalab.hscic.ccgs` AS ccgs 
+                    WHERE ccgs.stp_id IS NOT NULL 
+                    AND practices.ccg_id = ccgs.code
+                )
         GROUP BY
             practices.ccg_id,
             prescribing.bnf_code,
@@ -1079,6 +1106,15 @@ BEGIN
         WHERE
             MONTH BETWEEN TIMESTAMP(p__from_date)
             AND TIMESTAMP(p__to_date)
+            AND practices.setting = 4
+                AND practices.status_code = 'A'
+                AND practices.pcn_id IS NOT NULL 
+                AND EXISTS ( 
+                    SELECT 1 
+                    FROM `ebmdatalab.hscic.ccgs` AS ccgs 
+                    WHERE ccgs.stp_id IS NOT NULL 
+                    AND practices.ccg_id = ccgs.code
+                )
         GROUP BY
             ccgs.stp_id,
             prescribing.bnf_code,
