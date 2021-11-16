@@ -14,7 +14,7 @@ definitions = {
     "Ratio": "Ratio of chemical items to subparagraph items",
     "Mean": "Population mean number of chemical items prescribed",
     "std": "Standard Deviation",
-    "Z_Score": "Number of standard deviations prescribed"
+    "Z_Score": "Number of standard deviations prescribed "
     "item count is away from the mean",
 }
 
