@@ -781,10 +781,12 @@ class Runner:
         self._truncate_entities()
         self._truncate_results()
         self.toc.hierarchy = self.build.entity_hierarchy
+        self.run_results = {e:[] for e in self.build.entities}
 
         # loop through entity types, generated a report for each entity item
         for e in self.build.entities:
             for f in self._run_entity_report(e):
+                self.run_results[e].append(f)
                 self.toc.add_item(**f)
 
         # write out toc
@@ -987,6 +989,8 @@ class Runner:
             tables_low=(report.table_low, report.items_low),
             output_path=output_file,
             template_path=self.template_path,
+            from_date=self.build.from_date,
+            to_date= self.build.to_date
         )
         return {
             "code": code,
