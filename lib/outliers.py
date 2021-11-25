@@ -428,7 +428,7 @@ class Report:
 
     @staticmethod
     def _format_entity(entity: str) -> str:
-        return 'practice' if entity == "ccg" else entity
+        return "practice" if entity == "ccg" else entity
 
     @staticmethod
     def _format_denom(denominator_column: str, denominator_code: str) -> str:
@@ -781,7 +781,7 @@ class Runner:
         self._truncate_entities()
         self._truncate_results()
         self.toc.hierarchy = self.build.entity_hierarchy
-        self.run_results = {e:[] for e in self.build.entities}
+        self.run_results = {e: [] for e in self.build.entities}
 
         # loop through entity types, generated a report for each entity item
         for e in self.build.entities:
@@ -990,7 +990,7 @@ class Runner:
             output_path=output_file,
             template_path=self.template_path,
             from_date=self.build.from_date,
-            to_date= self.build.to_date
+            to_date=self.build.to_date,
         )
         return {
             "code": code,
