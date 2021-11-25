@@ -428,7 +428,7 @@ class Report:
 
     @staticmethod
     def _format_entity(entity: str) -> str:
-        return entity.upper() if entity == "ccg" else entity
+        return 'practice' if entity == "ccg" else entity
 
     @staticmethod
     def _format_denom(denominator_column: str, denominator_code: str) -> str:
