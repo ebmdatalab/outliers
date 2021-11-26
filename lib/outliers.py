@@ -991,6 +991,8 @@ class Runner:
             template_path=self.template_path,
             from_date=self.build.from_date,
             to_date=self.build.to_date,
+            entity_type=entity,
+            entity_code=code,
         )
         return {
             "code": code,
