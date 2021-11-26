@@ -18,7 +18,7 @@ definitions = {
     "item count is away from the mean",
 }
 
-REPORT_DATE_FORMAT = "%-d %B %Y"
+REPORT_DATE_FORMAT = "%B %Y"
 
 
 def add_definitions(df):
