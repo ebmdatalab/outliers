@@ -12,6 +12,7 @@ from lib.table_of_contents import TableOfContents
 from lib.make_html import write_to_template
 import traceback
 from pqdm.processes import pqdm
+import re
 
 
 class DatasetBuild:
@@ -616,10 +617,11 @@ class Plots:
         html_plot : html image
         """
         img = BytesIO()
-        plt.savefig(img, transparent=True)
+        plt.savefig(img, transparent=True, dpi=150)
         b64_plot = b64encode(img.getvalue()).decode()
+        plot_id = re.sub('[^(a-z)(A-Z)(0-9)._-]', '', b64_plot[256:288])
         html_plot = (
-            f'<img class="zoom" src="data:image/png;base64,{b64_plot}"/>'
+            f'<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#plot_{plot_id}"><img width="250" class="h-auto" src="data:image/png;base64,{b64_plot}"/></button><div class="modal fade" id="plot_{plot_id}" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><img class="w-100 h-auto" src="data:image/png;base64,{b64_plot}"/></div></div></div></div>'
         )
 
         return html_plot

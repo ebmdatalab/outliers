@@ -91,7 +91,8 @@ class TableOfContents:
             "name": selective_title(entity_item["name"]),
             "href": self.url_prefix
             + self._full_path(
-                output_path,
+                # output_path,
+                "/",
                 self._relative_path(output_path, entity_item["file_path"]),
             ),
         }
@@ -134,7 +135,7 @@ class TableOfContents:
                 f.write(self._print_markdown(output_path))
 
     def _print_markdown_link_html(self):
-        html_toc_url = f"{self.url_prefix}{'data/index.html'}"
+        html_toc_url = f"{self.url_prefix}{'index.html'}"
         return f"# [{self.heading}]({html_toc_url})"
 
     def _print_markdown(self, output_path):
