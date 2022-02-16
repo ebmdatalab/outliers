@@ -43,13 +43,13 @@ def add_definitions(df):
 
 def add_item_rows(table, items_df):
     """
-    Adds hidden rows containing item prescription counts
+    Adds modal containers containing item prescription counts
 
     Iterates rows of html table body
     extracts BNF chemical id from each row
     filters items_df by chemical id
-    creates hidden row from filtered dataframe
-    rebuilds table body with visible (original) and hidden rows
+    creates hidden modal content from filtered dataframe
+    rebuilds table body with visible (original) and hidden modals
 
     Parameters
     ----------
@@ -62,11 +62,11 @@ def add_item_rows(table, items_df):
         utf-8 encoded string of html table root element
     """
 
-    def make_hidden_row(df, id, analyse_url):
+    def make_hidden_row(df, id, analyse_url, row_name):
         """
-        Builds tr of precription items hidden by bootstrap collapse class
+        Builds div of precription items hidden by bootstrap modal collaps class
 
-        Creates tr html element containing full with td and div within
+        Creates div html element containing list within
         For each row of input df, generate BNF-item-specific analyse URL
         from input analyse_url show BNF item name and prescription count
         and add to div
@@ -79,39 +79,70 @@ def add_item_rows(table, items_df):
             Unique css id for tr to be built
         analyse_url : str
             URL to openprescribing anaylse page for current entity and chemical
+        row_name : str
+            Returns the row name for the modal header
         Returns
         -------
-        tr : lxml Element
-            html tr element
+        modal : lxml Element
+            html div element
         """
-        tr = html.Element("tr")
-        tr.set("id", f"{id}_items")
-        tr.set("class", "collapse")
-        td = html.Element("td")
-        td.set("colspan", "9")
-        td.set("class", "hiddenRow")
-        div = html.Element("div")
+        modal = html.Element("div")
+        modal.set("id", f"{id}_items")
+        modal.set("class", "modal fade")
+        modal.set("aria-labelledby", f"{id}_modal_label")
+        modal.set("aria-hidden", "true")
+        modal.set("tabindex", "-1")
 
-        items = []
+        modal_inner = html.Element("div")
+        modal_inner.set("class", "modal-dialog modal-dialog-centered")
+
+        modal_content = html.Element("div")
+        modal_content.set("class", "modal-content")
+
+        modal_header = html.Element("div")
+        modal_header.set("class", "modal-header")
+
+        modal_title = html.Element("h5")
+        modal_title.set("class", "modal-title")
+        modal_title.set("id", f"{id}_modal_label")
+        modal_title.text = row_name
+
+        close_button = html.Element("button")
+        close_button.set("type", "button")
+        close_button.set("class", "btn-close")
+        close_button.set("data-bs-dismiss", "modal")
+        close_button.set("aria-label", "Close")
+
+        modal_body = html.Element("div")
+        modal_body.set("class", "modal-body")
+
+        modal_list = html.Element("ul")
+
         for i, r in df.reset_index().iterrows():
             url = analyse_url.replace(r["chemical"], r["bnf_code"])
             name = r["bnf_name"]
             count = r["numerator"]
+            list_item = html.Element("li")
             anchor = html.Element("a")
             anchor.set("href", url)
             anchor.set("target", "_blank")
             anchor.text = f"{name} : {count}"
-            if i > 0:
-                div.append(html.Element("br"))
-            div.append(anchor)
-        items = "</br>".join(items)
-        td.append(div)
-        tr.append(td)
-        return tr
+            list_item.append(anchor)
+            modal_list.append(list_item)
+
+        modal_header.append(modal_title)
+        modal_header.append(close_button)
+        modal_body.append(modal_list)
+        modal_content.append(modal_header)
+        modal_content.append(modal_body)
+        modal_inner.append(modal_content)
+        modal.append(modal_inner)
+
+        return modal
 
     def make_open_button(id):
         """
-        Create open/expand prescription item detail button
+        Create modal button to open prescription items
 
         Parameters
         ----------
@@ -123,10 +154,10 @@ def add_item_rows(table, items_df):
             html button element
         """
         bt_open = html.Element("button")
+        bt_open.set("class", "btn btn-outline-primary btn-sm btn-xs ms-2 px-2")
+        bt_open.set("data-bs-target", f"#{id}_items")
+        bt_open.set("data-bs-toggle", "modal")
         bt_open.set("type", "button")
-        bt_open.set("data-toggle", "collapse")
-        bt_open.set("data-target", f"#{id}_items")
-        bt_open.set("class", "btn btn-default btn-xs")
         bt_open.text = "☰"
         return bt_open
 
@@ -140,6 +171,7 @@ def add_item_rows(table, items_df):
         id = f"{table_id}_{i}"
 
         # hack:extract the id of the BNF chemical from the analyse URL
+        row_name = tr.xpath("th")[0].text_content()
         analyse_url = tr.xpath("th/a")[0].get("href")
         chemical_id = analyse_url.split("/")[-1].split("&")[2].split("=")[1]
 
@@ -148,7 +180,7 @@ def add_item_rows(table, items_df):
 
         hidden_rows.append(
             make_hidden_row(
-                items_df[items_df.chemical == chemical_id], id, analyse_url
+                items_df[items_df.chemical == chemical_id], id, analyse_url, row_name
             )
         )
     tbody = table_root.xpath("tbody")[0]
@@ -223,7 +255,7 @@ def make_abbr(text, title):
     str
 
     """
-    return f'<abbr title="{title}">{text}</abbr>'
+    return f'<abbr data-bs-toggle="tooltip" data-bs-placement="top" title="{title}">{text}</abbr>'
 
 
 # hack: ideally header should be fixed in df, not html
@@ -285,7 +317,7 @@ def df_to_html(dfs, id):
     df = add_definitions(df)
     table = df.to_html(
         escape=True,
-        classes=["table", "thead-light", "table-bordered", "table-sm"],
+        classes=["table", "table", "table-sm", "table-bordered"],
         table_id=id,
     )
     table = markupsafe.Markup(table).unescape()

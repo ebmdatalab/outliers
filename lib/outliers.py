@@ -756,7 +756,7 @@ class Runner:
         entity_limit: int = None,
         output_dir="../data",
         template_path="../data/template.html",
-        url_prefix="https://raw.githack.com/ebmdatalab/outliers/master/",
+        url_prefix="",
         n_jobs=8,
     ) -> None:
         self.build = DatasetBuild(
