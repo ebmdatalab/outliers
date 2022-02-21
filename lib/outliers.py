@@ -9,7 +9,7 @@ import pandas as pd
 from datetime import date
 import seaborn as sns
 from lib.table_of_contents import TableOfContents
-from lib.make_html import write_to_template
+from lib.make_html import MakeHtml
 import traceback
 from pqdm.processes import pqdm
 import re
@@ -985,7 +985,7 @@ class Runner:
             "html",
             f"static_{entity}_{code}.html",
         )
-        write_to_template(
+        MakeHtml.write_to_template(
             entity_name=report.entity_name,
             tables_high=(report.table_high, report.items_high),
             tables_low=(report.table_low, report.items_low),

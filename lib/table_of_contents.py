@@ -1,6 +1,6 @@
 import os.path
 import jinja2
-from lib.make_html import selective_title, REPORT_DATE_FORMAT
+from lib.make_html import MakeHtml
 from datetime import date
 
 
@@ -55,8 +55,8 @@ class TableOfContents:
 
     def _get_context(self, output_path):
         ctx = {"header": self.heading}
-        ctx["from_date"] = self.from_date.strftime(REPORT_DATE_FORMAT)
-        ctx["to_date"] = self.from_date.strftime(REPORT_DATE_FORMAT)
+        ctx["from_date"] = self.from_date.strftime(MakeHtml.REPORT_DATE_FORMAT)
+        ctx["to_date"] = self.from_date.strftime(MakeHtml.REPORT_DATE_FORMAT)
         ctx["stps"] = []
         for stp_code, ccgs in self.hierarchy.items():
             stp_item = self._get_item_context(stp_code, "stp", output_path)
@@ -88,7 +88,7 @@ class TableOfContents:
         entity_item = self.items[entity_type][entity_code]
         return {
             "code": entity_code,
-            "name": selective_title(entity_item["name"]),
+            "name": MakeHtml.selective_title(entity_item["name"]),
             "href": self.url_prefix
             + self._full_path(
                 # output_path,
