@@ -3,8 +3,9 @@ Partly adapted from https://github.com/ebmdatalab/html-template-demo
 """
 
 from datetime import date
-import markupsafe
+
 import jinja2
+import markupsafe
 from lxml import html
 
 

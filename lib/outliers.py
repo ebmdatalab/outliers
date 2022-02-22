@@ -1,18 +1,20 @@
+import re
+import traceback
 from base64 import b64encode
+from datetime import date
 from io import BytesIO
 from os import path
-import numpy as np
-from ebmdatalab import bq
 from typing import Dict, List
-import pandas as pd
-from datetime import date
-import seaborn as sns
-from lib.table_of_contents import TableOfContents
-from lib.make_html import MakeHtml
-import traceback
-from pqdm.processes import pqdm
-import re
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from ebmdatalab import bq
+from pqdm.processes import pqdm
+
+from lib.make_html import MakeHtml
+from lib.table_of_contents import TableOfContents
 
 
 class DatasetBuild:

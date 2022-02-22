@@ -1,7 +1,9 @@
 import os.path
-import jinja2
-from lib.make_html import MakeHtml
 from datetime import date
+
+import jinja2
+
+from lib.make_html import MakeHtml
 
 
 class TableOfContents:
