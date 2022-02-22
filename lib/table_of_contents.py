@@ -65,9 +65,7 @@ class TableOfContents:
                 ccg_item = self._get_item_context(ccg_code, "ccg", output_path)
                 ccg_item["pcns"] = []
                 for pcn_code, practices in pcns.items():
-                    pcn_item = self._get_item_context(
-                        pcn_code, "pcn", output_path
-                    )
+                    pcn_item = self._get_item_context(pcn_code, "pcn", output_path)
                     pcn_item["practices"] = []
                     for practice_code in practices:
                         pcn_item["practices"].append(
@@ -166,8 +164,7 @@ class TableOfContents:
                 relative_path = self._relative_path(output_path, file)
                 fullpath = self._full_path(relative_path)
                 toc = toc + (
-                    "\n" + f"  * [{relative_path}]"
-                    f"({self.url_prefix}{fullpath})"
+                    "\n" + f"  * [{relative_path}]" f"({self.url_prefix}{fullpath})"
                 )
         return toc
 

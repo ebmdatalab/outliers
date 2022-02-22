@@ -139,9 +139,7 @@ class DatasetBuild:
         """
         csv_path = "../data/bq_cache/entity_hierarchy.zip"
         res: pd.DataFrame = bq.cached_read(
-            sql,
-            csv_path,
-            use_cache=(not self.force_rebuild),
+            sql, csv_path, use_cache=(not self.force_rebuild),
         )
         res = res.set_index(["stp_code", "ccg_code", "pcn_code"])
 
@@ -161,9 +159,7 @@ class DatasetBuild:
                 .unique()
             ):
                 pcns = {}
-                for pcn_code in res.loc[
-                    stp_code, ccg_code, slice(None)
-                ].index.unique():
+                for pcn_code in res.loc[stp_code, ccg_code, slice(None)].index.unique():
                     pcns[pcn_code] = (
                         res.loc[stp_code, ccg_code, slice(None)]
                         .query(f"pcn_code=='{pcn_code}'")
@@ -178,9 +174,7 @@ class DatasetBuild:
         bnf code:name mapping tables for numerator and denominator
         """
         self.names = {e: self._entity_names_query(e) for e in self.entities}
-        self.names[self.numerator_column] = self._get_bnf_names(
-            self.numerator_column
-        )
+        self.names[self.numerator_column] = self._get_bnf_names(self.numerator_column)
         self.names[self.denominator_column] = self._get_bnf_names(
             self.denominator_column
         )
@@ -210,16 +204,11 @@ class DatasetBuild:
         """
 
         csv_path = f"../data/bq_cache/{entity}_results.zip"
-        res = bq.cached_read(
-            sql,
-            csv_path,
-            use_cache=(not self.force_rebuild),
-        )
+        res = bq.cached_read(sql, csv_path, use_cache=(not self.force_rebuild),)
         # reload csv with correct datatypes
         # see https://github.com/ebmdatalab/datalab-pandas/issues/26
         res = pd.read_csv(
-            csv_path,
-            dtype={self.numerator_column: str, self.denominator_column: str},
+            csv_path, dtype={self.numerator_column: str, self.denominator_column: str},
         )
         res = res.set_index([entity, self.numerator_column])
         self.results[entity] = res
@@ -258,20 +247,14 @@ class DatasetBuild:
         """
         try:
             csv_path = f"../data/bq_cache/{entity}_measure_arrays.zip"
-            res = bq.cached_read(
-                sql,
-                csv_path,
-                use_cache=(not self.force_rebuild),
-            )
+            res = bq.cached_read(sql, csv_path, use_cache=(not self.force_rebuild),)
 
             res = pd.read_csv(csv_path, dtype={"chemical": str, "array": str})
         except Exception:
             print(f"Error getting BQ data for {entity}")
             traceback.print_stack()
         try:
-            res.array = res.array.apply(
-                lambda x: np.fromstring(x[1:-1], sep=",")
-            )
+            res.array = res.array.apply(lambda x: np.fromstring(x[1:-1], sep=","))
         except Exception:
             print(f"Error doing array conversion for {entity}")
             traceback.print_stack()
@@ -403,12 +386,12 @@ class Report:
         entity_type: str,
         entity_code: str,
         build: DatasetBuild,
-        low_number_threshold: int
+        low_number_threshold: int,
     ) -> None:
         self.entity_type = entity_type
         self.entity_code = entity_code
         self.build = build
-        self.low_number_threshold = low_number_threshold 
+        self.low_number_threshold = low_number_threshold
 
     def _ranked_dataset(self, h_l: str) -> pd.DataFrame:
         assert h_l in ["h", "l"], "high/low indicator must be 'h' or 'l'"
@@ -455,9 +438,7 @@ class Report:
         else:
             return denominator_code
 
-    def _add_openprescribing_analyse_url(
-        self, df: pd.DataFrame
-    ) -> pd.DataFrame:
+    def _add_openprescribing_analyse_url(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Generate URL to OpenPrescribing analyse page for
         numerator and denominator highlighting entity
@@ -516,12 +497,8 @@ class Report:
         """
         df = df.round(decimals=2)
         for x in [self.build.numerator_column, self.build.denominator_column]:
-            df = df.merge(
-                self.build.names[x], how="left", left_on=x, right_index=True
-            )
-        df = df.drop(
-            columns=[self.build.denominator_column, "rank_high", "rank_low"]
-        )
+            df = df.merge(self.build.names[x], how="left", left_on=x, right_index=True)
+        df = df.drop(columns=[self.build.denominator_column, "rank_high", "rank_low"])
         df = df.rename(
             columns={
                 f"{self.build.numerator_column}_name": self._COL_NAMES[
@@ -565,9 +542,9 @@ class Report:
         df = self._flag_low_numbers(df)
 
         return df
-    
-    def _flag_low_numbers(self,df):
-        df[MakeHtml.LOW_NUMBER_CLASS] = df["Chemical Items"]<self.low_number_threshold
+
+    def _flag_low_numbers(self, df):
+        df[MakeHtml.LOW_NUMBER_CLASS] = df["Chemical Items"] < self.low_number_threshold
         return df
 
     def format(self) -> None:
@@ -627,10 +604,8 @@ class Plots:
         img = BytesIO()
         plt.savefig(img, transparent=True, dpi=150)
         b64_plot = b64encode(img.getvalue()).decode()
-        plot_id = re.sub('[^(a-z)(A-Z)(0-9)._-]', '', b64_plot[256:288])
-        html_plot = (
-            f'<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#plot_{plot_id}"><img width="250" class="h-auto" src="data:image/png;base64,{b64_plot}"/></button><div class="modal fade" id="plot_{plot_id}" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><img class="w-100 h-auto" src="data:image/png;base64,{b64_plot}"/></div></div></div></div>'
-        )
+        plot_id = re.sub("[^(a-z)(A-Z)(0-9)._-]", "", b64_plot[256:288])
+        html_plot = f'<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#plot_{plot_id}"><img width="250" class="h-auto" src="data:image/png;base64,{b64_plot}"/></button><div class="modal fade" id="plot_{plot_id}" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><img class="w-100 h-auto" src="data:image/png;base64,{b64_plot}"/></div></div></div></div>'
 
         return html_plot
 
@@ -663,9 +638,7 @@ class Plots:
             legend=False,
         )
         ax.axvline(org_value, color="r", linewidth=1)
-        lower_limit = max(
-            0, min(np.quantile(distribution, 0.001), org_value * 0.9)
-        )
+        lower_limit = max(0, min(np.quantile(distribution, 0.001), org_value * 0.9))
         upper_limit = max(np.quantile(distribution, 0.999), org_value * 1.1)
         ax.set_xlim(lower_limit, upper_limit)
         ax = Plots._remove_clutter(ax)
@@ -770,7 +743,7 @@ class Runner:
         template_path="../data/template.html",
         url_prefix="",
         n_jobs=8,
-        low_number_threshold=5
+        low_number_threshold=5,
     ) -> None:
         self.build = DatasetBuild(
             from_date=from_date,
@@ -816,18 +789,13 @@ class Runner:
             return len(self.build.entity_hierarchy.keys())
 
         def ccg_count():
-            return sum(
-                [len(v.keys()) for v in self.build.entity_hierarchy.values()]
-            )
+            return sum([len(v.keys()) for v in self.build.entity_hierarchy.values()])
 
         def pcn_count():
             return sum(
                 [
                     len(x.keys())
-                    for y in [
-                        v.values()
-                        for v in self.build.entity_hierarchy.values()
-                    ]
+                    for y in [v.values() for v in self.build.entity_hierarchy.values()]
                     for x in y
                 ]
             )
@@ -839,8 +807,7 @@ class Runner:
                     for q in [
                         x.values()
                         for y in [
-                            v.values()
-                            for v in self.build.entity_hierarchy.values()
+                            v.values() for v in self.build.entity_hierarchy.values()
                         ]
                         for x in y
                     ]
@@ -852,9 +819,7 @@ class Runner:
             for stp, ccgs in self.build.entity_hierarchy.items():
                 for ccg, pcns in ccgs.items():
                     for pcn, practices in pcns.items():
-                        self.build.entity_hierarchy[stp][ccg][pcn] = practices[
-                            0:1
-                        ]
+                        self.build.entity_hierarchy[stp][ccg][pcn] = practices[0:1]
 
         def one_pcn_per_ccg():
             for stp, ccgs in self.build.entity_hierarchy.items():
@@ -936,8 +901,7 @@ class Runner:
             return
         stps = list(self.build.entity_hierarchy.keys())
         self.build.results["stp"] = self.build.results["stp"].loc[
-            stps,
-            slice(None),
+            stps, slice(None),
         ]
 
         ccgs = [
@@ -945,24 +909,18 @@ class Runner:
             for y in [v.keys() for v in self.build.entity_hierarchy.values()]
             for x in y
         ]
-        self.build.results["ccg"] = self.build.results["ccg"].loc[
-            ccgs, slice(None)
-        ]
+        self.build.results["ccg"] = self.build.results["ccg"].loc[ccgs, slice(None)]
 
         pcns = [
             p
             for q in [
                 x.keys()
-                for y in [
-                    v.values() for v in self.build.entity_hierarchy.values()
-                ]
+                for y in [v.values() for v in self.build.entity_hierarchy.values()]
                 for x in y
             ]
             for p in q
         ]
-        self.build.results["pcn"] = self.build.results["pcn"].loc[
-            pcns, slice(None)
-        ]
+        self.build.results["pcn"] = self.build.results["pcn"].loc[pcns, slice(None)]
 
         practices = [
             a
@@ -970,10 +928,7 @@ class Runner:
                 p
                 for q in [
                     x.values()
-                    for y in [
-                        v.values()
-                        for v in self.build.entity_hierarchy.values()
-                    ]
+                    for y in [v.values() for v in self.build.entity_hierarchy.values()]
                     for x in y
                 ]
                 for p in q
@@ -990,15 +945,13 @@ class Runner:
             entity_type=entity,
             entity_code=code,
             build=self.build,
-            low_number_threshold=self.low_number_threshold
+            low_number_threshold=self.low_number_threshold,
         )
         report.format()
         output_file = path.join(
-            self.output_dir,
-            "html",
-            f"static_{entity}_{code}.html",
+            self.output_dir, "html", f"static_{entity}_{code}.html",
         )
-        
+
         MakeHtml.write_to_template(
             entity_name=report.entity_name,
             tables_high=(report.table_high, report.items_high),
@@ -1021,11 +974,6 @@ class Runner:
         codes = self.build.results[entity].index.get_level_values(0).unique()
         kwargs = [{"entity": entity, "code": c} for c in codes]
         files = pqdm(
-            kwargs,
-            self._run_item_report,
-            n_jobs=self.n_jobs,
-            argument_type="kwargs",
+            kwargs, self._run_item_report, n_jobs=self.n_jobs, argument_type="kwargs",
         )
         return files
-
-    

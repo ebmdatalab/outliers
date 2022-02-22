@@ -7,11 +7,11 @@ import markupsafe
 import jinja2
 from lxml import html
 
+
 class MakeHtml:
     DEFINITIONS = {
         "Chemical Items": "number of prescribed items containing this chemical",
-        "Subparagraph Items": "count of all prescribed items "
-        "from this subparagraph",
+        "Subparagraph Items": "count of all prescribed items " "from this subparagraph",
         "Ratio": "Ratio of chemical items to subparagraph items",
         "Mean": "Population mean number of chemical items prescribed",
         "std": "Standard Deviation",
@@ -181,9 +181,7 @@ class MakeHtml:
 
         ix_col = df.index.name
         df = df.reset_index()
-        df[ix_col] = df.apply(
-            lambda x: f'<a href="{x["URL"]}">{x[ix_col]}</a>', axis=1
-        )
+        df[ix_col] = df.apply(lambda x: f'<a href="{x["URL"]}">{x[ix_col]}</a>', axis=1)
         df = df.drop("URL", axis=1)
 
         df = df.set_index(ix_col)
@@ -227,7 +225,6 @@ class MakeHtml:
 
         """
         return f'<abbr data-bs-toggle="tooltip" data-bs-placement="top" title="{title}">{text}</abbr>'
-
 
     @staticmethod
     # hack: ideally header should be fixed in df, not html
@@ -292,17 +289,17 @@ class MakeHtml:
             escape=True,
             classes=["table", "table", "table-sm", "table-bordered"],
             table_id=id,
-            columns=columns
+            columns=columns,
         )
         table = markupsafe.Markup(table).unescape()
-        table = MakeHtml.add_row_classes(df,table)
+        table = MakeHtml.add_row_classes(df, table)
         table = MakeHtml.add_item_rows(table, items_df)
         table = MakeHtml.merge_table_header(table)
 
         return table
 
     @staticmethod
-    def add_row_classes(df,table):
+    def add_row_classes(df, table):
         """
         Adds "low_number" class to all trs with corresponding flagged rows in df
         Adds "row_{n}" class pertaining to row number to all trs
