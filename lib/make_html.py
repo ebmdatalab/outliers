@@ -295,16 +295,17 @@ class MakeHtml:
             columns=columns
         )
         table = markupsafe.Markup(table).unescape()
-        table = MakeHtml.add_low_number_row_class(df,table)
+        table = MakeHtml.add_row_classes(df,table)
         table = MakeHtml.add_item_rows(table, items_df)
         table = MakeHtml.merge_table_header(table)
 
         return table
 
     @staticmethod
-    def add_low_number_row_class(df,table):
+    def add_row_classes(df,table):
         """
         Adds "low_number" class to all trs with corresponding flagged rows in df
+        Adds "row_{n}" class pertaining to row number to all trs
 
         Parameters
         ----------
@@ -323,6 +324,7 @@ class MakeHtml:
         for i, row in enumerate(rows):
             if df.iloc[i][MakeHtml.selective_title(MakeHtml.LOW_NUMBER_CLASS)]:
                 row.classes.add(MakeHtml.LOW_NUMBER_CLASS)
+            row.classes.add(f"row_{i+1}")
         return html.tostring(html_table).decode("utf-8")
 
     @staticmethod
