@@ -1,7 +1,6 @@
 from base64 import b64encode
 from io import BytesIO
 from os import path
-from matplotlib import pyplot as plt
 import numpy as np
 from ebmdatalab import bq
 from typing import Dict, List
@@ -13,6 +12,7 @@ from lib.make_html import MakeHtml
 import traceback
 from pqdm.processes import pqdm
 import re
+import matplotlib.pyplot as plt
 
 
 class DatasetBuild:
@@ -403,10 +403,12 @@ class Report:
         entity_type: str,
         entity_code: str,
         build: DatasetBuild,
+        low_number_threshold: int
     ) -> None:
         self.entity_type = entity_type
         self.entity_code = entity_code
         self.build = build
+        self.low_number_threshold = low_number_threshold 
 
     def _ranked_dataset(self, h_l: str) -> pd.DataFrame:
         assert h_l in ["h", "l"], "high/low indicator must be 'h' or 'l'"
@@ -560,6 +562,12 @@ class Report:
         df = Plots.add_plots(df, "ratio")
         df = self._add_openprescribing_analyse_url(df)
         df = self._tidy_table(df)
+        df = self._flag_low_numbers(df)
+
+        return df
+    
+    def _flag_low_numbers(self,df):
+        df[MakeHtml.LOW_NUMBER_CLASS] = df["Chemical Items"]<self.low_number_threshold
         return df
 
     def format(self) -> None:
@@ -746,6 +754,8 @@ class Runner:
     url_prefix : str
         prefix for urls for links to report files within
         generated table of contents
+    low_number_threshold : int
+        threshold for selectable filtering of low numbered chemical counts
     """
 
     def __init__(
@@ -760,6 +770,7 @@ class Runner:
         template_path="../data/template.html",
         url_prefix="",
         n_jobs=8,
+        low_number_threshold=5
     ) -> None:
         self.build = DatasetBuild(
             from_date=from_date,
@@ -775,6 +786,7 @@ class Runner:
         )
         self.entity_limit = entity_limit
         self.n_jobs = n_jobs
+        self.low_number_threshold = low_number_threshold
 
     def run(self):
         # run main build process on bigquery and fetch results
@@ -978,6 +990,7 @@ class Runner:
             entity_type=entity,
             entity_code=code,
             build=self.build,
+            low_number_threshold=self.low_number_threshold
         )
         report.format()
         output_file = path.join(
@@ -985,6 +998,7 @@ class Runner:
             "html",
             f"static_{entity}_{code}.html",
         )
+        
         MakeHtml.write_to_template(
             entity_name=report.entity_name,
             tables_high=(report.table_high, report.items_high),
@@ -1013,3 +1027,5 @@ class Runner:
             argument_type="kwargs",
         )
         return files
+
+    

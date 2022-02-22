@@ -21,6 +21,7 @@ class MakeHtml:
 
     REPORT_DATE_FORMAT = "%B %Y"
     ALLCAPS = ["NHS", "PCN", "CCG", "BNF", "std", "STP", "(STP)", "NHS"]
+    LOW_NUMBER_CLASS = "low_number"
 
     @staticmethod
     def add_definitions(df):
@@ -286,16 +287,43 @@ class MakeHtml:
         df = MakeHtml.format_url(df)
         df = df.rename(columns=lambda x: MakeHtml.selective_title(x))
         df = MakeHtml.add_definitions(df)
+        columns = [c for c in df.columns if c.lower() != MakeHtml.LOW_NUMBER_CLASS]
         table = df.to_html(
             escape=True,
             classes=["table", "table", "table-sm", "table-bordered"],
             table_id=id,
+            columns=columns
         )
         table = markupsafe.Markup(table).unescape()
+        table = MakeHtml.add_low_number_row_class(df,table)
         table = MakeHtml.add_item_rows(table, items_df)
         table = MakeHtml.merge_table_header(table)
 
         return table
+
+    @staticmethod
+    def add_low_number_row_class(df,table):
+        """
+        Adds "low_number" class to all trs with corresponding flagged rows in df
+
+        Parameters
+        ----------
+        df: DataFrame
+            df from which html table was created
+        table: str
+            html rendering of df as <table>
+
+        Returns
+        -------
+        str
+            modified html rendering of df as <table>
+        """
+        html_table = html.fragment_fromstring(table)
+        rows = html_table.xpath("tbody/tr")
+        for i, row in enumerate(rows):
+            if df.iloc[i][MakeHtml.selective_title(MakeHtml.LOW_NUMBER_CLASS)]:
+                row.classes.add(MakeHtml.LOW_NUMBER_CLASS)
+        return html.tostring(html_table).decode("utf-8")
 
     @staticmethod
     def selective_title(str):
