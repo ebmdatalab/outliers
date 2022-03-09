@@ -63,8 +63,9 @@
     <section aria-labelledby="higherHeading">
       <div class="container">
         <h2 class="pb-3" id="higherHeading">Prescribing where {{ entity_name }} is higher than most</h2>
+        <button id="higherHeading-lowShowHide" class="btn btn-outline-danger-outline mb-3" type="button">Hide low numbers</button>
       </div>
-      <div class="container px-lg-4 mb-4">
+      <div class="container mb-4">
         <div class="table-responsive">
           {{ table_high }}
         </div>
@@ -74,8 +75,9 @@
     <section aria-labelledby="lowerHeading">
       <div class="container">
         <h2 class="pb-3" id="lowerHeading">Prescribing where {{ entity_name }} is lower than most</h2>
+        <button id="lowerHeading-lowShowHide" class="btn btn-outline-danger-outline mb-3" type="button">Hide low numbers</button>
       </div>
-      <div class="container px-lg-4 mb-4">
+      <div class="container mb-4">
         <div class="table-responsive">
           {{ table_low }}
         </div>
@@ -94,6 +96,31 @@
       );
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    </script>
+
+    <script>
+      ["higherHeading-lowShowHide", "lowerHeading-lowShowHide"].forEach(function (
+        btn
+      ) {
+        var toggleButton = document.getElementById(btn);
+        var section = toggleButton.closest("section");
+        toggleButton.addEventListener("click", function (e) {
+          var lowRows = section.querySelectorAll("tr.low_number");
+          lowRows.forEach(function (row) {
+            return row.classList.toggle("d-none");
+          });
+
+          if (toggleButton.textContent === "Hide low numbers") {
+            toggleButton.textContent = "Show low numbers";
+            toggleButton.classList.remove("btn-outline-danger");
+            toggleButton.classList.add("btn-outline-success");
+          } else {
+            toggleButton.textContent = "Hide low numbers";
+            toggleButton.classList.remove("btn-outline-success");
+            toggleButton.classList.add("btn-outline-danger");
+          }
+        });
       });
     </script>
 </body>
