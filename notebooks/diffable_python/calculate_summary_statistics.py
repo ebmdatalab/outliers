@@ -23,7 +23,8 @@ from_date = date(year=2021,month=4,day=1)
 to_date = date(year=2021,month=8,day=1)
 r = Runner(from_date,to_date,5,["practice","ccg","pcn","stp"],False)
 
-r.run()
+r.build.run()
+r.build.fetch_results()
 
 # +
 ### Extracting all the stored z scores etc across organisations
