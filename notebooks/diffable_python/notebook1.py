@@ -17,8 +17,8 @@
 from lib.outliers import Runner
 from datetime import date
 
-from_date = date(year=2021,month=4,day=1)
-to_date = date(year=2021,month=8,day=1)
-r = Runner(from_date,to_date,5,["practice","ccg","pcn","stp"],False)
+from_date = date(year=2021,month=6,day=1)
+to_date = date(year=2021,month=12,day=1)
+r = Runner(from_date=from_date,to_date=to_date,n_outliers=10,entities=["practice","ccg","pcn","stp"],force_rebuild=False,n_jobs=16)
 
 r.run()
