@@ -2,79 +2,77 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link
-    crossorigin="anonymous"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css"
-    integrity="sha512-GQGU0fMMi238uA+a/bdWJfpUGKUkBdgfFdgBm72SUQ6BeyWjoY/ton0tEjH+OSH9iP4Dfh+7HM0I9f5eR0L/4w=="
-    referrerpolicy="no-referrer"
-    rel="stylesheet"
-  />
-  <link rel="stylesheet" href="./static/css/oxford.css">
-  <link rel="stylesheet" href="./static/css/outliers.css">
+    <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" integrity="sha512-GQGU0fMMi238uA+a/bdWJfpUGKUkBdgfFdgBm72SUQ6BeyWjoY/ton0tEjH+OSH9iP4Dfh+7HM0I9f5eR0L/4w==" referrerpolicy="no-referrer"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="./static/css/oxford.css">
+    <link rel="stylesheet" href="./static/css/outliers.css">
 
-  <title>Static outliers for Childwall & Wavertree PCN</title>
+    <title>Static outliers for Childwall & Wavertree PCN</title>
 </head>
+
 <body>
     <div class="bg-dark">
-      <div class="container d-flex justify-content-center">
-        <a class="visually-hidden-focusable text-white p-2" href="#content">Skip to main content</a>
-      </div>
+        <div class="container d-flex justify-content-center">
+            <a class="visually-hidden-focusable text-white p-2" href="#content">Skip to main content</a>
+        </div>
     </div>
 
     <header>
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-oxford">
-        <div class="container">
-          <a class="navbar-brand" href="../index.html">OpenPrescribing outlier detection</a>
-        </div>
-      </nav>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-oxford">
+            <div class="container">
+                <a class="navbar-brand" href="../index.html">OpenPrescribing outlier detection</a>
+            </div>
+        </nav>
     </header>
 
     <main id="content">
-      <div class="bg-oxford-50 mb-4">
-        <div class="container pt-5 pb-4">
-          <div class="row">
-            <div class="col-12">
-              <h1 class="display-5 fw-bold lh-1">Static outliers for Childwall & Wavertree PCN</h1>
-            </div>
-            <div class="col-lg-8 col-md-9 col-12 pt-4 fs-5">
-              <p>There is substantial variation in prescribing behaviours, across various different areas of medicine. Some variation can be explained by demographic changes, or local policies or guidelines, but much of the remaining variation is less easy to
-                explain. At <a href="https://openprescribing.net/">OpenPrescribing</a> we are piloting a number of data-driven approaches to identify unusual prescribing and collect feedback on this prescribing to inform development of new tools to support
-                prescribers and organisations to audit and review prescribing.</p>
-              <div class="collapse" id="explainerTextCollapse">
-                <p>This report has been developed to automatically identify prescribing patterns at a chemical level which are furthest away from “typical prescribing” and can be classified as an “outlier”. We calculate the number of prescriptions for each chemical
-                    in the <a href="https://www.thedatalab.org/blog/161/prescribing-data-bnf-codes">BNF coding system</a> using the BNF subparagraph as a denominator, for prescriptions dispensed between June 2021 and December 2021. We then calculate the
-                    mean and standard deviation for each numerator and denominator pair across all practices/CCGs/PCNs/STPs. From this we can calculate the “z-score”, which is a measure of how many standard deviations a given practice/CCG/PCN/STP is from the
-                    population mean. We then rank your “z-scores” to find the top 5 results where prescribing is an outlier for prescribing higher than its peers and those where it is an outlier for prescribing lower than its peers.
-                </p>
-                <p>It is important to remember that this information was generated automatically and it is therefore likely that some of the behaviour is warranted. This report seeks only to collect information about where this variation may be warranted and where
-                    it might not. Our full analytical method code is openly available on GitHub <a href="https://github.com/ebmdatalab/outliers/">here</a>.
-                </p>
-                <p>The DataLab is keen to hear your feedback on the results. You can do this by completing the following <a href="https://docs.google.com/forms/d/e/1FAIpQLSeH4ai_qyetAY4UAgZSWGnYQHkXNr9efFBmQvdrBi5uuXvgnQ/viewform?usp=pp_url&entry.2016356131=pcn+U65582">survey</a>            or emailing us at <a href="mailto:ebmdatalab@phc.ox.ac.uk?subject=OpenPrescribing%20outliers%20feedback">ebmdatalab@phc.ox.ac.uk</a>. Please DO NOT INCLUDE IDENTIFIABLE PATIENT information in your feedback. All feedback is helpful, you can
-                    send short or detailed feedback.
-                </p>
-              </div>
-              <p>
-                <button id="explainerTextBtn" class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#explainerTextCollapse" aria-expanded="false" aria-controls="explainerTextCollapse">
+        <div class="bg-oxford-50 mb-4">
+            <div class="container pt-5 pb-4">
+                <div class="row">
+                    <div class="col-12">
+                        <h1 class="display-5 fw-bold lh-1">Static outliers for Childwall & Wavertree PCN</h1>
+                    </div>
+                    <div class="col-lg-8 col-md-9 col-12 pt-4 fs-5">
+                        <p>At <a href="https://openprescribing.net/">OpenPrescribing</a> we are piloting a number of data-driven approaches to identify unusual prescribing and collect feedback on this prescribing to inform development of new tools to support
+                            prescribers and organisations to audit and review prescribing. These pilot results are provided for the interest of advanced users, although we don't know how relevant they are in practice. There is substantial variation in
+                            prescribing behaviours, across various different areas of medicine. Some variation can be explained by demographic changes, or local policies or guidelines, but much of the remaining variation is less easy to explain.
+                        </p>
+                        <p>The DataLab is keen to hear your feedback on the results. You can do this by completing the following <a href="https://docs.google.com/forms/d/e/1FAIpQLSeH4ai_qyetAY4UAgZSWGnYQHkXNr9efFBmQvdrBi5uuXvgnQ/viewform?usp=pp_url&entry.2016356131=pcn+U65582">survey</a>                            or emailing us at <a href="mailto:ebmdatalab@phc.ox.ac.uk?subject=OpenPrescribing%20outliers%20feedback">ebmdatalab@phc.ox.ac.uk</a>. Please DO NOT INCLUDE IDENTIFIABLE PATIENT information in your feedback. All feedback is
+                            helpful, you can send short or detailed feedback.
+                        </p>
+                        <div class="collapse" id="explainerTextCollapse">
+                            <p>This report has been developed to automatically identify prescribing patterns at a chemical level which are furthest away from “typical prescribing” and can be classified as an “outlier”. We calculate the number of prescriptions
+                                for each chemical in the <a href="https://www.thedatalab.org/blog/161/prescribing-data-bnf-codes">BNF coding system</a> using the BNF subparagraph as a denominator, for prescriptions dispensed between June 2021 and
+                                December 2021. We then calculate the mean and standard deviation for each numerator and denominator pair across all practices/CCGs/PCNs/STPs. From this we can calculate the “z-score”, which is a measure of how many standard
+                                deviations a given practice/CCG/PCN/STP is from the population mean. We then rank your “z-scores” to find the top 5 results where prescribing is an outlier for prescribing higher than its peers and those where it is an
+                                outlier for prescribing lower than its peers.
+                            </p>
+                            <p>It is important to remember that this information was generated automatically and it is therefore likely that some of the behaviour is warranted. This report seeks only to collect information about where this variation may
+                                be warranted and where it might not. Our full analytical method code is openly available on GitHub <a href="https://github.com/ebmdatalab/outliers/">here</a>.
+                            </p>
+                        </div>
+                        <p>
+                            <button id="explainerTextBtn" class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#explainerTextCollapse" aria-expanded="false" aria-controls="explainerTextCollapse">
                   Show more &plus;
                 </button>
-              </p>
+                        </p>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </main>
 
     <section aria-labelledby="higherHeading">
-      <div class="container">
-        <h2 class="pb-3" id="higherHeading">Prescribing where Childwall & Wavertree PCN is higher than most</h2>
-        <button id="higherHeading-lowShowHide" class="btn btn-outline-danger-outline mb-3" type="button">Hide low numbers</button>
-      </div>
-      <div class="container mb-4">
-        <div class="table-responsive">
-          <table border="1" class="dataframe table table table-sm table-bordered" id="table_high">
+        <div class="container">
+            <h2 class="pb-3" id="higherHeading">Prescribing where Childwall & Wavertree PCN is higher than most</h2>
+            <button id="higherHeading-lowShowHide" class="btn btn-outline-danger-outline mb-3" type="button">Hide low numbers</button>
+        </div>
+        <div class="container mb-4">
+            <div class="table-responsive">
+                <table border="1" class="dataframe table table table-sm table-bordered" id="table_high">
   <thead>
     
     
@@ -200,18 +198,18 @@
       <td><button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#plot_ISpYaAA1qCi44BKFoIhSCKgBFEHBZZBF"><img width="250" class="h-auto" src="data:image/png;base64,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"></button><div class="modal fade" id="plot_ISpYaAA1qCi44BKFoIhSCKgBFEHBZZBF" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><img class="w-100 h-auto" src="data:image/png;base64,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"></div></div></div></div></td>
     </tr>
   <tr id="table_high_9_items" class="collapse"><td colspan="9" class="hiddenRow"><ul class="my-0 ps-4 py-2"><li><a href="https://openprescribing.net/analyse/#org=pcn&amp;orgIds=U65582&amp;numIds=0304010ABAAAAAA&amp;denomIds=3.4.1&amp;selectedTab=summary" target="_blank">Desloratadine 5mg tablets : 220</a></li><li><a href="https://openprescribing.net/analyse/#org=pcn&amp;orgIds=U65582&amp;numIds=0304010ABAAADAD&amp;denomIds=3.4.1&amp;selectedTab=summary" target="_blank">Desloratadine 2.5mg/5ml oral solution sugar free : 4</a></li><li><a href="https://openprescribing.net/analyse/#org=pcn&amp;orgIds=U65582&amp;numIds=0304010ABBBAAAA&amp;denomIds=3.4.1&amp;selectedTab=summary" target="_blank">Neoclarityn 5mg tablets : 28</a></li></ul></td></tr></tbody></table>
+            </div>
         </div>
-      </div>
     </section>
 
     <section aria-labelledby="lowerHeading">
-      <div class="container">
-        <h2 class="pb-3" id="lowerHeading">Prescribing where Childwall & Wavertree PCN is lower than most</h2>
-        <button id="lowerHeading-lowShowHide" class="btn btn-outline-danger-outline mb-3" type="button">Hide low numbers</button>
-      </div>
-      <div class="container mb-4">
-        <div class="table-responsive">
-          <table border="1" class="dataframe table table table-sm table-bordered" id="table_low">
+        <div class="container">
+            <h2 class="pb-3" id="lowerHeading">Prescribing where Childwall & Wavertree PCN is lower than most</h2>
+            <button id="lowerHeading-lowShowHide" class="btn btn-outline-danger-outline mb-3" type="button">Hide low numbers</button>
+        </div>
+        <div class="container mb-4">
+            <div class="table-responsive">
+                <table border="1" class="dataframe table table table-sm table-bordered" id="table_low">
   <thead>
     
     
@@ -337,59 +335,54 @@
       <td><button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#plot_pRQUiOLMAIooigpuaDG4ITowbjiiSNix"><img width="250" class="h-auto" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAg0AAACWCAYAAABdJrs9AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAXEQAAFxEByibzPwAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAVfklEQVR4nO3deZQdZZ2H8edNQtg3RTYD1BxBQDyKiKOIAi4oWspRAXdlxnVUQFHQAnHFpRQUiOLMAIooigpuaDG4ITowbjiiSNix2AQjIJE9JNT88b49adp0upL0vdVd/XzOqXP71q2kf6nc5Xvr3ULTNEiSJE1kVtcFSJKk6cHQIEmSWjE0SJKkVgwNkiSpFUODJElqxdAgSZJaMTRIkqRWDA2SJKkVQ4MkSWrF0CBJkloxNEiSpFYMDZIkqRVDgyRJasXQIEmSWjE0SJKkVgwNkiSpFUODJElqxdAgSZJaMTRIkqRWDA2SJKkVQ4MkSWrF0CBJkloxNKi/QliXEJq0rdt1OZI03RkaJElSK3O6LkCSJpIV1RrAlsBWwKbARqO2DYC5wOy0zQEa4L603Ztu7wBuS9utwELgz3WZLxnmv0WazkLTNF3XIA1GbJK4K91bj6a5u8tytGJZUc0ihoKdgMek2x2ArYEtgDCAX7sUuAm4HrgOuBK4FPgjcI2BQnooQ4P6y9AwpWVFtQnw5LQ9BfhnYMPlHDrywX4jcANwC/A3YBHx6sEiYHE6bkm6nQWsCayVtnWAjYGHj9o2JwaSLVl+IFkMLAB+AfxP2v5Ul7lvmpqxDA3qL0PDlJIV1YbAnsCz0rbTmEPuBX5P/Ka/YNR2U13mSwdY11zgkUAG7Jjq2gl4LDFcjPYX4DzgHODcusxvHVRd0lRkaFB/GRo6lRVVIH74vhB4AfFqwujO19cAFwK/BH4FXFKX+QPDrnM8qf55wG7A7sBTgScQ+01A7DfxK6ACvlaX+dVd1CkNk6FB/WVoGLqsqGYDTwNeAuxL/PY+4mbgJ2k7ry7z64de4GrKimo94JnA84GcGCpG/BL4MvANr0CorwwN6i9Dw1CkoLA7cACwP7GvwIjfAN9L2+/71B9g1JWU/YFXA49KDy0BvgvMB/67T/9mydCg/jI0DFRWVDsBrwVeRewTAPAg8FPgTODsusxv7qi8oUoB4snE8PBylvWFuJgYHs6oy/y+jsqTJo2hQf1laJh0acTDq4hhYZe0uwHOB74OfLsu84XdVDc1ZEW1FvAy4O3EPhAQ54X4FHBiXeZ3dlWbtLoMDeovQ8OkSN+i9wLeROyrMDc9tAA4DfhqXeY3dlPd1JXO2+7AIcB+xE6gtwPHAp81PGg6MjSovwwNqyUrqocBrwPeDGybdt8BnA6cCvzO9vp2sqLaDjiK2HwxEh4+Ccyvy/zeLmuTVoahQf1laFglWVE9FjgYeA2wdtp9IXAScFZd5vd0Vdt0l8LDe4nhYTZxsqqjgNPrMn+wy9qkNgwN6i9DQ2tpCufnAe8kDikEuIfY/HBiXeaXdlVbH6Xw8HFiswXEDpOH12X+4+6qkiZmaFB/GRomlGZDfAVwOMtmaPwT8FngC3WZ39FVbTNBVlS7E/s4PCXt+g5waF3mdWdFSStgaFB/GRrGlSYpejNwKMuGS/6S2M5+9iCnbdZDpQ6T+wPHANsQp9P+KHBsXeb3d1mbNJahQf1laPgHWVGtD7wNeBewSdr9PWJYuNCOjd3JimodoADeTVxs62rg4LrMz+20MGkUQ4P6y9Dw/9JiUYcQryxsTJyE6Qzg4/ZXmFqyotoWOIE4VTXAt4lNFtd1V5UUGRrUX4YGsqJaFzgIeA8xLCwlro/wsbrMr+qyNo0vNVm8kDibpE0WmjIMDeqvGRwasqJaE3gjcXjf5sSw8EViWLi2w9K0EsZpsjioLvMfdFqYZixDg/prBoaGrKjmEOcA+CDxGyrEZogPeGVh+kpNFvOJw2IBvgW8oy7zG7qrSjORoUH9NYNCQ5pnYT/gw8AOaff3gPfVZf77zgrTpElNFvsS+ztsQ5xH48PAcXWZL+6yNs0chgb11wwJDVlRPZc4UdDI4kjnA0fWZf6LzorSwKQmi/cS59ZYA7iM2GRxXqeFaUYwNKi/eh4asqJ6PHFs/95p16+JHyY/cehk/2VFtT1xEq5np11fA95Vl/mfu6tKfWdoUH/1NDRkRTUPOBo4EAjAVcTREd8xLMwsoyaGOo44SdedwAeIq2g+0GVt6idDg/qrZ6EhK6oNiL3o30lcSOpWYofHk/yAmNnSpF3vB94BzAEuBw4DzjFIajIZGtRfPQkNWVGtAbwB+BDwCOA+4jfLT9RlvqjL2jS1ZEW1E7Gj5LPSrp8QmyzsDKtJYWhQf03z0DBqgp9PAtsDDXFipqMcaqfxpOfN84kLYe1AfN6cSnze3NxlbZr+DA3qr2kcGrKiehLxTX+PtOsnxKWTf9ddVZpO0hWqNxKvUG0C3E0MoJ+qy3zavBY0tRga1F/TMDRkRZURpwt+Zdp1KXFo3bm2TWtVpHVHjiT2d5gL3EQcZfPluswf7LI2TT+GBvXXNAoNqSPbkcQFpdYEbgHeB3yxLvMlXdamfsiK6p+I83m8LO26hPgcO9tAqrYMDeqvaRAa0kyOryW+mW9OnOXvGOLCRHet6M9KqyIrqt2Iz7Hd066LgKOAHxoeNBFDg/prioeGrKieSuzpvmvadTpwRF3mN3ZXlWaC1FlyH+AjwC5p9wXpvuFB4zI0qL+maGhIkzN9gmX9Fn4DvN1pnzVsKTy8mDhZ2GPS7t8CHyNOFmafBz2EoUH9NcVCQ1oz4DDi7I3rADcTlz0+3TdndSkrqtnAi4gdJEfWMLkMKIEznDxMIwwN6q8pEhrSt7mXAJ8GtgbuBz4FfNx+C5pK0nP1ucROuU9Pu2viUM1T6zK/r6PSNEUYGtRfUyA0ZEX1aOAzwHPSrm8R51u4dti1SCsjK6qnE8PDPmnXLcTge5Izkc5chgb1V4ehISuqdYmXeg8jLl98BXH54h8PqwZpMmRFtQtwBLAfcYG0O4GTgRPqMr++y9o0fIYG9VcHoWFUx7Ljga2IQyg/DBxXl/niQf9+aVCyotoBeBfwGuJcIkuBM4kzTF7UZW0aHkOD+mvIoSE1RcwntglDfEN9l+tEqE+yotoMeGvaNkm7f07sp/N9O/X2m6FB/TWk0JCaIo4kNkXMBa4kNkX8aBC/T5oKsqJamzgx2TuBR6fdVxJXYP1SXeb3dFWbBsfQoP4acGhITREvIjZFbE1sijia2BRx/2T+LmmqSrOavoDYdDGywNptwOeAE+sy/0tXtWnyGRrUXwMMDVlRbUdsihjpWX4WsSnCjmGasbKi2pUYHg4AZhOHF58OfLou8wVd1qbJYWhQfw0gNKQJmo4krjw50hRxcF3mP1zdv1vqi6yotgEOIS7NvX7a/V/Efg/nOU319GVoUH9NYmhYzgRNNkVIE0jLcr8BeDtxNBHAxcTX0dcdUTT9GBrUX5MUGtJQs/nA3mmXTRHSSsiKag1gf2LTxRPT7puIr6uT6jK/o6vatHIMDeqv1QwNWVGtT1wy+FCWTdB0sKMipFWTrtjtQQwPL0y77wI+T7xqd11XtakdQ4P6axVDQ3pjexmx/XVL4G7gQ8QZ8LycKk2CrKi2JwbyA4G1gCXE8PBR5zaZugwN6q9VCA1ZUe0EfBbYK+06g7hWxE0DqVGa4bKiegRwEPAOYANgMXGa6o/7upt6DA3qr5UIDWmWuw8Se3vPBi4lTtB0/oCrlARkRbUxcaKodwDrEYdr/gdQ1mV+S5e1aRlDg/qrRWhIs9odChTEoWF3EJsiTqzL/IFhlSopyorq4cTZVQ8G1gXuJU4U9cm6zBd2WZsMDeqzFYSGNIvdq4CPAfOAB4ATgaPrMr992KVKeqisqDYlzofyNmBt4jDnE4hXHv7eZW0zmaFB/TVOaMiK6hnAscAu6bGzgCPqMr96+EVKWpGsqDYH3gO8hbi65l+JTYknezVw+AwN6q8xoSF7z/e3Aj7JsqFevyLOt3BhF+VJai8rqnnEZeb/BQjE2VjfDZztDJPDY2hQf40KDY8/5IzTF629/iuBWUBN7MPwDd9spOklK6rHE68UPjvt+jlwWF3mv+muqpljVtcFSINy4AEffOTIz4tnr/FqYifHw4Ed6jL/uoFBmn7qMv898BzgecRRTnsAv86K6itpzQsNkFca1DtZUW0NvHvtxfe98bLj9p8LsMtBpx99+7obHWsHKqk/sqKaQ2yuOBrYnDhM8wTgY3WZL+qwtN4yNKg3sqLaltjscCAwZ53F99694LgD1k0PT+rS2JKmjqyo1iMO0zwcWAe4FXg/sbPkki5r6xtDg6a9rKh2Ic5l/3Jik9siYP7+l/z45GPPOX5kUSlDg9RzWVFtCXyEZZ0lFxA7O5/bZV19YmjQtJQV1WziKIhDiW2aEL9dfBr4XF3miyZzaWxJ00dWVE8gvhfslXb9gNhZ8o+dFdUThgZNK2nlyX8FDgEelXZfBRwPnFaX+bJgYGiQZqy08Ny+wDHAdsCDwEnAB5xZctUZGjQtpM6NBxPXhtgw7T4POA44py7zB//hDxkapBkvK6q5xImhPgBsDNxJnAl2fl3m93RZ23RkaNCUlaZ63hP4N2A/4kJSDwBfBY5LQ6/GZ2iQlGRF9TBi58i3AXOAPxPXmTnVmSXbMzRoysmKagtiR6bXs6wJ4lbg34n9FdqteGdokDRGVlSPJg7RfGnadRVwFHDWcq9Y6iEMDZoSUsfGfYA3EDs4zk4PXQCcDJxZl/m9K/WXGhokjSMrql2JzRR7p12XEMPENw0P4zM0qFNpBrfXpW1e2n0rcBpwSl3ml6/yX25okDSBrKieRRym+ZS067J0/+t1mS/trLApytCgoUtti/sDryQOlwxAA/wIOAX4bl3mi1f7FxkaJLWQRlo8G3gf8PS0+xpgPvBFZ5JdxtCgoUhDJXPgFcQ549dID91AvKrwhbrM/zSpv9TQIGklZUW1J7HD5DPTrjuBU4HP1GV+dWeFTRGGBg1MVlQbE8dJ70dcYGbN9NDfgG8QR0FcMLD2Q0ODpFWUFdXOxPlgXkl872qIw7y/DHyrLvM7OyyvM4YGTZp0iW9H4hWF5wNPIw5tgji189nAWcC5k9L8MBFDg6TVlBXVI4A3Eed6GFk59x7g28BXgJ/WZX5fR+UNnaFBqyW9oPYCnkFsdshGPbyQGBS+CZw3lKAwmqFB0iRJI7yeCbwGeAkwshjePcCPgYo40dyN3VQ4HIYGrZSsqOYBuwG7E4PC48YcchHxxVMBv+106JKhQdIAZEW1LvBiYnjYG1hv1MNXAb8EfpFuL+nTSpuGBo0rXUV4PLAz8GTikKR5Yw67ltjO91Pi1YR2Ey8Ng6FB0oBlRbUmsSk2J15t3WHMIfcBVwCXE4dzXgb8idgJfOF0mxPC0DDDpX4ImxCf6Nun2x2JQWHLMYc/SJwAZSRF/6wu83poxa4sQ4OkIcuK6uEs+5K1G/BE4poXy/MAcFPaFo7Z/jrm59umwrwRhoaeS5fRthi1PRLYhtj3YGTbcDl/dCkxGV+ctv8FfjOtegwbGiR1LH0xewTxy9iOxC9m2xCv2m4FbNbyr2qIE98trMv8sQMotRVDwxSSFmhaE1gbWGsFtyM/b0hMsCPbRmPub8yyzjrjuZs4icnI5bOR2wUrPW3zVGNokDTFpVU4twA2JYaLTcf8PHrfpsCadZmHToql49CQFdWOxCF5I8PyGuIl8AfH/Dz2ftvHJjquqcu8SbXMAeambc0xt+PtG/0BvqIP9za3a7FsHoPJ0BCHOS4Ebiau6DZyWwPXpdvbRs5B7xgaJPVIumqxXpdXfLsODVPhw2qkhq6S2wPAvcTOMuPdjrdvEXGipDvS7ejt79Otg82kMzRI0qSaM/EhA/UD4ofmUuKH9yzih/es5fy8osfaHjfeYwFYnLb7x9yO9/PI7b2s3If96Nv7p0LHFkmS2ujsSkMI4VKApml26qSAGchzPlye7+HznA+f53y4uj7fs7r4pZIkafoxNEiSpFYMDZIkqRVDgyRJasXQIEmSWjE0SJKkVpxGWpIkteKVBkmS1IqhQZIktWJokCRJrRgaJElSK4YGSZLUiqFBkiS1MvDQEELYK4RwaQjh6hDCKSGE2cs55qUhhCtDCNeEED466Jr6bqJzHkLYOYRwYTrmjyGEQ7qqtS/aPM9HHVuFEK4eZn190/J9ZbMQwndDCJeHEK4IIbygi1r7ouU5Pywd84cQwrkhhM26qLUPQggnhBBuDCEsWcExrd93JstAQ0MIYRZwCnBA0zTbAhsArx5zzIbAscCewPbAM0IIew6yrj5rc86Be4DXpaVVnwocHELYebiV9kfLcz5y7KuA24dYXu+sxPk+DfhK0zQ7ADsBvxhelf3S8r18O+AtwK5N0zwOuBg4bNi19siZwK7jPbgy7zuTadBXGp4E/LlpmgXp/ueB/cYcsw9wftM0NzdNs4T4Qh97jNqb8Jw3TXNl0zRXpJ//DlwGbDXUKvulzfOcEMImwNsAr6atngnPdwhhe2Czpmm+AdA0zZKmaW4bbpm90uY5HoA1gLVDCIH4IXbz8Ersl6ZpLmia5pYVHNLqfWeyDTo0zANuGHX/ev7xw6nNMWpvpc5nCOFRxDR74YDr6rO25/x44CjgvmEU1WNtzvcOwMIQwhkhhN+FEL4UQnjY0CrsnwnPedM0VwKfScfdTLy6c8KwCpyBOvnsHHRoCJN0jNprfT5DCBsB3wHe3jSNl8xX3YTnPITwPGBp0zTnDaGevmvzHJ8D7AF8tGmaJwA1cMwgi+q5Ns/xhwMvAbYFHglcCxw+4Lpmsk4+OwcdGm7goclna+DGVThG7bU6nyGEdYAKOLlpmjOHVFtftTnnewDPCiHUwAXANiGEPwynvN5p+76yoGmaP6b7XwOeOITa+qrNOX8mcG1qal5KbJN/6pDqm4k6+ewcdGi4CJgXQnhMuv964FtjjjmX2PlxixDCHODA5Ryj9iY85yGENdK+HzVNM3/I9fXRhOe8aZojmqaZ1zRNBjwNuC51FtPKa/O+chEwN4Qw8qa6N3DpkOrrozbn/DrgySGEDdL9vYEFaFDa/J9MuoGGhpQ23wCcFUK4BrgL+HIIYd8QwinpmEXES1g/B64AftY0zU8HWVeftTnnwEuJL+gXhRAuTtv+HZU87bU855okLd9XHgTeCnw3XdHZB3vyr7KW5/zXxI7svw4hXAJsA5Rd1TzdhRD+M4RwIzA7Db08MYSwawjhHBj//2Tgdbk0tiRJasMZISVJUiuGBkmS1IqhQZIktWJokCRJrRgaJElSK4YGSZLUiqFBkiS1YmiQJEmtGBokSVIrhgZJktSKoUGSJLViaJAkSa0YGiRJUiuGBkmS1IqhQZIktWJokCRJrRgaJElSK4YGSZLUiqFBkiS1YmiQJEmtGBokSVIrhgZJktSKoUGSJLViaJAkSa38H7ePPt8gvwkkAAAAAElFTkSuQmCC"></button><div class="modal fade" id="plot_pRQUiOLMAIooigpuaDG4ITowbjiiSNix" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><img class="w-100 h-auto" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAg0AAACWCAYAAABdJrs9AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAXEQAAFxEByibzPwAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjMsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+AADFEAAAVfklEQVR4nO3deZQdZZ2H8edNQtg3RTYD1BxBQDyKiKOIAi4oWspRAXdlxnVUQFHQAnHFpRQUiOLMAIooigpuaDG4ITowbjiiSNix2AQjIJE9JNT88b49adp0upL0vdVd/XzOqXP71q2kf6nc5Xvr3ULTNEiSJE1kVtcFSJKk6cHQIEmSWjE0SJKkVgwNkiSpFUODJElqxdAgSZJaMTRIkqRWDA2SJKkVQ4MkSWrF0CBJkloxNEiSpFYMDZIkqRVDgyRJasXQIEmSWjE0SJKkVgwNkiSpFUODJElqxdAgSZJaMTRIkqRWDA2SJKkVQ4MkSWrF0CBJkloxNKi/QliXEJq0rdt1OZI03RkaJElSK3O6LkCSJpIV1RrAlsBWwKbARqO2DYC5wOy0zQEa4L603Ztu7wBuS9utwELgz3WZLxnmv0WazkLTNF3XIA1GbJK4K91bj6a5u8tytGJZUc0ihoKdgMek2x2ArYEtgDCAX7sUuAm4HrgOuBK4FPgjcI2BQnooQ4P6y9AwpWVFtQnw5LQ9BfhnYMPlHDrywX4jcANwC/A3YBHx6sEiYHE6bkm6nQWsCayVtnWAjYGHj9o2JwaSLVl+IFkMLAB+AfxP2v5Ul7lvmpqxDA3qL0PDlJIV1YbAnsCz0rbTmEPuBX5P/Ka/YNR2U13mSwdY11zgkUAG7Jjq2gl4LDFcjPYX4DzgHODcusxvHVRd0lRkaFB/GRo6lRVVIH74vhB4AfFqwujO19cAFwK/BH4FXFKX+QPDrnM8qf55wG7A7sBTgScQ+01A7DfxK6ACvlaX+dVd1CkNk6FB/WVoGLqsqGYDTwNeAuxL/PY+4mbgJ2k7ry7z64de4GrKimo94JnA84GcGCpG/BL4MvANr0CorwwN6i9Dw1CkoLA7cACwP7GvwIjfAN9L2+/71B9g1JWU/YFXA49KDy0BvgvMB/67T/9mydCg/jI0DFRWVDsBrwVeRewTAPAg8FPgTODsusxv7qi8oUoB4snE8PBylvWFuJgYHs6oy/y+jsqTJo2hQf1laJh0acTDq4hhYZe0uwHOB74OfLsu84XdVDc1ZEW1FvAy4O3EPhAQ54X4FHBiXeZ3dlWbtLoMDeovQ8OkSN+i9wLeROyrMDc9tAA4DfhqXeY3dlPd1JXO2+7AIcB+xE6gtwPHAp81PGg6MjSovwwNqyUrqocBrwPeDGybdt8BnA6cCvzO9vp2sqLaDjiK2HwxEh4+Ccyvy/zeLmuTVoahQf1laFglWVE9FjgYeA2wdtp9IXAScFZd5vd0Vdt0l8LDe4nhYTZxsqqjgNPrMn+wy9qkNgwN6i9DQ2tpCufnAe8kDikEuIfY/HBiXeaXdlVbH6Xw8HFiswXEDpOH12X+4+6qkiZmaFB/GRomlGZDfAVwOMtmaPwT8FngC3WZ39FVbTNBVlS7E/s4PCXt+g5waF3mdWdFSStgaFB/GRrGlSYpejNwKMuGS/6S2M5+9iCnbdZDpQ6T+wPHANsQp9P+KHBsXeb3d1mbNJahQf1laPgHWVGtD7wNeBewSdr9PWJYuNCOjd3JimodoADeTVxs62rg4LrMz+20MGkUQ4P6y9Dw/9JiUYcQryxsTJyE6Qzg4/ZXmFqyotoWOIE4VTXAt4lNFtd1V5UUGRrUX4YGsqJaFzgIeA8xLCwlro/wsbrMr+qyNo0vNVm8kDibpE0WmjIMDeqvGRwasqJaE3gjcXjf5sSw8EViWLi2w9K0EsZpsjioLvMfdFqYZixDg/prBoaGrKjmEOcA+CDxGyrEZogPeGVh+kpNFvOJw2IBvgW8oy7zG7qrSjORoUH9NYNCQ5pnYT/gw8AOaff3gPfVZf77zgrTpElNFvsS+ztsQ5xH48PAcXWZL+6yNs0chgb11wwJDVlRPZc4UdDI4kjnA0fWZf6LzorSwKQmi/cS59ZYA7iM2GRxXqeFaUYwNKi/eh4asqJ6PHFs/95p16+JHyY/cehk/2VFtT1xEq5np11fA95Vl/mfu6tKfWdoUH/1NDRkRTUPOBo4EAjAVcTREd8xLMwsoyaGOo44SdedwAeIq2g+0GVt6idDg/qrZ6EhK6oNiL3o30lcSOpWYofHk/yAmNnSpF3vB94BzAEuBw4DzjFIajIZGtRfPQkNWVGtAbwB+BDwCOA+4jfLT9RlvqjL2jS1ZEW1E7Gj5LPSrp8QmyzsDKtJYWhQf03z0DBqgp9PAtsDDXFipqMcaqfxpOfN84kLYe1AfN6cSnze3NxlbZr+DA3qr2kcGrKiehLxTX+PtOsnxKWTf9ddVZpO0hWqNxKvUG0C3E0MoJ+qy3zavBY0tRga1F/TMDRkRZURpwt+Zdp1KXFo3bm2TWtVpHVHjiT2d5gL3EQcZfPluswf7LI2TT+GBvXXNAoNqSPbkcQFpdYEbgHeB3yxLvMlXdamfsiK6p+I83m8LO26hPgcO9tAqrYMDeqvaRAa0kyOryW+mW9OnOXvGOLCRHet6M9KqyIrqt2Iz7Hd066LgKOAHxoeNBFDg/prioeGrKieSuzpvmvadTpwRF3mN3ZXlWaC1FlyH+AjwC5p9wXpvuFB4zI0qL+maGhIkzN9gmX9Fn4DvN1pnzVsKTy8mDhZ2GPS7t8CHyNOFmafBz2EoUH9NcVCQ1oz4DDi7I3rADcTlz0+3TdndSkrqtnAi4gdJEfWMLkMKIEznDxMIwwN6q8pEhrSt7mXAJ8GtgbuBz4FfNx+C5pK0nP1ucROuU9Pu2viUM1T6zK/r6PSNEUYGtRfUyA0ZEX1aOAzwHPSrm8R51u4dti1SCsjK6qnE8PDPmnXLcTge5Izkc5chgb1V4ehISuqdYmXeg8jLl98BXH54h8PqwZpMmRFtQtwBLAfcYG0O4GTgRPqMr++y9o0fIYG9VcHoWFUx7Ljga2IQyg/DBxXl/niQf9+aVCyotoBeBfwGuJcIkuBM4kzTF7UZW0aHkOD+mvIoSE1RcwntglDfEN9l+tEqE+yotoMeGvaNkm7f07sp/N9O/X2m6FB/TWk0JCaIo4kNkXMBa4kNkX8aBC/T5oKsqJamzgx2TuBR6fdVxJXYP1SXeb3dFWbBsfQoP4acGhITREvIjZFbE1sijia2BRx/2T+LmmqSrOavoDYdDGywNptwOeAE+sy/0tXtWnyGRrUXwMMDVlRbUdsihjpWX4WsSnCjmGasbKi2pUYHg4AZhOHF58OfLou8wVd1qbJYWhQfw0gNKQJmo4krjw50hRxcF3mP1zdv1vqi6yotgEOIS7NvX7a/V/Efg/nOU319GVoUH9NYmhYzgRNNkVIE0jLcr8BeDtxNBHAxcTX0dcdUTT9GBrUX5MUGtJQs/nA3mmXTRHSSsiKag1gf2LTxRPT7puIr6uT6jK/o6vatHIMDeqv1QwNWVGtT1wy+FCWTdB0sKMipFWTrtjtQQwPL0y77wI+T7xqd11XtakdQ4P6axVDQ3pjexmx/XVL4G7gQ8QZ8LycKk2CrKi2JwbyA4G1gCXE8PBR5zaZugwN6q9VCA1ZUe0EfBbYK+06g7hWxE0DqVGa4bKiegRwEPAOYANgMXGa6o/7upt6DA3qr5UIDWmWuw8Se3vPBi4lTtB0/oCrlARkRbUxcaKodwDrEYdr/gdQ1mV+S5e1aRlDg/qrRWhIs9odChTEoWF3EJsiTqzL/IFhlSopyorq4cTZVQ8G1gXuJU4U9cm6zBd2WZsMDeqzFYSGNIvdq4CPAfOAB4ATgaPrMr992KVKeqisqDYlzofyNmBt4jDnE4hXHv7eZW0zmaFB/TVOaMiK6hnAscAu6bGzgCPqMr96+EVKWpGsqDYH3gO8hbi65l+JTYknezVw+AwN6q8xoSF7z/e3Aj7JsqFevyLOt3BhF+VJai8rqnnEZeb/BQjE2VjfDZztDJPDY2hQf40KDY8/5IzTF629/iuBWUBN7MPwDd9spOklK6rHE68UPjvt+jlwWF3mv+muqpljVtcFSINy4AEffOTIz4tnr/FqYifHw4Ed6jL/uoFBmn7qMv898BzgecRRTnsAv86K6itpzQsNkFca1DtZUW0NvHvtxfe98bLj9p8LsMtBpx99+7obHWsHKqk/sqKaQ2yuOBrYnDhM8wTgY3WZL+qwtN4yNKg3sqLaltjscCAwZ53F99694LgD1k0PT+rS2JKmjqyo1iMO0zwcWAe4FXg/sbPkki5r6xtDg6a9rKh2Ic5l/3Jik9siYP7+l/z45GPPOX5kUSlDg9RzWVFtCXyEZZ0lFxA7O5/bZV19YmjQtJQV1WziKIhDiW2aEL9dfBr4XF3miyZzaWxJ00dWVE8gvhfslXb9gNhZ8o+dFdUThgZNK2nlyX8FDgEelXZfBRwPnFaX+bJgYGiQZqy08Ny+wDHAdsCDwEnAB5xZctUZGjQtpM6NBxPXhtgw7T4POA44py7zB//hDxkapBkvK6q5xImhPgBsDNxJnAl2fl3m93RZ23RkaNCUlaZ63hP4N2A/4kJSDwBfBY5LQ6/GZ2iQlGRF9TBi58i3AXOAPxPXmTnVmSXbMzRoysmKagtiR6bXs6wJ4lbg34n9FdqteGdokDRGVlSPJg7RfGnadRVwFHDWcq9Y6iEMDZoSUsfGfYA3EDs4zk4PXQCcDJxZl/m9K/WXGhokjSMrql2JzRR7p12XEMPENw0P4zM0qFNpBrfXpW1e2n0rcBpwSl3ml6/yX25okDSBrKieRRym+ZS067J0/+t1mS/trLApytCgoUtti/sDryQOlwxAA/wIOAX4bl3mi1f7FxkaJLWQRlo8G3gf8PS0+xpgPvBFZ5JdxtCgoUhDJXPgFcQ549dID91AvKrwhbrM/zSpv9TQIGklZUW1J7HD5DPTrjuBU4HP1GV+dWeFTRGGBg1MVlQbE8dJ70dcYGbN9NDfgG8QR0FcMLD2Q0ODpFWUFdXOxPlgXkl872qIw7y/DHyrLvM7OyyvM4YGTZp0iW9H4hWF5wNPIw5tgji189nAWcC5k9L8MBFDg6TVlBXVI4A3Eed6GFk59x7g28BXgJ/WZX5fR+UNnaFBqyW9oPYCnkFsdshGPbyQGBS+CZw3lKAwmqFB0iRJI7yeCbwGeAkwshjePcCPgYo40dyN3VQ4HIYGrZSsqOYBuwG7E4PC48YcchHxxVMBv+106JKhQdIAZEW1LvBiYnjYG1hv1MNXAb8EfpFuL+nTSpuGBo0rXUV4PLAz8GTikKR5Yw67ltjO91Pi1YR2Ey8Ng6FB0oBlRbUmsSk2J15t3WHMIfcBVwCXE4dzXgb8idgJfOF0mxPC0DDDpX4ImxCf6Nun2x2JQWHLMYc/SJwAZSRF/6wu83poxa4sQ4OkIcuK6uEs+5K1G/BE4poXy/MAcFPaFo7Z/jrm59umwrwRhoaeS5fRthi1PRLYhtj3YGTbcDl/dCkxGV+ctv8FfjOtegwbGiR1LH0xewTxy9iOxC9m2xCv2m4FbNbyr2qIE98trMv8sQMotRVDwxSSFmhaE1gbWGsFtyM/b0hMsCPbRmPub8yyzjrjuZs4icnI5bOR2wUrPW3zVGNokDTFpVU4twA2JYaLTcf8PHrfpsCadZmHToql49CQFdWOxCF5I8PyGuIl8AfH/Dz2ftvHJjquqcu8SbXMAeambc0xt+PtG/0BvqIP9za3a7FsHoPJ0BCHOS4Ebiau6DZyWwPXpdvbRs5B7xgaJPVIumqxXpdXfLsODVPhw2qkhq6S2wPAvcTOMuPdjrdvEXGipDvS7ejt79Otg82kMzRI0qSaM/EhA/UD4ofmUuKH9yzih/es5fy8osfaHjfeYwFYnLb7x9yO9/PI7b2s3If96Nv7p0LHFkmS2ujsSkMI4VKApml26qSAGchzPlye7+HznA+f53y4uj7fs7r4pZIkafoxNEiSpFYMDZIkqRVDgyRJasXQIEmSWjE0SJKkVpxGWpIkteKVBkmS1IqhQZIktWJokCRJrRgaJElSK4YGSZLUiqFBkiS1MvDQEELYK4RwaQjh6hDCKSGE2cs55qUhhCtDCNeEED466Jr6bqJzHkLYOYRwYTrmjyGEQ7qqtS/aPM9HHVuFEK4eZn190/J9ZbMQwndDCJeHEK4IIbygi1r7ouU5Pywd84cQwrkhhM26qLUPQggnhBBuDCEsWcExrd93JstAQ0MIYRZwCnBA0zTbAhsArx5zzIbAscCewPbAM0IIew6yrj5rc86Be4DXpaVVnwocHELYebiV9kfLcz5y7KuA24dYXu+sxPk+DfhK0zQ7ADsBvxhelf3S8r18O+AtwK5N0zwOuBg4bNi19siZwK7jPbgy7zuTadBXGp4E/LlpmgXp/ueB/cYcsw9wftM0NzdNs4T4Qh97jNqb8Jw3TXNl0zRXpJ//DlwGbDXUKvulzfOcEMImwNsAr6atngnPdwhhe2Czpmm+AdA0zZKmaW4bbpm90uY5HoA1gLVDCIH4IXbz8Ersl6ZpLmia5pYVHNLqfWeyDTo0zANuGHX/ev7xw6nNMWpvpc5nCOFRxDR74YDr6rO25/x44CjgvmEU1WNtzvcOwMIQwhkhhN+FEL4UQnjY0CrsnwnPedM0VwKfScfdTLy6c8KwCpyBOvnsHHRoCJN0jNprfT5DCBsB3wHe3jSNl8xX3YTnPITwPGBp0zTnDaGevmvzHJ8D7AF8tGmaJwA1cMwgi+q5Ns/xhwMvAbYFHglcCxw+4Lpmsk4+OwcdGm7goclna+DGVThG7bU6nyGEdYAKOLlpmjOHVFtftTnnewDPCiHUwAXANiGEPwynvN5p+76yoGmaP6b7XwOeOITa+qrNOX8mcG1qal5KbJN/6pDqm4k6+ewcdGi4CJgXQnhMuv964FtjjjmX2PlxixDCHODA5Ryj9iY85yGENdK+HzVNM3/I9fXRhOe8aZojmqaZ1zRNBjwNuC51FtPKa/O+chEwN4Qw8qa6N3DpkOrrozbn/DrgySGEDdL9vYEFaFDa/J9MuoGGhpQ23wCcFUK4BrgL+HIIYd8QwinpmEXES1g/B64AftY0zU8HWVeftTnnwEuJL+gXhRAuTtv+HZU87bU855okLd9XHgTeCnw3XdHZB3vyr7KW5/zXxI7svw4hXAJsA5Rd1TzdhRD+M4RwIzA7Db08MYSwawjhHBj//2Tgdbk0tiRJasMZISVJUiuGBkmS1IqhQZIktWJokCRJrRgaJElSK4YGSZLUiqFBkiS1YmiQJEmtGBokSVIrhgZJktSKoUGSJLViaJAkSa0YGiRJUiuGBkmS1IqhQZIktWJokCRJrRgaJElSK4YGSZLUiqFBkiS1YmiQJEmtGBokSVIrhgZJktSKoUGSJLViaJAkSa38H7ePPt8gvwkkAAAAAElFTkSuQmCC"></div></div></div></div></td>
     </tr>
   <tr id="table_low_9_items" class="collapse"><td colspan="9" class="hiddenRow"><ul class="my-0 ps-4 py-2"><li><a href="https://openprescribing.net/analyse/#org=pcn&amp;orgIds=U65582&amp;numIds=0703050A0AAABAB&amp;denomIds=7.3.5&amp;selectedTab=summary" target="_blank">Levonorgestrel 1.5mg tablets : 7</a></li><li><a href="https://openprescribing.net/analyse/#org=pcn&amp;orgIds=U65582&amp;numIds=0703050A0BCADAB&amp;denomIds=7.3.5&amp;selectedTab=summary" target="_blank">Levonelle 1500microgram tablets : 1</a></li></ul></td></tr></tbody></table>
+            </div>
         </div>
-      </div>
     </section>
 
-    <script
-      crossorigin="anonymous"
-      integrity="sha512-pax4MlgXjHEPfCwcJLQhigY7+N8rt6bVvWLFyUMuxShv170X53TRzGPmPkZmGBhk+jikR8WBM4yl7A9WMHHqvg=="
-      referrerpolicy="no-referrer"
-      src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"
-    ></script>
+    <script crossorigin="anonymous" integrity="sha512-pax4MlgXjHEPfCwcJLQhigY7+N8rt6bVvWLFyUMuxShv170X53TRzGPmPkZmGBhk+jikR8WBM4yl7A9WMHHqvg==" referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script>
-      var tooltipTriggerList = [].slice.call(
-        document.querySelectorAll('[data-bs-toggle="tooltip"]')
-      );
-      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-      });
-    </script>
-
-    <script>
-      ["higherHeading-lowShowHide", "lowerHeading-lowShowHide"].forEach(function (
-        btn
-      ) {
-        var toggleButton = document.getElementById(btn);
-        var section = toggleButton.closest("section");
-        toggleButton.addEventListener("click", function (e) {
-          var lowRows = section.querySelectorAll("tr.low_number");
-          lowRows.forEach(function (row) {
-            return row.classList.toggle("d-none");
-          });
-
-          if (toggleButton.textContent === "Hide low numbers") {
-            toggleButton.textContent = "Show low numbers";
-            toggleButton.classList.remove("btn-outline-danger");
-            toggleButton.classList.add("btn-outline-success");
-          } else {
-            toggleButton.textContent = "Hide low numbers";
-            toggleButton.classList.remove("btn-outline-success");
-            toggleButton.classList.add("btn-outline-danger");
-          }
+        var tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-      });
     </script>
 
     <script>
-      var explainerTextCollapse = document.getElementById("explainerTextCollapse");
-      var explainerTextBtn = document.getElementById("explainerTextBtn");
-      explainerTextCollapse.addEventListener("hidden.bs.collapse", function () {
-        explainerTextBtn.textContent = "Show more +";
-      });
-      explainerTextCollapse.addEventListener("shown.bs.collapse", function () {
-        explainerTextBtn.textContent = "Show less -";
-      });
+        ["higherHeading-lowShowHide", "lowerHeading-lowShowHide"].forEach(function(
+            btn
+        ) {
+            var toggleButton = document.getElementById(btn);
+            var section = toggleButton.closest("section");
+            toggleButton.addEventListener("click", function(e) {
+                var lowRows = section.querySelectorAll("tr.low_number");
+                lowRows.forEach(function(row) {
+                    return row.classList.toggle("d-none");
+                });
+
+                if (toggleButton.textContent === "Hide low numbers") {
+                    toggleButton.textContent = "Show low numbers";
+                    toggleButton.classList.remove("btn-outline-danger");
+                    toggleButton.classList.add("btn-outline-success");
+                } else {
+                    toggleButton.textContent = "Hide low numbers";
+                    toggleButton.classList.remove("btn-outline-success");
+                    toggleButton.classList.add("btn-outline-danger");
+                }
+            });
+        });
+    </script>
+
+    <script>
+        var explainerTextCollapse = document.getElementById("explainerTextCollapse");
+        var explainerTextBtn = document.getElementById("explainerTextBtn");
+        explainerTextCollapse.addEventListener("hidden.bs.collapse", function() {
+            explainerTextBtn.textContent = "Show more +";
+        });
+        explainerTextCollapse.addEventListener("shown.bs.collapse", function() {
+            explainerTextBtn.textContent = "Show less -";
+        });
     </script>
 </body>
 
