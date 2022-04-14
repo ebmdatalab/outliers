@@ -104,8 +104,6 @@ underused_summary = underused_summary.rename( columns={"50%":"median"}, inplace=
 # in each type of organisation. These are chemicals are seen to be used more often
 # in a particular organisation than its peers.
 
-underused_summary
-
 # +
 ### Extracting the summary statistics for the z scores
 overused_tmp = overused_summary[overused_summary.index.isin(["z_score"], level=1)]
