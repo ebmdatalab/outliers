@@ -84,7 +84,7 @@ metrics_to_show = [ "n", "chemicals", "median","max","min","IQR" ]
 ### identified in the TOP 5 in at least one organisation of the entity type.
 ### There are the chemicals displayed in the 'Higher than most' table.
 
-overused_summary = e_data.query('rank_high<=10').query('z_score>=0').groupby( "entity" )[["z_score"]].describe().reindex(['stp', 'ccg', 'pcn', 'practice']).stack(level=0)
+overused_summary = e_data.query('rank_high<=10').query('z_score>0').groupby( "entity" )[["z_score"]].describe().reindex(['stp', 'ccg', 'pcn', 'practice']).stack(level=0)
 overused_summary = overused_summary.rename( columns={"50%":"median"}, inplace=False )
 
 # +
@@ -92,7 +92,7 @@ overused_summary = overused_summary.rename( columns={"50%":"median"}, inplace=Fa
 ### identified in the BOTTOM 5 in at least one organisation of the entity type.
 ### There are the chemicals displayed in the 'Lower than most' table.
 
-underused_summary = e_data.query('rank_low<=10').query('z_score<=0').groupby( "entity" )[["z_score"]].describe().reindex(['stp', 'ccg', 'pcn', 'practice']).stack(level=0)
+underused_summary = e_data.query('rank_low<=10').query('z_score<0').groupby( "entity" )[["z_score"]].describe().reindex(['stp', 'ccg', 'pcn', 'practice']).stack(level=0)
 underused_summary = underused_summary.rename( columns={"50%":"median"}, inplace=False )
 # -
 
@@ -103,6 +103,8 @@ underused_summary = underused_summary.rename( columns={"50%":"median"}, inplace=
 # The table below summarises the Z scores for the high outlying (i.e., top 5) chemicals
 # in each type of organisation. These are chemicals are seen to be used more often
 # in a particular organisation than its peers.
+
+underused_summary
 
 # +
 ### Extracting the summary statistics for the z scores
