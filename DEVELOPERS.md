@@ -123,5 +123,11 @@ A `TableOfContents` instance is created by the `Runner.run()` and for each compl
 
 # Deployment to openprescribing.net
 
+This project is designed for use in an interactive session, e.g. jupyter notebook (as per `notebooks/notebook1.ipynb`) during prototyping/development of these reports. The majority of the updates to data and precalculated metrics on openprescribing.net are done via Django [management commands](https://docs.djangoproject.com/en/4.0/howto/custom-management-commands/), and so the "production" version of these reports that appear on openprescribing are also generated using [such a command](https://github.com/ebmdatalab/openprescribing/blob/main/openprescribing/pipeline/management/commands/outlier_reports.py). 
+
+This management command makes use of the [BigQuery objects](#bigquery-objects) described earlier in this document, but has some slight modifications to the Python code. The three report-generation Python files are combined into a single file and minimal Django management command logic is added. `pqdm` as used in standalone reports not suitable for this purpose, and so the underlying `ProcessPoolExecutor` is used instead. By default a lower degree of parallelism is used as not to adversely affect other running processes. Another change from this project is that the ebmdatalab cached bq read methods are replaced with raw BigQuery read methods from the BigQuery API. Repeated runs where caching beneficial unlikely in production so this is not conisdered to be a major issue.
+
 # Known issues
-* entity list configuration not passed to builder sproc
+* The entity list configuration within a `Runner` is not passed to builder stored procedure and so data tables in may be unneccesarily populated.
+* Outlier data generation steps are statically defined for each entity type, additional entity types (e.g. regional teams) would require copying of code. It may be better to turn into dynamic SQL but performance penalty of doing so in BigQuery is currently unknown
+* Use of the `entity_limit` parameter with a non-default `entities` list within `Runner` triggers a bug within `truncate_entities()` due to assumption of a full entity hierarchy
