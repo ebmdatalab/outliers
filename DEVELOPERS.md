@@ -112,6 +112,8 @@ The `Plots` class is a collection of static methods for formatting of the distri
 
 ### lib/make_html.py
 
+Partially adapted from https://github.com/ebmdatalab/html-template-demo, this contains a number of helper methods for population of a Jinja2 template with data contained within a `Report` object. The most complex of which is `df_to_html()` which generates HTML tables from the Pandas Dataframes containing the low and high outliers. 
+
 ### lib/table_of_contents.py
 
 #### TableOfContents
