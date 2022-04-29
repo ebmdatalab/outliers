@@ -95,10 +95,12 @@ Each instance exposes a single public `run()` method whose first action is to in
 
 If an entity limit is configured, these in-memory results are then truncated to that limit. Due to the hierarchical nature of the entity types (STP->CCG->PCN->Practice), this is a surprisingly complex process which ensures that the entities at each level are evenly distributed across entities at the parent level. There are [known issues](#known-issues) and inefficiencies within this process, but since this is only used during development it has not been prioritised for improvement.
 
-#### DatasetBuild
-The `DatasetBuild` class represents an execution of the [dataset builder procedure](#build_outliers-stored-procedure) and its resultant dataset. It is instantiated with the dataset-specific parameters, and its constructor performs some basic checks of these parameters and instantitates data structures for storage of the dataset itself. 
+Once the dataset is built and optionally truncated, the list of configured entity types is iterated, generating [`Report`s](#report) from the dataset, and then [rendering HTML](#libmakehtmlpy) from them. Within each entity type, these steps are performed in parallel using `pqdm` which also provides progress bars (where this is run in an interactive session). The number of concurrent jobs is configured by the `n_jobs` parameter of the `Runner` constructor. 
 
-It exposes a public `run()` instance method, which connects to BigQuery and calls the [dataset builder procedure](#build_outliers-stored-procedure) stored procedure.
+#### DatasetBuild
+The `DatasetBuild` class represents an execution of the [dataset builder procedure](#buildoutliers-stored-procedure) and its resultant dataset. It is instantiated with the dataset-specific parameters, and its constructor performs some basic checks of these parameters and instantitates data structures for storage of the dataset itself. 
+
+It exposes a public `run()` instance method, which connects to BigQuery and calls the [dataset builder procedure](#buildoutliers-stored-procedure) stored procedure.
 
 The `fetch_results()` instance method iterates through the [entity result tables](#tables), performing a cached database read into the instances results data structures. The caching is performed by the [`cached_read()`](https://github.com/ebmdatalab/datalab-pandas/blob/master/ebmdatalab/bq.py#L27) method of the `BQ` module of the ebmdatalab [datalab-pandas](https://github.com/ebmdatalab/datalab-pandas) project. Without a force parameter, these reads should read from the local file cache (if present) if a given dataset's data has previously been fetched.
 
@@ -117,6 +119,7 @@ Partially adapted from https://github.com/ebmdatalab/html-template-demo, this co
 ### lib/table_of_contents.py
 
 #### TableOfContents
+A `TableOfContents` instance is created by the `Runner.run()` and for each completed report, its path is passed to `add_item()`. The final HTML or markdown tables of contents are rendered by `write_html()` and `write_markdown()` respectively.
 
 # Deployment to openprescribing.net
 
