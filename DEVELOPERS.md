@@ -130,4 +130,4 @@ This management command makes use of the [BigQuery objects](#bigquery-objects) d
 # Known issues
 * The entity list configuration within a `Runner` is not passed to builder stored procedure and so data tables in may be unneccesarily populated.
 * Outlier data generation steps are statically defined for each entity type, additional entity types (e.g. regional teams) would require copying of code. It may be better to turn into dynamic SQL but performance penalty of doing so in BigQuery is currently unknown
-* Use of the `entity_limit` parameter with a non-default `entities` list within `Runner` triggers a bug within `truncate_entities()` due to assumption of a full entity hierarchy
+* Use of the `entity_limit` parameter with a non-default `entities` list within `Runner` triggers a bug ( [#41](/../../issues/41)) within `truncate_entities()` due to assumption of a full entity hierarchy
