@@ -127,6 +127,28 @@ This project is designed for use in an interactive session, e.g. jupyter noteboo
 
 This management command makes use of the [BigQuery objects](#bigquery-objects) described earlier in this document, but has some slight modifications to the Python code. The three report-generation Python files are combined into a single file and minimal Django management command logic is added. `pqdm` as used in standalone reports not suitable for this purpose, and so the underlying `ProcessPoolExecutor` is used instead. By default a lower degree of parallelism is used as not to adversely affect other running processes. Another change from this project is that the ebmdatalab cached bq read methods are replaced with raw BigQuery read methods from the BigQuery API. Repeated runs where caching beneficial unlikely in production so this is not conisdered to be a major issue.
 
+## Updating the reports on openprescribing.net
+
+This is performed by logging on to the server hosting openprescribing.net and `su`ing to the `hello` account. The directory presented upon login of this account is the correct place from which to execute the following command. 
+The management command is invoked via `manage.py outlier_reports` and the following arguments:
+
+* `--from_date` *YYYY-MM-DD format, start date for data to be included in reports. Optional, if omitted, 6 months prior to `--to_date` will be used.*
+* `--to_date` *YYYY-MM-DD format, end date for data to be included in reports.*
+* `--n_outliers` *integer number of high/low outliers to be included in each report*
+* `--entities` *comma-separated list of entities for which report is to be run, defaults to "practice, ccg, pcn, stp"*
+* `--force_rebuild` *true/false should any existing data for this parameter set be discarded and rebuilt, defaults to False*
+* `--template_path` *path to override default Jinja2 template for reports*
+* `--url_prefix` *path to be appended to destination URL for each report in the table of contents*
+* `--n_jobs` *number of report building processes to run in parallel, defaults to 3*
+* `--low_number_threshold` *at one number of subparagraph items should rows in the outlier table be flagged for low number hiding, defaults to 5*
+* `--entity_limit` *limit the number of entities of each type for which reports should be generated, default no limit*
+
+Thus a typical invocation of the management command following an update of the prescribing data to the end of March 2022 might be:
+
+```sh
+manage.py outlier_reports --to_date 2022-03-01 --n_outliers 10
+```
+
 # Known issues
 * The entity list configuration within a `Runner` is not passed to builder stored procedure and so data tables in may be unneccesarily populated.
 * Outlier data generation steps are statically defined for each entity type, additional entity types (e.g. regional teams) would require copying of code. It may be better to turn into dynamic SQL but performance penalty of doing so in BigQuery is currently unknown
