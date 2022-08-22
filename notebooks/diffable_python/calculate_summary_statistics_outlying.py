@@ -13,6 +13,9 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
+#   vscode:
+#     interpreter:
+#       hash: de1343822d6e7d7aeea8796be9d48304b0fa3610166e8740495ec86b33c71a9e
 # ---
 
 from lib.outliers import Runner
@@ -54,7 +57,7 @@ e_counts
 # ## Chemical counts
 #
 # Counts of the number of unique outlying chemicals (i.e., those identified in the top/bottom
-# 5 z scores) amongst all organisations of the given type.
+# 10 z scores) amongst all organisations of the given type.
 
 # +
 ### Summarising the number of unique chemicals identified in the
@@ -81,7 +84,7 @@ metrics_to_show = [ "n", "chemicals", "median","max","min","IQR" ]
 
 # +
 ### Calculating summary statistics for the Z scores for those chemicals
-### identified in the TOP 5 in at least one organisation of the entity type.
+### identified in the TOP 10 in at least one organisation of the entity type.
 ### There are the chemicals displayed in the 'Higher than most' table.
 
 overused_summary = e_data.query('rank_high<=10').query('z_score>0').groupby( "entity" )[["z_score"]].describe().reindex(['stp', 'ccg', 'pcn', 'practice']).stack(level=0)
@@ -89,7 +92,7 @@ overused_summary = overused_summary.rename( columns={"50%":"median"}, inplace=Fa
 
 # +
 ### Calculating summary statistics for the Z scores for those chemicals
-### identified in the BOTTOM 5 in at least one organisation of the entity type.
+### identified in the BOTTOM 10 in at least one organisation of the entity type.
 ### There are the chemicals displayed in the 'Lower than most' table.
 
 underused_summary = e_data.query('rank_low<=10').query('z_score<0').groupby( "entity" )[["z_score"]].describe().reindex(['stp', 'ccg', 'pcn', 'practice']).stack(level=0)
@@ -100,7 +103,7 @@ underused_summary = underused_summary.rename( columns={"50%":"median"}, inplace=
 #
 # ### Higher than most chemicals
 #
-# The table below summarises the Z scores for the high outlying (i.e., top 5) chemicals
+# The table below summarises the Z scores for the high outlying (i.e., top 10) chemicals
 # in each type of organisation. These are chemicals are seen to be used more often
 # in a particular organisation than its peers.
 
@@ -119,7 +122,7 @@ overused_toprint.join( all_counts )[metrics_to_show]
 
 # ### Lower than most chemicals
 #
-# The table below summarises the Z scores for the low outlying (i.e., bottom 5) chemicals
+# The table below summarises the Z scores for the low outlying (i.e., bottom 10) chemicals
 # in each type of organisation. These are chemicals are seen to be used less often
 # in a particular organisation than its peers.
 
