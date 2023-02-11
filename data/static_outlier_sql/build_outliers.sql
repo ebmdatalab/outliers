@@ -239,7 +239,7 @@ BEGIN
                     m.entity,
                     s.subpara,
                     s.chemical,
-                    s.numerator
+                    SUM(s.numerator) as numerator
                 FROM
                     `ebmdatalab.outlier_detection.summed` AS s
                 JOIN
@@ -249,6 +249,10 @@ BEGIN
                     s.entity IS NOT NULL
                     AND s.subpara IS NOT NULL
                     AND s.build_id = @build_id
+                GROUP BY
+                    s.entity,
+                    subpara,
+                    chemical
             ),
             entity_ratios AS (
                 SELECT
