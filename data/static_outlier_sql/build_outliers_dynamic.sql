@@ -56,9 +56,15 @@ BEGIN
             b.from_date = p__from_date
             AND b.to_date = p__to_date
             AND b.n = p__n
-            AND (SELECT
+            --clunky way of expressing: are all elements of p__entities in b.entities
+            -- and vice-versa
+            AND False not in (SELECT
                     LOGICAL_AND(p_e IN UNNEST(b.entities))
-                FROM UNNEST(p__entities) p_e)
+                FROM UNNEST(p__entities) p_e
+                UNION DISTINCT
+                SELECT
+                    LOGICAL_AND(p_e IN UNNEST(p__entities))
+                FROM UNNEST(b.entities) p_e)
     );
 
     -- already got data for this build?
