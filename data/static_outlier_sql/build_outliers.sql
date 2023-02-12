@@ -31,6 +31,9 @@ BEGIN
     p__force : boolean
         force the regeneration of an outlier datasets if build
         matching above parameters exists
+    p__entities : array<string>
+        which entity types should be reported on in this build
+        e.g. STP, PCN, ICB, sub-ICB
     */
 
 
@@ -218,7 +221,7 @@ BEGIN
     set v__i = 0;
     WHILE v__i < ARRAY_LENGTH(p__entities) DO
         SET v__entity = p__entities[OFFSET(v__i)];
-        
+
         -- entity ranking
         EXECUTE IMMEDIATE FORMAT(
             """
