@@ -223,8 +223,7 @@ BEGIN
         SET v__entity = p__entities[OFFSET(v__i)];
 
         -- entity ranking
-        EXECUTE IMMEDIATE FORMAT(
-            """
+        EXECUTE IMMEDIATE FORMAT("""
             INSERT
                 `ebmdatalab.outlier_detection.%s_ranked` (
                     build_id,
@@ -340,86 +339,85 @@ BEGIN
                         z_score ASC
                 ) AS rank_low
             FROM
-                entity_zscores;
-            """,
+                entity_zscores;""",
             v__entity,
             v__entity,
-            v__entity
-        ) using v__build_id as build_id;
+            v__entity)
+        using v__build_id as build_id;
 
         --entity items   
-        EXECUTE IMMEDIATE FORMAT("""INSERT
-        `ebmdatalab.outlier_detection.%s_outlier_items` (
-            build_id,
-            %s,
-            bnf_code,
-            bnf_name,
-            chemical,
-            high_low,
-            numerator
-        ) 
-        WITH outlier_entity_chemicals AS (
-            SELECT
-                r.%s as entity,
-                r.chemical,
-                CASE
-                    WHEN r.rank_high <= @n THEN 'h'
-                    ELSE 'l'
-                END AS high_low
-            FROM
-                `ebmdatalab.outlier_detection.%s_ranked` AS r
-            WHERE
-                r.build_id = @build_id
-                AND (
-                    r.rank_high <= @n
-                    OR r.rank_low <= @n
-                )
-        ),
-        aggregated AS (
-            SELECT
-                m.entity,
-                prescribing.bnf_code,
-                prescribing.bnf_name,
-                SUBSTR(bnf_code, 1, 9) AS chemical,
-                o.high_low,
-                SUM(items) AS numerator
-            FROM
-                `ebmdatalab.hscic.normalised_prescribing`AS prescribing
-                INNER JOIN `ebmdatalab.hscic.practices` AS practices 
-                    ON practices.code = prescribing.practice
-                INNER JOIN `ebmdatalab.outlier_detection.vw_mapping_%s` m
-                    ON m.practice = prescribing.practice
-                INNER JOIN `outlier_entity_chemicals` AS o 
-                    ON o.chemical = substr(bnf_code, 1, 9)
-                    AND o.entity = m.entity
-            WHERE
-                MONTH BETWEEN TIMESTAMP(@from_date)
-                AND TIMESTAMP(@to_date)
-                AND practices.setting = 4
-                    AND practices.status_code = 'A'
-                    AND practices.pcn_id IS NOT NULL 
-                    AND EXISTS ( 
-                        SELECT 1 
-                        FROM `ebmdatalab.hscic.ccgs` AS ccgs 
-                        WHERE ccgs.stp_id IS NOT NULL 
-                        AND practices.ccg_id = ccgs.code
+        EXECUTE IMMEDIATE FORMAT("""
+            INSERT `ebmdatalab.outlier_detection.%s_outlier_items` (
+                build_id,
+                %s,
+                bnf_code,
+                bnf_name,
+                chemical,
+                high_low,
+                numerator
+            ) 
+            WITH outlier_entity_chemicals AS (
+                SELECT
+                    r.%s as entity,
+                    r.chemical,
+                    CASE
+                        WHEN r.rank_high <= @n THEN 'h'
+                        ELSE 'l'
+                    END AS high_low
+                FROM
+                    `ebmdatalab.outlier_detection.%s_ranked` AS r
+                WHERE
+                    r.build_id = @build_id
+                    AND (
+                        r.rank_high <= @n
+                        OR r.rank_low <= @n
                     )
-            GROUP BY
-                m.entity,
-                prescribing.bnf_code,
-                prescribing.bnf_name,
-                SUBSTR(bnf_code, 1, 9),
-                o.high_low)
-        SELECT 
-            @build_id, 
-            *
-        FROM aggregated""",
-        v__entity,
-        v__entity,
-        v__entity,
-        v__entity,
-        v__entity)
-        using v__build_id as build_id, p__n as n, p__from_date as from_date, p__to_date as to_date ;
+            ),
+            aggregated AS (
+                SELECT
+                    m.entity,
+                    prescribing.bnf_code,
+                    prescribing.bnf_name,
+                    SUBSTR(bnf_code, 1, 9) AS chemical,
+                    o.high_low,
+                    SUM(items) AS numerator
+                FROM
+                    `ebmdatalab.hscic.normalised_prescribing`AS prescribing
+                    INNER JOIN `ebmdatalab.hscic.practices` AS practices 
+                        ON practices.code = prescribing.practice
+                    INNER JOIN `ebmdatalab.outlier_detection.vw_mapping_%s` m
+                        ON m.practice = prescribing.practice
+                    INNER JOIN `outlier_entity_chemicals` AS o 
+                        ON o.chemical = substr(bnf_code, 1, 9)
+                        AND o.entity = m.entity
+                WHERE
+                    MONTH BETWEEN TIMESTAMP(@from_date)
+                    AND TIMESTAMP(@to_date)
+                    AND practices.setting = 4
+                        AND practices.status_code = 'A'
+                        AND practices.pcn_id IS NOT NULL 
+                        AND EXISTS ( 
+                            SELECT 1 
+                            FROM `ebmdatalab.hscic.ccgs` AS ccgs 
+                            WHERE ccgs.stp_id IS NOT NULL 
+                            AND practices.ccg_id = ccgs.code
+                        )
+                GROUP BY
+                    m.entity,
+                    prescribing.bnf_code,
+                    prescribing.bnf_name,
+                    SUBSTR(bnf_code, 1, 9),
+                    o.high_low)
+            SELECT 
+                @build_id, 
+                *
+            FROM aggregated""",
+            v__entity,
+            v__entity,
+            v__entity,
+            v__entity,
+            v__entity)
+        using v__build_id as build_id, p__n as n, p__from_date as from_date, p__to_date as to_date;
 
         -- entity measure arrays
         EXECUTE IMMEDIATE FORMAT("""
@@ -454,9 +452,9 @@ BEGIN
             GROUP BY 
                 r.build_id,
                 r.chemical;""", 
-                v__entity,
-                v__entity,
-                v__entity)
+            v__entity,
+            v__entity,
+            v__entity)
         using v__build_id as build_id, p__n as n;
 
         SET v__i = v__i + 1;
