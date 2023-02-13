@@ -39,10 +39,7 @@ BEGIN
 
     DECLARE v__build_id INT64 DEFAULT NULL;
     DECLARE v__entity STRING;
-    DECLARE v__i INT64;
-    DECLARE v__j INT64;
-    DECLARE v__aggregate_table_suffixes ARRAY<string>;
-    SET v__aggregate_table_suffixes = ['ranked','outlier_items','measure_arrays'];
+    DECLARE v__i INT64 DEFAULT 0;
 
     --check to see if this build has been run already
     SET v__build_id =(
@@ -69,30 +66,9 @@ BEGIN
     IF v__build_id IS NOT NULL THEN 
         --do nothing if not force-rebuild mode
         IF NOT p__force THEN RETURN; END IF;
-
-        --if forced then delete the old data before we start
-        DELETE `ebmdatalab.outlier_detection.summed`
-        WHERE
-            build_id = v__build_id;
+        --else delete the old data before we start
+        CALL delete_outliers(v__build_id)
         
-        --delete from the aggregated entity tables for this build
-        SET v__i =0;
-        WHILE v__i < ARRAY_LENGTH(p__entities) DO
-            SET v__j =0;
-            WHILE v__j < ARRAY_LENGTH(v__aggregate_table_suffixes) DO
-                EXECUTE IMMEDIATE format("""
-                    DELETE ebmdatalab.outlier_detection.%s_%s
-                    WHERE build_id = @build_id
-                """
-                ,p__entities[OFFSET(v__i)]
-                ,v__aggregate_table_suffixes[OFFSET(v__j)]
-                ) using v__build_id as build_id;
-
-                SET v__j = v__j + 1;
-            END WHILE;
-
-            SET v__i = v__i + 1;
-        END WHILE;
         
     --new build with requested configuration
     ELSE
@@ -218,7 +194,6 @@ BEGIN
                 build_id = v__build_id
         ) x;
 
-    set v__i = 0;
     WHILE v__i < ARRAY_LENGTH(p__entities) DO
         SET v__entity = p__entities[OFFSET(v__i)];
 
